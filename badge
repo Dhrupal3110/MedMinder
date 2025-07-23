@@ -1,0 +1,171 @@
+import React from "react";
+import classNames from "classnames";
+import "./badge.css"; // import custom CSS
+
+export type BadgeVariant =
+  | "primary"
+  | "secondary"
+  | "success"
+  | "warning"
+  | "danger"
+  | "info"
+  | "gray";
+
+export type BadgeSize = "sm" | "md" | "lg";
+
+interface BadgeProps {
+  children?: React.ReactNode;
+  variant?: BadgeVariant;
+  size?: BadgeSize;
+  rounded?: boolean;
+  icon?: React.ReactNode;
+  dot?: boolean;
+  count?: number | string;
+  className?: string;
+}
+
+export const Badge: React.FC<BadgeProps> = ({
+  children,
+  variant = "gray",
+  size = "md",
+  rounded = true,
+  icon,
+  dot = false,
+  count,
+  className,
+}) => {
+  const badgeClass = classNames(
+    "badge",
+    `badge-${variant}`,
+    `badge-${size}`,
+    { "badge-rounded": rounded },
+    className
+  );
+
+  const countBadge = count !== undefined && (
+    <span className="badge-count">{count}</span>
+  );
+
+  // Count-only badge
+  if (count !== undefined && !children && !icon && !dot) {
+    return <span className={badgeClass}>{countBadge}</span>;
+  }
+
+  return (
+    <span className={badgeClass}>
+      {dot && <span className="badge-dot" />}
+      {icon && <span className="badge-icon">{icon}</span>}
+      {children}
+      {countBadge}
+    </span>
+  );
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 500;
+  padding: 4px 8px;
+  font-family: sans-serif;
+  border-radius: 4px;
+  gap: 4px;
+  transition: all 0.2s ease-in-out;
+}
+
+.badge-rounded {
+  border-radius: 9999px;
+}
+
+/* Sizes */
+.badge-sm {
+  font-size: 12px;
+  padding: 2px 6px;
+}
+
+.badge-md {
+  font-size: 14px;
+  padding: 4px 8px;
+}
+
+.badge-lg {
+  font-size: 16px;
+  padding: 6px 12px;
+}
+
+/* Variants */
+.badge-primary {
+  background-color: #e0f0ff;
+  color: #0056b3;
+}
+
+.badge-secondary {
+  background-color: #f2e0ff;
+  color: #6f42c1;
+}
+
+.badge-success {
+  background-color: #e6f4ea;
+  color: #2e7d32;
+}
+
+.badge-warning {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.badge-danger {
+  background-color: #f8d7da;
+  color: #842029;
+}
+
+.badge-info {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.badge-gray {
+  background-color: #e2e3e5;
+  color: #495057;
+}
+
+/* Dot */
+.badge-dot {
+  width: 8px;
+  height: 8px;
+  background-color: currentColor;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 4px;
+}
+
+/* Icon */
+.badge-icon {
+  display: inline-flex;
+  margin-right: 4px;
+}
+
+/* Count */
+.badge-count {
+  background-color: red;
+  color: white;
+  font-size: 11px;
+  border-radius: 9999px;
+  padding: 2px 6px;
+  margin-left: 4px;
+  line-height: 1;
+}
