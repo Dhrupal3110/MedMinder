@@ -1,8 +1,19 @@
 :root {
+  /* === Light Theme === */
   --primary-color: #0d6efd;
   --border-color: #ccc;
   --text-color: #333;
   --danger-color: #dc3545;
+  --checkbox-hover-opacity: 0.08;
+}
+
+[data-theme="dark"] {
+  /* === Dark Theme Overrides === */
+  --primary-color: #4d9fff;
+  --border-color: #555;
+  --text-color: #eee;
+  --danger-color: #ff6b6b;
+  --checkbox-hover-opacity: 0.12;
 }
 
 /* === Base Checkbox === */
@@ -17,20 +28,20 @@
   cursor: pointer;
   position: relative;
   box-sizing: border-box;
-  transition: 
+  transition:
     border-color 0.2s ease,
     background-color 0.2s ease,
     transform 0.1s ease,
     box-shadow 0.2s ease;
 }
 
-/* === Hover === */
+/* === Hover: Use themed color or fallback to primary === */
 .ui-checkbox:hover:not(:disabled) {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 30%, transparent);
+  border-color: var(--checkbox-hover-color, var(--primary-color));
+  background-color: color-mix(in srgb, var(--checkbox-hover-color, var(--primary-color)) var(--checkbox-hover-opacity), transparent);
 }
 
-/* === Active === */
+/* === Active (Click) === */
 .ui-checkbox:active:not(:disabled) {
   transform: scale(0.95);
 }
@@ -41,13 +52,13 @@
   opacity: 0.5;
 }
 
-/* === Checked Box Style === */
+/* === Checked === */
 .ui-checkbox:checked {
-  background-color: var(--primary-color);
-  border-color: var(--primary-color);
+  background-color: var(--checkbox-hover-color, var(--primary-color));
+  border-color: var(--checkbox-hover-color, var(--primary-color));
 }
 
-/* === Pure CSS Tick Mark === */
+/* === Checkmark (tick) === */
 .ui-checkbox::after {
   content: "";
   position: absolute;
@@ -73,11 +84,9 @@
   width: 16px;
   height: 16px;
 }
-
 .ui-checkbox--small::after {
   width: 4px;
   height: 8px;
-  border-width: 0 2px 2px 0;
 }
 
 .ui-checkbox--medium {
@@ -89,42 +98,26 @@
   width: 32px;
   height: 32px;
 }
-
 .ui-checkbox--large::after {
   width: 8px;
   height: 16px;
   border-width: 0 3px 3px 0;
 }
 
-/* === Color Variants === */
+/* === Color Variants (override hover color for each) === */
 .ui-checkbox--default {
-  border-color: var(--border-color);
+  --checkbox-hover-color: var(--text-color);
 }
 
 .ui-checkbox--primary {
-  border-color: var(--primary-color);
+  --checkbox-hover-color: var(--primary-color);
 }
 
 .ui-checkbox--danger {
-  border-color: var(--danger-color);
+  --checkbox-hover-color: var(--danger-color);
 }
 
-.ui-checkbox--primary:checked {
-  background-color: var(--primary-color);
-  border-color: var(--primary-color);
-}
-
-.ui-checkbox--default:checked {
-  background-color: var(--text-color);
-  border-color: var(--text-color);
-}
-
-.ui-checkbox--danger:checked {
-  background-color: var(--danger-color);
-  border-color: var(--danger-color);
-}
-
-/* === Hide checkmark when using custom icons === */
+/* === Hide checkmark if using custom icons === */
 .ui-checkbox--no-after::after {
   display: none !important;
 }
