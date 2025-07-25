@@ -1,3 +1,4 @@
+/* Existing CSS (from your previous input) for global styles and theme variables */
 :root {
   --primary-color: #1890ff;
   --primary-hover: #40a9ff;
@@ -55,6 +56,11 @@
   --avatar-default-bg: #f3f4f6;
   --avatar-default-color: #6b7280;
   --checkbox-hover-opacity: 0.08;
+
+  /* VSCode-like Light Theme Code Colors */
+  --code-bg-light: #f6f8fa;
+  --code-text-light: #24292e;
+  --code-border-light: #e1e4e8;
 }
 
 [data-theme="dark"] {
@@ -114,8 +120,14 @@
   --avatar-default-bg: #374151;
   --avatar-default-color: #d1d5db;
   --checkbox-hover-opacity: 0.12;
+
+  /* VSCode-like Dark Theme Code Colors */
+  --code-bg-dark: #1e1e1e; /* VSCode default dark background */
+  --code-text-dark: #d4d4d4; /* VSCode default text color */
+  --code-border-dark: #333333;
 }
 
+/* Global styles */
 * {
   margin: 0;
   padding: 0;
@@ -134,10 +146,11 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Main Layout */
 .app-container {
   display: flex;
   min-height: 100vh;
-  overflow-x: hidden; /* Prevent horizontal scroll when drawer is open */
+  overflow-x: hidden;
 }
 
 /* Custom Scrollbar Styles for Sidebar/Drawer */
@@ -276,6 +289,7 @@ body {
   padding: 24px 48px 40px 48px;
 }
 
+/* Component Documentation Styles */
 .component-docs {
   max-width: 100%;
 }
@@ -326,6 +340,7 @@ body {
   margin-bottom: 4px;
 }
 
+/* Enhanced ExampleContainer Styles */
 .example-container {
   margin-bottom: 40px;
   border: 1px solid var(--border-light);
@@ -333,9 +348,10 @@ body {
   overflow: hidden;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
   box-shadow: var(--shadow-sm);
+  background: var(--bg-color); /* Ensure container background matches theme */
 }
 
-.example-container h3 {
+.example-title {
   font-size: 18px;
   font-weight: 600;
   color: var(--text-color);
@@ -345,32 +361,115 @@ body {
   border-bottom: 1px solid var(--border-light);
 }
 
-.example-container > p {
+.example-description {
   padding: 16px 24px 0;
   margin: 0 0 16px 0;
   color: var(--text-secondary);
 }
 
-.example-demo {
+.example-demo-wrapper {
   padding: 24px;
-  background: var(--bg-color);
+  background: var(--bg-color); /* Demo background */
+  border-bottom: 1px solid var(--border-light); /* Separator from code */
 }
 
-.example-code {
-  background: var(--bg-secondary);
-  border-top: 1px solid var(--border-light);
-  padding: 16px 24px;
+.example-demo {
+  /* Styles passed via props will override or extend this */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
 }
 
-.example-code pre {
+.example-code-wrapper {
+  background: var(--code-bg-light); /* Default light theme code background */
+  padding: 0; /* Remove default padding, headers and pre will handle it */
+  position: relative;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  overflow: hidden; /* Ensure rounded corners apply to content */
+}
+
+[data-theme="dark"] .example-code-wrapper {
+  background: var(--code-bg-dark); /* Dark theme code background */
+}
+
+.example-code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: var(--bg-secondary); /* Header background */
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.copy-button {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  position: relative; /* For copy status */
+  overflow: hidden;
+}
+
+.copy-button:hover {
+  background-color: var(--bg-hover);
+  color: var(--primary-color);
+}
+
+.copy-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.copy-status {
+  position: absolute;
+  right: 10px;
+  background-color: var(--primary-color);
+  color: var(--white-color);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fade-in-out 2s forwards;
+}
+
+@keyframes fade-in-out {
+  0% { opacity: 0; transform: translateY(10px); }
+  20% { opacity: 1; transform: translateY(0); }
+  80% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(10px); }
+}
+
+
+.example-code-block {
   margin: 0;
+  padding: 20px 24px; /* Padding for the code block */
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
   font-size: 13px;
-  color: var(--text-secondary);
   line-height: 1.5;
   overflow-x: auto;
+  color: var(--code-text-light); /* Default light theme text color */
+  background: var(--code-bg-light); /* Default light theme background */
 }
 
+[data-theme="dark"] .example-code-block {
+  color: var(--code-text-dark); /* Dark theme text color */
+  background: var(--code-bg-dark); /* Dark theme background */
+}
+
+
+/* Component Groups */
 .button-group {
   display: flex;
   gap: 12px;
@@ -392,6 +491,7 @@ body {
   flex-wrap: wrap;
 }
 
+/* API Table */
 .api-table {
   width: 100%;
   border-collapse: collapse;
@@ -444,10 +544,10 @@ body {
 
 /* Drawer Specific Styles (Mobile Only) */
 .drawer-toggle-button {
-  display: none; /* Hidden by default on desktop */
+  display: none;
   background: none;
   border: none;
-  color: var(--text-color); /* Use text color for icon */
+  color: var(--text-color);
   cursor: pointer;
   padding: 8px;
   border-radius: 50%;
@@ -464,7 +564,7 @@ body {
 }
 
 .drawer-overlay {
-  display: none; /* Hidden by default */
+  display: none;
   position: fixed;
   top: 0;
   left: 0;
@@ -484,32 +584,31 @@ body {
     top: 0;
     left: 0;
     height: 100vh;
-    width: 280px; /* Fixed width for the drawer */
-    transform: translateX(-100%); /* Hidden off-screen */
+    width: 280px;
+    transform: translateX(-100%);
     transition: transform 0.3s ease-out, box-shadow 0.3s ease;
     border-right: 1px solid var(--border-light);
     border-bottom-right-radius: 0;
-    box-shadow: var(--shadow-lg); /* Add shadow for drawer effect */
+    box-shadow: var(--shadow-lg);
   }
 
   .sidebar.open {
-    transform: translateX(0); /* Slide into view */
+    transform: translateX(0);
   }
 
   .drawer-overlay {
-    display: block; /* Show overlay on mobile */
+    display: block;
     opacity: 1;
     visibility: visible;
   }
 
-  /* Adjust overlay visibility based on sidebar state */
   .sidebar:not(.open) + .drawer-overlay {
     opacity: 0;
     visibility: hidden;
   }
 
   .main-content {
-    margin-left: 0; /* No margin on mobile */
+    margin-left: 0;
   }
 
   .content-wrapper {
@@ -533,15 +632,15 @@ body {
   }
 
   .sidebar-header {
-    flex-direction: row; /* Keep elements in a row in header */
-    align-items: center; /* Center vertically */
-    justify-content: space-between; /* Space between title and toggle */
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
     padding: 16px;
-    position: static; /* Remove sticky on mobile drawer */
+    position: static;
   }
 
   .drawer-toggle-button {
-    display: block; /* Show hamburger button on mobile */
+    display: block;
   }
 
   .nav-section-title,
