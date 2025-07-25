@@ -4,7 +4,7 @@ import { ThemeToggle } from '../ThemeToggle/ThemeToggle';
 
 const Layout = () => {
   const location = useLocation();
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false); // State to manage drawer visibility
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const components = [
     { id: 'avatar', label: 'Avatar' },
@@ -29,18 +29,20 @@ const Layout = () => {
 
   return (
     <div className='app-container'>
-      {/* Drawer Overlay (visible only when drawer is open on mobile) */}
       {isDrawerOpen && <div className="drawer-overlay" onClick={closeDrawer}></div>}
 
-      {/* Sidebar / Drawer */}
       <div className={`sidebar ${isDrawerOpen ? 'open' : ''}`}>
         <div className='sidebar-header'>
           <div className='sidebar-header-content'>
             <h1>ASPEN React UI Library</h1>
             <p>A collection of custom-built React components.</p>
           </div>
-          {/* Hamburger icon for mobile */}
-          <button className="drawer-toggle-button" onClick={toggleDrawer} aria-label="Toggle navigation">
+          <button
+            className="drawer-toggle-button"
+            onClick={toggleDrawer}
+            aria-label={isDrawerOpen ? "Close navigation" : "Open navigation"}
+            title={isDrawerOpen ? "Close navigation" : "Open navigation"}
+          >
             {isDrawerOpen ? (
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
             ) : (
@@ -58,7 +60,7 @@ const Layout = () => {
                   key={component.id}
                   to={component.id}
                   className={`nav-item ${checkIsActive(component.id) ? 'active' : ''}`}
-                  onClick={closeDrawer} {/* Close drawer when a link is clicked */}
+                  onClick={closeDrawer}
                 >
                   {component.label}
                 </Link>
@@ -68,10 +70,10 @@ const Layout = () => {
         </nav>
       </div>
 
-      {/* Main Content Area */}
       <div className='main-content'>
         <div className='content-wrapper'>
           <div className='theme-toggle-button'>
+            {/* Ensure the ThemeToggle component internally has a button with an aria-label or title attribute */}
             <ThemeToggle />
           </div>
           <Outlet />
