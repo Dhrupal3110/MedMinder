@@ -1,0 +1,69 @@
+import React from 'react';
+import { Link, Outlet, useLocation } from 'react-router-dom';
+import { ThemeToggle } from '../ThemeToggle/ThemeToggle'; // Assuming this path is correct
+
+const Layout = () => {
+  const location = useLocation(); // Get the current location object
+
+  const components = [
+    { id: 'avatar', label: 'Avatar' },
+    { id: 'button', label: 'Button' },
+    { id: 'checkbox', label: 'Checkbox' },
+    { id: 'input', label: 'Input' },
+    { id: 'radio-group', label: 'RadioGroup' },
+    { id: 'select', label: 'Select' },
+  ];
+
+  // Helper function to check if a link is active
+  // This avoids calling a hook inside a loop
+  const checkIsActive = (targetPath) => {
+    // Check if the current path starts with the target path (for nested routes)
+    // Or if it's an exact match for the base path
+    return location.pathname === `/${targetPath}` || location.pathname.startsWith(`/${targetPath}/`);
+  };
+
+  return (
+    <div className='app-container'>
+      {/* Sidebar */}
+      <div className='sidebar'>
+        <div className='sidebar-header'>
+          <div className='sidebar-header-content'>
+            <h1>ASPEN React UI Library</h1>
+            <p>A collection of custom-built React components.</p>
+          </div>
+        </div>
+
+        <nav className='sidebar-nav'>
+          <div className='nav-section'>
+            <div className='nav-section-title'>General</div>
+            {
+              components.map(component => (
+                <Link
+                  key={component.id}
+                  to={component.id}
+                  // Use the updated checkIsActive function
+                  className={`nav-item ${checkIsActive(component.id) ? 'active' : ''}`}
+                >
+                  {component.label}
+                </Link>
+              ))
+            }
+          </div>
+          {/* You can add more nav-sections here for other categories */}
+        </nav>
+      </div>
+
+      {/* Main Content Area */}
+      <div className='main-content'>
+        <div className='content-wrapper'>
+          <div className='theme-toggle-button'>
+            <ThemeToggle />
+          </div>
+          <Outlet /> {/* Renders the matched child route component */}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Layout;
