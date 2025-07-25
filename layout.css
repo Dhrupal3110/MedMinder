@@ -137,8 +137,36 @@ body {
 .app-container {
   display: flex;
   min-height: 100vh;
+  overflow-x: hidden; /* Prevent horizontal scroll when drawer is open */
 }
 
+/* Custom Scrollbar Styles for Sidebar/Drawer */
+.sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: 10px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background-color: var(--border-color);
+  border-radius: 10px;
+  border: 2px solid var(--bg-secondary);
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background-color: var(--primary-color);
+}
+
+/* For Firefox */
+.sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) var(--bg-secondary);
+}
+
+/* Sidebar */
 .sidebar {
   width: 280px;
   background: var(--bg-color);
@@ -233,6 +261,7 @@ body {
   box-shadow: 0 0 10px rgba(var(--primary-color-rgb), 0.1);
 }
 
+/* Main Content */
 .main-content {
   flex: 1;
   margin-left: 280px;
@@ -413,19 +442,74 @@ body {
   justify-content: flex-end;
 }
 
+/* Drawer Specific Styles (Mobile Only) */
+.drawer-toggle-button {
+  display: none; /* Hidden by default on desktop */
+  background: none;
+  border: none;
+  color: var(--text-color); /* Use text color for icon */
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.drawer-toggle-button:hover {
+  background-color: var(--bg-hover);
+}
+
+.drawer-toggle-button svg {
+  width: 24px;
+  height: 24px;
+}
+
+.drawer-overlay {
+  display: none; /* Hidden by default */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 99;
+  transition: opacity 0.3s ease-out, visibility 0.3s ease-out;
+  opacity: 0;
+  visibility: hidden;
+}
+
+
 @media (max-width: 768px) {
   .sidebar {
-    width: 100%;
-    height: auto;
-    position: relative;
-    border-right: none;
-    border-bottom: 1px solid var(--border-light);
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 280px; /* Fixed width for the drawer */
+    transform: translateX(-100%); /* Hidden off-screen */
+    transition: transform 0.3s ease-out, box-shadow 0.3s ease;
+    border-right: 1px solid var(--border-light);
     border-bottom-right-radius: 0;
-    box-shadow: none;
+    box-shadow: var(--shadow-lg); /* Add shadow for drawer effect */
+  }
+
+  .sidebar.open {
+    transform: translateX(0); /* Slide into view */
+  }
+
+  .drawer-overlay {
+    display: block; /* Show overlay on mobile */
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Adjust overlay visibility based on sidebar state */
+  .sidebar:not(.open) + .drawer-overlay {
+    opacity: 0;
+    visibility: hidden;
   }
 
   .main-content {
-    margin-left: 0;
+    margin-left: 0; /* No margin on mobile */
   }
 
   .content-wrapper {
@@ -449,11 +533,15 @@ body {
   }
 
   .sidebar-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
+    flex-direction: row; /* Keep elements in a row in header */
+    align-items: center; /* Center vertically */
+    justify-content: space-between; /* Space between title and toggle */
     padding: 16px;
-    position: static;
+    position: static; /* Remove sticky on mobile drawer */
+  }
+
+  .drawer-toggle-button {
+    display: block; /* Show hamburger button on mobile */
   }
 
   .nav-section-title,
