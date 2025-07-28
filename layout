@@ -1,120 +1,192 @@
-  .example-container {
-    border: 1px solid var(--border-color, #1e293b);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 24px;
-    background-color: var(--background-elevated, #0f172a);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
-    transition: background-color 0.3s ease, color 0.3s ease;
-  }
+import React, { useState, useRef } from 'react';
+import { Copy, EyeOff, Eye, Code2 } from 'lucide-react';
 
-  .example-title {
-    font-size: 1.375rem;
-    font-weight: 600;
-    color: var(--text-primary, #fff);
-    margin-bottom: 6px;
-  }
+export interface ExampleContainerProps {
+  title: string;
+  description?: string;
+  code: string;
+  children: React.ReactNode;
+  style?: React.CSSProperties;
+}
 
-  .example-description {
-    color: var(--text-secondary, #94a3b8);
-    font-size: 1rem;
-    margin-bottom: 18px;
-  }
+export const ExampleContainer: React.FC<ExampleContainerProps> = ({
+  title,
+  description,
+  code,
+  children,
+  style = { display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '16px' },
+}) => {
+  const [copyStatus, setCopyStatus] = useState('');
+  const [showCode, setShowCode] = useState(true);
+  const codeRef = useRef<HTMLPreElement>(null);
 
-  .example-demo-wrapper {
-    border-top-left-radius: 12px;
-    border-top-right-radius: 12px;
-    background-color: var(--background-soft, #1e293b);
-    padding: 24px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow-x: auto;
-  }
-
-  .example-demo {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    justify-content: center;
-  }
-
-  .example-code-wrapper {
-    border-top: 1px solid var(--border-color, #334155);
-    padding-top: 12px;
-    margin-top: 12px;
-  }
-
-  .example-code-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-  }
-
-  .code-toggle,
-  .copy-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background-color: transparent;
-    border: 1px solid transparent;
-    border-radius: 6px;
-    color: var(--text-muted, #cbd5e1);
-    font-size: 0.875rem;
-    padding: 6px 12px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .code-toggle:hover,
-  .copy-button:hover {
-    background-color: var(--hover-color, #334155);
-    border-color: var(--border-color, #475569);
-    color: var(--text-primary, #fff);
-  }
-
-  .copy-status {
-    margin-left: 6px;
-    font-size: 0.8rem;
-    color: var(--text-success, #4ade80);
-  }
-
-  .example-code-block {
-    background-color: var(--background-code, #0f172a);
-    color: var(--text-code, #e2e8f0);
-    padding: 16px;
-    border-radius: 8px;
-    font-family: 'Fira Code', monospace;
-    font-size: 0.875rem;
-    overflow-x: auto;
-    border: 1px solid var(--border-color, #1e293b);
-  }
-
-  @media (max-width: 600px) {
-    .example-container {
-      padding: 16px;
+  const handleCopyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopyStatus('Copied!');
+    } catch {
+      setCopyStatus('Copy failed');
     }
+    setTimeout(() => setCopyStatus(''), 2000);
+  };
 
-    .example-title {
-      font-size: 1.125rem;
-    }
+  return (
+    <div className="example-container">
+      <h3 className="example-title">{title}</h3>
+      {description && <p className="example-description">{description}</p>}
 
-    .example-description {
-      font-size: 0.9rem;
-    }
+      <div className="example-demo-wrapper">
+        <div className="example-demo" style={style}>
+          {children}
+        </div>
+      </div>
 
-    .example-demo-wrapper {
-      padding: 16px;
-    }
+      <div className="example-code-wrapper">
+        <div className="example-code-header">
+          <button
+            className="code-toggle"
+            onClick={() => setShowCode((prev) => !prev)}
+            title={showCode ? 'Hide code block' : 'Show code block'}
+            aria-label="Toggle code visibility"
+          >
+            {showCode ? <EyeOff size={18} /> : <Eye size={18} />}
+            {showCode ? 'Hide Code' : 'Show Code'}
+          </button>
 
-    .example-code-block {
-      font-size: 0.8rem;
-    }
+          <button className="copy-button" onClick={handleCopyCode} title="Copy code" aria-label="Copy code">
+            <Copy size={18} />
+            {copyStatus && <span className="copy-status">{copyStatus}</span>}
+          </button>
+        </div>
 
-    .code-toggle,
-    .copy-button {
-      font-size: 0.8rem;
-      padding: 4px 8px;
-    }
-  }
+        {showCode && (
+          <pre ref={codeRef} className="example-code-block">
+            <code>{code}</code>
+          </pre>
+        )}
+      </div>
+
+      <style jsx>{`
+        .example-container {
+          border: 1px solid var(--border-color);
+          border-radius: 12px;
+          padding: 24px;
+          margin-bottom: 24px;
+          background-color: var(--background-elevated);
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+          transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .example-title {
+          font-size: 1.5rem;
+          font-weight: 600;
+          color: var(--text-primary);
+          margin-bottom: 8px;
+        }
+
+        .example-description {
+          color: var(--text-secondary);
+          font-size: 1rem;
+          margin-bottom: 20px;
+        }
+
+        .example-demo-wrapper {
+          border-radius: 12px;
+          background-color: var(--background-soft);
+          padding: 24px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          overflow-x: auto;
+        }
+
+        .example-demo {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 16px;
+        }
+
+        .example-code-wrapper {
+          border-top: 1px solid var(--border-color);
+          padding-top: 16px;
+          margin-top: 16px;
+        }
+
+        .example-code-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 12px;
+        }
+
+        .code-toggle,
+        .copy-button {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          background-color: transparent;
+          border: 1px solid transparent;
+          border-radius: 6px;
+          color: var(--text-muted);
+          font-size: 0.875rem;
+          padding: 6px 12px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .code-toggle:hover,
+        .copy-button:hover {
+          background-color: var(--hover-color);
+          border-color: var(--border-color);
+          color: var(--text-primary);
+        }
+
+        .copy-status {
+          font-size: 0.75rem;
+          margin-left: 4px;
+          color: var(--text-success);
+        }
+
+        .example-code-block {
+          background-color: var(--background-code);
+          color: var(--text-code);
+          padding: 18px;
+          border-radius: 8px;
+          font-family: 'Fira Code', monospace;
+          font-size: 0.875rem;
+          overflow-x: auto;
+          border: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 600px) {
+          .example-container {
+            padding: 16px;
+          }
+
+          .example-title {
+            font-size: 1.25rem;
+          }
+
+          .example-description {
+            font-size: 0.95rem;
+          }
+
+          .example-demo-wrapper {
+            padding: 16px;
+          }
+
+          .example-code-block {
+            font-size: 0.8rem;
+          }
+
+          .code-toggle,
+          .copy-button {
+            font-size: 0.8rem;
+            padding: 4px 8px;
+          }
+        }
+      `}</style>
+    </div>
+  );
+};
