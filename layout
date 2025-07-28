@@ -1,48 +1,101 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import React from 'react';
 
-type Theme = 'light' | 'dark';
-
-interface ThemeContextType {
-  theme: Theme;
-  toggleTheme: () => void;
+export interface APITableRow {
+  property: string;
+  description: string;
+  type: string;
+  default: string | number;
+  version?: string;
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
-
-export const useTheme = () => {
-  const context = useContext(ThemeContext);
-  if (context === undefined) {
-    throw new Error('useTheme must me used within a ThemeProvider');
-  }
-  return context;
-};
-
-interface ThemeProviderProps {
-  children: React.ReactNode;
+export interface APITableProps {
+  props: APITableRow[];
 }
 
-export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [theme, setTheme] = useState<Theme>(() => {
-    const savedTheme = localStorage.getItem('theme') as Theme;
-    if (savedTheme) return savedTheme;
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
-    return 'light';
-  });
-
-  useEffect(() => {
-    const root = document.documentElement;
-    root.style.transition = 'background-color 0.3s ease, color 0.3s ease';
-    root.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
-  };
-
+export const APITable: React.FC<APITableProps> = ({ props }) => {
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
+    <div className="api-table-container">
+      <table className="api-table">
+        <thead>
+          <tr>
+            <th>Property</th>
+            <th>Description</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Version</th>
+          </tr>
+        </thead>
+        <tbody>
+          {props.map((prop, index) => (
+            <tr key={index}>
+              <td><code>{prop.property}</code></td>
+              <td>{prop.description}</td>
+              <td><code>{prop.type}</code></td>
+              <td><code>{prop.default}</code></td>
+              <td>{prop.version || '-'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
+
+
+
+
+
+
+.api-table-container {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 12px;
+  background-color: var(--bg-color);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  border: 1px solid var(--border-light);
+}
+
+.api-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  min-width: 600px;
+}
+
+.api-table thead {
+  background-color: var(--bg-secondary);
+  color: var(--text-color);
+}
+
+.api-table th,
+.api-table td {
+  padding: 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-light);
+  transition: all 0.3s ease;
+}
+
+.api-table th {
+  text-transform: uppercase;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+}
+
+.api-table tbody tr:hover {
+  background-color: var(--bg-hover);
+}
+
+.api-table code {
+  font-family: monospace;
+  background-color: var(--bg-secondary);
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--border-light);
+  color: var(--primary-color);
+  font-weight: 500;
+  font-size: 13px;
+  transition: all 0.3s ease;
+}
