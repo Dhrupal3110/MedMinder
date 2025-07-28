@@ -1,42 +1,67 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
+import { Copy, Code2, EyeOff, Eye } from 'lucide-react';
 
-export interface APITableRow {
-  property: string;
-  description: string;
-  type: string;
-  default: string | number;
-  version?: string;
+export interface ExampleContainerProps {
+  title: string;
+  description?: string;
+  code: string;
+  children: React.ReactNode;
+  style?: React.CSSProperties;
 }
 
-export interface APITableProps {
-  props: APITableRow[];
-}
+export const ExampleContainer: React.FC<ExampleContainerProps> = ({
+  title,
+  description,
+  code,
+  children,
+  style = { display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '16px' },
+}) => {
+  const [copyStatus, setCopyStatus] = useState('');
+  const [showCode, setShowCode] = useState(true);
+  const codeRef = useRef<HTMLPreElement>(null);
 
-export const APITable: React.FC<APITableProps> = ({ props }) => {
+  const handleCopyCode = async () => {
+    if (codeRef.current) {
+      try {
+        await navigator.clipboard.writeText(code);
+        setCopyStatus('Copied!');
+      } catch (err) {
+        setCopyStatus('Failed to copy!');
+        console.error('Failed to copy text: ', err);
+      }
+      setTimeout(() => setCopyStatus(''), 2000);
+    }
+  };
+
   return (
-    <div className="api-table-container">
-      <table className="api-table">
-        <thead>
-          <tr>
-            <th>Property</th>
-            <th>Description</th>
-            <th>Type</th>
-            <th>Default</th>
-            <th>Version</th>
-          </tr>
-        </thead>
-        <tbody>
-          {props.map((prop, index) => (
-            <tr key={index}>
-              <td><code>{prop.property}</code></td>
-              <td>{prop.description}</td>
-              <td><code>{prop.type}</code></td>
-              <td><code>{prop.default}</code></td>
-              <td>{prop.version || '-'}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className='example-container'>
+      <h3 className='example-title'>{title}</h3>
+      {description && <p className='example-description'>{description}</p>}
+
+      <div className='example-demo-wrapper'>
+        <div className='example-demo' style={style}>
+          {children}
+        </div>
+      </div>
+
+      <div className='example-code-wrapper'>
+        <div className='example-code-header'>
+          <button className='code-toggle' onClick={() => setShowCode(!showCode)} title={showCode ? 'Hide Code' : 'Show Code'}>
+            {showCode ? <EyeOff size={18} /> : <Eye size={18} />} {showCode ? 'Hide Code' : 'Show Code'}
+          </button>
+
+          <button className='copy-button' onClick={handleCopyCode} title="Copy code">
+            <Copy size={18} />
+            {copyStatus && <span className="copy-status">{copyStatus}</span>}
+          </button>
+        </div>
+
+        {showCode && (
+          <pre ref={codeRef} className='example-code-block'>
+            <code>{code}</code>
+          </pre>
+        )}
+      </div>
     </div>
   );
 };
@@ -46,89 +71,104 @@ export const APITable: React.FC<APITableProps> = ({ props }) => {
 
 
 
-.api-table-container {
-  width: 100%;
-  overflow-x: auto;
+/* ExampleContainer Styles */
+.example-container {
+  border: 1px solid var(--border-color);
   border-radius: 12px;
-  background-color: var(--bg-color);
-  box-shadow: var(--shadow-sm);
-  transition: all 0.3s ease;
-  border: 1px solid var(--border-light);
-  padding: 12px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-light) transparent;
+  padding: 20px;
+  margin-bottom: 24px;
+  background-color: var(--background-elevated);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* For WebKit-based browsers (Chrome, Safari) */
-.api-table-container::-webkit-scrollbar {
-  height: 6px;
-}
-
-.api-table-container::-webkit-scrollbar-thumb {
-  background-color: var(--border-light);
-  border-radius: 8px;
-}
-
-.api-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-  min-width: 600px;
-  color: var(--text-color);
-}
-
-.api-table thead {
-  background-color: var(--bg-secondary);
-  transition: all 0.3s ease;
-}
-
-.api-table th,
-.api-table td {
-  padding: 14px 16px;
-  text-align: left;
-  border-bottom: 1px solid var(--border-light);
-  transition: all 0.3s ease;
-}
-
-.api-table th {
-  text-transform: uppercase;
-  font-size: 13px;
+.example-title {
+  margin-bottom: 4px;
+  font-size: 1.25rem;
   font-weight: 600;
-  letter-spacing: 0.5px;
+  color: var(--text-primary);
+}
+
+.example-description {
+  margin-bottom: 16px;
   color: var(--text-secondary);
-  white-space: nowrap;
+  font-size: 0.95rem;
 }
 
-.api-table tbody tr:hover {
-  background-color: var(--bg-hover);
+.example-demo-wrapper {
+  margin-bottom: 16px;
 }
 
-.api-table code {
-  font-family: monospace;
-  background-color: var(--bg-secondary);
-  padding: 2px 6px;
+.example-demo {
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background-color: var(--background-soft);
+}
+
+.example-code-wrapper {
+  border-top: 1px solid var(--border-color);
+  padding-top: 12px;
+}
+
+.example-code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.code-toggle,
+.copy-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 6px 10px;
   border-radius: 6px;
-  border: 1px solid var(--border-light);
-  color: var(--primary-color);
-  font-weight: 500;
-  font-size: 13px;
-  transition: all 0.3s ease;
+  transition: background-color 0.2s ease;
 }
 
-/* Responsive stacking (optional) */
+.code-toggle:hover,
+.copy-button:hover {
+  background-color: var(--hover-color);
+  color: var(--text-primary);
+}
+
+.copy-status {
+  font-size: 0.8rem;
+  margin-left: 4px;
+  color: var(--text-success);
+}
+
+.example-code-block {
+  background-color: var(--background-code);
+  color: var(--text-code);
+  border-radius: 6px;
+  padding: 14px;
+  font-size: 0.85rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  border: 1px solid var(--border-color);
+}
+
+/* Responsive tweaks */
 @media (max-width: 600px) {
-  .api-table {
-    min-width: 100%;
-    font-size: 13px;
+  .example-container {
+    padding: 16px;
   }
 
-  .api-table th,
-  .api-table td {
-    padding: 10px;
+  .code-toggle,
+  .copy-button {
+    font-size: 0.8rem;
   }
 
-  .api-table-container {
-    padding: 8px;
+  .example-code-block {
+    font-size: 0.78rem;
   }
 }
-
