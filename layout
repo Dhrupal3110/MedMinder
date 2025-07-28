@@ -1,209 +1,48 @@
-import { Link, Outlet } from 'react-router-dom';
-import { ThemeToggle } from '../ThemeToggle/ThemeToggle';
-import { useActiveRoute } from '../../hooks/useActiveroute';
-import { useState, useEffect } from 'react';
-import { 
-  User, 
-  MousePointer, 
-  CheckSquare, 
-  Type, 
-  Circle, 
-  ChevronDown,
-  BookOpen,
-  Palette,
-  Lightbulb,
-  Menu,
-  X
-} from 'lucide-react';
+import { createContext, useContext, useEffect, useState } from "react";
 
-const Layout = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+type Theme = 'light' | 'dark';
 
-  const components = [
-    { id: 'avatar' as const, label: 'Avatar', icon: User },
-    { id: 'button' as const, label: 'Button', icon: MousePointer },
-    { id: 'checkbox' as const, label: 'Checkbox', icon: CheckSquare },
-    { id: 'input' as const, label: 'Input', icon: Type },
-    { id: 'radio-group' as const, label: 'RadioGroup', icon: Circle },
-    { id: 'select' as const, label: 'Select', icon: ChevronDown },
-  ];
+interface ThemeContextType {
+  theme: Theme;
+  toggleTheme: () => void;
+}
 
-  const checkIsActive = (path: string): boolean => {
-    return useActiveRoute(path);
-  };
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-  // Handle mobile detection and resize
+export const useTheme = () => {
+  const context = useContext(ThemeContext);
+  if (context === undefined) {
+    throw new Error('useTheme must me used within a ThemeProvider');
+  }
+  return context;
+};
+
+interface ThemeProviderProps {
+  children: React.ReactNode;
+}
+
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
+  const [theme, setTheme] = useState<Theme>(() => {
+    const savedTheme = localStorage.getItem('theme') as Theme;
+    if (savedTheme) return savedTheme;
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
+    return 'light';
+  });
+
   useEffect(() => {
-    const checkIsMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-      if (window.innerWidth > 768) {
-        setIsMobileMenuOpen(false);
-      }
-    };
+    const root = document.documentElement;
+    root.style.transition = 'background-color 0.3s ease, color 0.3s ease';
+    root.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
-    checkIsMobile();
-    window.addEventListener('resize', checkIsMobile);
-    return () => window.removeEventListener('resize', checkIsMobile);
-  }, []);
-
-  // Handle body scroll lock when mobile menu is open
-  useEffect(() => {
-    if (isMobileMenuOpen && isMobile) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isMobileMenuOpen, isMobile]);
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  const closeMobileMenu = () => {
-    if (isMobile) {
-      setIsMobileMenuOpen(false);
-    }
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
   };
 
   return (
-    <div className='app-container'>
-      {/* Mobile Overlay */}
-      {isMobile && isMobileMenuOpen && (
-        <div 
-          className="mobile-overlay" 
-          onClick={closeMobileMenu}
-          aria-hidden="true"
-        />
-      )}
-
-      {/* Mobile Header */}
-      {isMobile && (
-        <div className="mobile-header">
-          <div className="mobile-header-content">
-            <h1>ASPEN React UI</h1>
-            <button
-              className={`mobile-menu-button ${isMobileMenuOpen ? 'open' : ''}`}
-              onClick={toggleMobileMenu}
-              aria-label="Toggle navigation menu"
-              aria-expanded={isMobileMenuOpen}
-            >
-              {isMobileMenuOpen ? (
-                <X size={20} />
-              ) : (
-                <Menu size={20} />
-              )}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Sidebar */}
-      <div className={`sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
-        <div className='sidebar-header'>
-          <div className='sidebar-header-content'>
-            <h1>ASPEN React UI Library</h1>
-            <p>Modern Component Collection</p>
-          </div>
-          {isMobile && (
-            <button
-              className="sidebar-close-button"
-              onClick={closeMobileMenu}
-              aria-label="Close navigation menu"
-            >
-              <X size={18} />
-            </button>
-          )}
-        </div>
-        
-        <nav className='sidebar-nav' role="navigation" aria-label="Component navigation">
-          <div className='nav-section'>
-            <div className='nav-section-title'>Components</div>
-            {components.map(component => {
-              const IconComponent = component.icon;
-              return (
-                <Link
-                  key={component.id}
-                  to={component.id}
-                  className={`nav-item ${checkIsActive(component.id) ? 'active' : ''}`}
-                  onClick={closeMobileMenu}
-                  aria-current={checkIsActive(component.id) ? 'page' : undefined}
-                >
-                  <span className="nav-item-icon" aria-hidden="true">
-                    <IconComponent size={16} />
-                  </span>
-                  <span className="nav-item-label">{component.label}</span>
-                  {checkIsActive(component.id) && (
-                    <span className="nav-item-indicator" aria-hidden="true" />
-                  )}
-                </Link>
-              );
-            })}
-          </div>
-
-          {/* Additional Navigation Sections */}
-          <div className='nav-section'>
-            <div className='nav-section-title'>Resources</div>
-            <a
-              href="#getting-started" 
-              className="nav-item"
-              onClick={closeMobileMenu}
-            >
-              <span className="nav-item-icon" aria-hidden="true">
-                <BookOpen size={16} />
-              </span>
-              <span className="nav-item-label">Getting Started</span>
-            </a>
-            <a
-              href="#theming" 
-              className="nav-item"
-              onClick={closeMobileMenu}
-            >
-              <span className="nav-item-icon" aria-hidden="true">
-                <Palette size={16} />
-              </span>
-              <span className="nav-item-label">Theming</span>
-            </a>
-            <a
-              href="#examples" 
-              className="nav-item"
-              onClick={closeMobileMenu}
-            >
-              <span className="nav-item-icon" aria-hidden="true">
-                <Lightbulb size={16} />
-              </span>
-              <span className="nav-item-label">Examples</span>
-            </a>
-          </div>
-        </nav>
-
-        {/* Sidebar Footer */}
-        <div className="sidebar-footer">
-          <div className="sidebar-version">
-            <span>Version 1.0.0</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className='main-content'>
-        <div className='content-wrapper'>
-          <div className='content-header'>
-            <div className='theme-toggle-button'>
-              <ThemeToggle />
-            </div>
-          </div>
-          <main role="main">
-            <Outlet />
-          </main>
-        </div>
-      </div>
-    </div>
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      {children}
+    </ThemeContext.Provider>
   );
 };
-
-export default Layout;
