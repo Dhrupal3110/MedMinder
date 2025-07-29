@@ -1,163 +1,45 @@
-import React, { useRef, useState } from "react";
-import { Copy, Eye, EyeOff, Code2 } from "lucide-react";
+import React from 'react';
+import { Pencil } from 'lucide-react'; // React Lucide icon
 
-export interface ExampleContainerProps {
-  title: string;
-  description?: string;
-  code: string;
-  children: React.ReactNode;
-}
-
-export const ExampleContainer: React.FC<ExampleContainerProps> = ({
-  title,
-  description,
-  code,
-  children,
-}) => {
-  const codeRef = useRef<HTMLPreElement>(null);
-  const [copied, setCopied] = useState(false);
-  const [showCode, setShowCode] = useState(true);
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(code);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Copy failed", err);
-    }
-  };
-
+export const SectionLabel: React.FC<{ label: string }> = ({ label }) => {
   return (
-    <div className="example-container">
-      <div className="example-preview">
-        <div className="example-children">{children}</div>
-      </div>
-
-      {title || description ? (
-        <div className="example-meta">
-          {title && <h4 className="example-title">{title}</h4>}
-          {description && <p className="example-desc">{description}</p>}
-        </div>
-      ) : null}
-
-      <div className="example-controls">
-        <button onClick={() => setShowCode((prev) => !prev)} className="control-btn">
-          {showCode ? <EyeOff size={16} /> : <Eye size={16} />}
-        </button>
-        <button onClick={handleCopy} className="control-btn">
-          <Copy size={16} />
-          {copied && <span className="copied">Copied</span>}
-        </button>
-      </div>
-
-      {showCode && (
-        <pre ref={codeRef} className="example-code">
-          <code>{code}</code>
-        </pre>
-      )}
-
-      <style jsx>{`
-        .example-container {
-          background: var(--bg-color);
-          border: 1px solid var(--border-color);
-          border-radius: 8px;
-          padding: 1.5rem;
-          box-shadow: var(--shadow-md);
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-          transition: all 0.3s ease;
-        }
-
-        .example-preview {
-          background: var(--bg-secondary);
-          border: 1px dashed var(--border-light);
-          padding: 1rem;
-          border-radius: 8px;
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: flex-start;
-          gap: 1rem;
-        }
-
-        .example-meta {
-          padding: 0.5rem 0;
-        }
-
-        .example-title {
-          color: var(--text-color);
-          font-size: 1rem;
-          font-weight: 600;
-          margin: 0;
-        }
-
-        .example-desc {
-          color: var(--text-secondary);
-          font-size: 0.875rem;
-          margin: 0.25rem 0 0 0;
-        }
-
-        .example-controls {
-          display: flex;
-          gap: 0.5rem;
-          align-items: center;
-        }
-
-        .control-btn {
-          background: transparent;
-          border: 1px solid var(--border-color);
-          color: var(--text-secondary);
-          padding: 0.4rem 0.6rem;
-          border-radius: 6px;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          transition: all 0.2s ease;
-        }
-
-        .control-btn:hover {
-          color: var(--primary-color);
-          border-color: var(--primary-hover);
-          background: var(--nav-item-hover-bg);
-        }
-
-        .copied {
-          font-size: 0.75rem;
-          color: var(--success-color);
-        }
-
-        .example-code {
-          background: var(--bg-active);
-          padding: 1rem;
-          font-size: 0.875rem;
-          font-family: 'Fira Code', monospace;
-          color: var(--text-color);
-          border-radius: 8px;
-          overflow-x: auto;
-          border: 1px solid var(--border-light);
-        }
-
-        @media (max-width: 640px) {
-          .example-container {
-            padding: 1rem;
-          }
-
-          .example-controls {
-            flex-wrap: wrap;
-          }
-
-          .control-btn {
-            padding: 0.35rem 0.5rem;
-            font-size: 0.875rem;
-          }
-
-          .example-code {
-            font-size: 0.8rem;
-          }
-        }
-      `}</style>
+    <div className="section-label">
+      <span className="label-text">
+        <strong>{label}</strong>
+        <Pencil size={14} className="label-icon" />
+      </span>
+      <div className="label-line" />
     </div>
   );
 };
+
+
+
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin: 16px 0;
+}
+
+.label-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  color: var(--label-color);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.label-icon {
+  color: var(--label-icon-color);
+}
+
+.label-line {
+  flex-grow: 1;
+  height: 1px;
+  background-color: var(--label-line-color);
+  opacity: 0.4;
+}
