@@ -291,8 +291,8 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
           const originalRef = (children as any).ref;
           if (typeof originalRef === 'function') {
             originalRef(node);
-          } else if (originalRef && typeof originalRef === 'object' && originalRef.hasOwnProperty('current')) {
-            originalRef.current = node;
+          } else if (originalRef && typeof originalRef === 'object' && 'current' in originalRef) {
+            (originalRef as React.MutableRefObject<HTMLElement>).current = node;
           }
         },
         onMouseEnter: (e: React.MouseEvent) => {
@@ -338,8 +338,8 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
         tooltipRef.current = node;
         if (typeof ref === 'function') {
           ref(node);
-        } else if (ref && typeof ref === 'object' && ref.hasOwnProperty('current')) {
-          (ref as React.MutableRefObject<HTMLDivElement>).current = node;
+        } else if (ref && typeof ref === 'object' && 'current' in ref) {
+          (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
         }
       }}
       id={tooltipId}
