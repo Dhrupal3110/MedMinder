@@ -1,3 +1,59 @@
+const child = children as ReactElement<any> & { ref?: React.Ref<any> };
+
+const triggerElement = isValidElement(child)
+  ? cloneElement(child, {
+      ref: (node: HTMLElement | null) => {
+        triggerRef.current = node;
+
+        if (typeof child.ref === 'function') {
+          child.ref(node);
+        } else if (child.ref && typeof child.ref === 'object') {
+          (child.ref as MutableRefObject<HTMLElement | null>).current = node;
+        }
+      },
+      onMouseEnter: (e: React.MouseEvent) => {
+        child.props.onMouseEnter?.(e);
+        handleMouseEnter();
+      },
+      onMouseLeave: (e: React.MouseEvent) => {
+        child.props.onMouseLeave?.(e);
+        handleMouseLeave();
+      },
+      onFocus: (e: React.FocusEvent) => {
+        child.props.onFocus?.(e);
+        handleFocus();
+      },
+      onBlur: (e: React.FocusEvent) => {
+        child.props.onBlur?.(e);
+        handleBlur();
+      },
+      onClick: (e: React.MouseEvent) => {
+        child.props.onClick?.(e);
+        handleClick();
+      },
+      onKeyDown: (e: React.KeyboardEvent) => {
+        child.props.onKeyDown?.(e);
+        handleKeyDown(e);
+      },
+      'aria-describedby': currentVisible
+        ? tooltipId
+        : child.props['aria-describedby'] || ariaDescribedBy,
+    })
+  : child;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import React, {
   forwardRef,
   useState,
