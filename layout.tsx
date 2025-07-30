@@ -52,7 +52,6 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
   
   const triggerRef = useRef<HTMLElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
-  // Fix: Use number instead of NodeJS.Timeout for browser compatibility
   const showTimeoutRef = useRef<number>();
   const hideTimeoutRef = useRef<number>();
   const tooltipId = useId();
@@ -145,7 +144,7 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
       }
     } else if (left + tooltipRect.width > viewport.width) {
       if (placement.includes('right')) {
-        left = triggerRect.left - tooltipRect.width - offset;
+        left = triggerRef.left - tooltipRect.width - offset;
         finalPlacement = placement.replace('right', 'left') as typeof placement;
       } else {
         left = viewport.width - tooltipRect.width - 8;
@@ -162,20 +161,20 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
 
     if (hideTimeoutRef.current) {
       clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = undefined;
     }
 
-    if (delay > 0) {
-      showTimeoutRef.current = window.setTimeout(() => {
-        if (!isControlled) {
-          setInternalVisible(true);
-        }
-        onVisibleChange?.(true);
-      }, delay);
-    } else {
+    const executeShow = () => {
       if (!isControlled) {
         setInternalVisible(true);
       }
       onVisibleChange?.(true);
+    };
+
+    if (delay > 0) {
+      showTimeoutRef.current = window.setTimeout(executeShow, delay);
+    } else {
+      executeShow();
     }
   }, [disabled, content, delay, isControlled, onVisibleChange]);
 
@@ -183,44 +182,44 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
   const hideTooltip = useCallback(() => {
     if (showTimeoutRef.current) {
       clearTimeout(showTimeoutRef.current);
+      showTimeoutRef.current = undefined;
     }
 
-    if (hideDelay > 0) {
-      hideTimeoutRef.current = window.setTimeout(() => {
-        if (!isControlled) {
-          setInternalVisible(false);
-        }
-        onVisibleChange?.(false);
-      }, hideDelay);
-    } else {
+    const executeHide = () => {
       if (!isControlled) {
         setInternalVisible(false);
       }
       onVisibleChange?.(false);
+    };
+
+    if (hideDelay > 0) {
+      hideTimeoutRef.current = window.setTimeout(executeHide, hideDelay);
+    } else {
+      executeHide();
     }
   }, [hideDelay, isControlled, onVisibleChange]);
 
-  // Event handlers
+  // Event handlers - Fixed trigger logic
   const handleMouseEnter = useCallback(() => {
-    if (trigger === 'hover' || trigger === 'manual') {
+    if (trigger === 'hover') {
       showTooltip();
     }
   }, [trigger, showTooltip]);
 
   const handleMouseLeave = useCallback(() => {
-    if (trigger === 'hover' || trigger === 'manual') {
+    if (trigger === 'hover') {
       hideTooltip();
     }
   }, [trigger, hideTooltip]);
 
   const handleFocus = useCallback(() => {
-    if (trigger === 'focus' || trigger === 'manual') {
+    if (trigger === 'focus') {
       showTooltip();
     }
   }, [trigger, showTooltip]);
 
   const handleBlur = useCallback(() => {
-    if (trigger === 'focus' || trigger === 'manual') {
+    if (trigger === 'focus') {
       hideTooltip();
     }
   }, [trigger, hideTooltip]);
@@ -245,7 +244,10 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
   // Update position when visible
   useEffect(() => {
     if (currentVisible) {
-      calculatePosition();
+      // Small delay to ensure DOM is ready
+      const timeoutId = setTimeout(() => {
+        calculatePosition();
+      }, 0);
       
       const handleResize = () => calculatePosition();
       const handleScroll = () => calculatePosition();
@@ -254,6 +256,7 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
       window.addEventListener('scroll', handleScroll, true);
       
       return () => {
+        clearTimeout(timeoutId);
         window.removeEventListener('resize', handleResize);
         window.removeEventListener('scroll', handleScroll, true);
       };
@@ -282,7 +285,7 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
     .filter(Boolean)
     .join(' ');
 
-  // Fix: Improved ref handling for triggerElement
+  // Enhanced ref handling for triggerElement
   const triggerElement = isValidElement(children) 
     ? cloneElement(children, {
         ref: (node: HTMLElement) => {
@@ -352,6 +355,8 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
         zIndex,
         maxWidth: typeof maxWidth === 'number' ? `${maxWidth}px` : maxWidth,
         pointerEvents: trigger === 'hover' ? 'none' : 'auto',
+        visibility: currentVisible ? 'visible' : 'hidden',
+        opacity: currentVisible ? 1 : 0,
       }}
       role="tooltip"
       aria-label={ariaLabel}
@@ -366,7 +371,7 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
   return (
     <>
       {triggerElement}
-      {currentVisible && content && (
+      {content && (
         portal ? createPortal(tooltipContent, document.body) : tooltipContent
       )}
     </>
