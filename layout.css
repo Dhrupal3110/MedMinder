@@ -49,6 +49,7 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
   const [internalVisible, setInternalVisible] = useState(defaultVisible);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const [actualPlacement, setActualPlacement] = useState(placement);
+  const [mounted, setMounted] = useState(false);
   
   const triggerRef = useRef<HTMLElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -59,105 +60,113 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
   const isControlled = visible !== undefined;
   const currentVisible = isControlled ? visible : internalVisible;
 
+  // Ensure component is mounted before showing tooltip
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Calculate tooltip position
   const calculatePosition = useCallback(() => {
-    if (!triggerRef.current || !tooltipRef.current) return;
+    if (!triggerRef.current || !tooltipRef.current || !mounted) return;
 
     const triggerRect = triggerRef.current.getBoundingClientRect();
     const tooltipRect = tooltipRef.current.getBoundingClientRect();
     const viewport = {
       width: window.innerWidth,
       height: window.innerHeight,
+      scrollX: window.scrollX,
+      scrollY: window.scrollY,
     };
 
     let top = 0;
     let left = 0;
     let finalPlacement = placement;
 
-    // Calculate base position
+    // Calculate base position with scroll offset
     switch (placement) {
       case 'top':
       case 'top-start':
       case 'top-end':
-        top = triggerRect.top - tooltipRect.height - offset;
+        top = triggerRect.top + viewport.scrollY - tooltipRect.height - offset;
         left = placement === 'top-start' 
-          ? triggerRect.left
+          ? triggerRect.left + viewport.scrollX
           : placement === 'top-end'
-          ? triggerRect.right - tooltipRect.width
-          : triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2;
+          ? triggerRect.right + viewport.scrollX - tooltipRect.width
+          : triggerRect.left + viewport.scrollX + triggerRect.width / 2 - tooltipRect.width / 2;
         break;
       case 'bottom':
       case 'bottom-start':
       case 'bottom-end':
-        top = triggerRect.bottom + offset;
+        top = triggerRect.bottom + viewport.scrollY + offset;
         left = placement === 'bottom-start'
-          ? triggerRect.left
+          ? triggerRect.left + viewport.scrollX
           : placement === 'bottom-end'
-          ? triggerRect.right - tooltipRect.width
-          : triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2;
+          ? triggerRect.right + viewport.scrollX - tooltipRect.width
+          : triggerRect.left + viewport.scrollX + triggerRect.width / 2 - tooltipRect.width / 2;
         break;
       case 'left':
       case 'left-start':
       case 'left-end':
         top = placement === 'left-start'
-          ? triggerRect.top
+          ? triggerRect.top + viewport.scrollY
           : placement === 'left-end'
-          ? triggerRect.bottom - tooltipRect.height
-          : triggerRect.top + triggerRect.height / 2 - tooltipRect.height / 2;
-        left = triggerRect.left - tooltipRect.width - offset;
+          ? triggerRect.bottom + viewport.scrollY - tooltipRect.height
+          : triggerRect.top + viewport.scrollY + triggerRect.height / 2 - tooltipRect.height / 2;
+        left = triggerRect.left + viewport.scrollX - tooltipRect.width - offset;
         break;
       case 'right':
       case 'right-start':
       case 'right-end':
         top = placement === 'right-start'
-          ? triggerRect.top
+          ? triggerRect.top + viewport.scrollY
           : placement === 'right-end'
-          ? triggerRect.bottom - tooltipRect.height
-          : triggerRect.top + triggerRect.height / 2 - tooltipRect.height / 2;
-        left = triggerRect.right + offset;
+          ? triggerRect.bottom + viewport.scrollY - tooltipRect.height
+          : triggerRect.top + viewport.scrollY + triggerRect.height / 2 - tooltipRect.height / 2;
+        left = triggerRect.right + viewport.scrollX + offset;
         break;
     }
 
     // Viewport collision detection and adjustment
-    if (top < 0) {
+    const minMargin = 8;
+    if (top < viewport.scrollY + minMargin) {
       if (placement.includes('top')) {
-        top = triggerRect.bottom + offset;
+        top = triggerRect.bottom + viewport.scrollY + offset;
         finalPlacement = placement.replace('top', 'bottom') as typeof placement;
       } else {
-        top = 8;
+        top = viewport.scrollY + minMargin;
       }
-    } else if (top + tooltipRect.height > viewport.height) {
+    } else if (top + tooltipRect.height > viewport.scrollY + viewport.height - minMargin) {
       if (placement.includes('bottom')) {
-        top = triggerRect.top - tooltipRect.height - offset;
+        top = triggerRect.top + viewport.scrollY - tooltipRect.height - offset;
         finalPlacement = placement.replace('bottom', 'top') as typeof placement;
       } else {
-        top = viewport.height - tooltipRect.height - 8;
+        top = viewport.scrollY + viewport.height - tooltipRect.height - minMargin;
       }
     }
 
-    if (left < 0) {
+    if (left < viewport.scrollX + minMargin) {
       if (placement.includes('left')) {
-        left = triggerRect.right + offset;
+        left = triggerRect.right + viewport.scrollX + offset;
         finalPlacement = placement.replace('left', 'right') as typeof placement;
       } else {
-        left = 8;
+        left = viewport.scrollX + minMargin;
       }
-    } else if (left + tooltipRect.width > viewport.width) {
+    } else if (left + tooltipRect.width > viewport.scrollX + viewport.width - minMargin) {
       if (placement.includes('right')) {
-        left = triggerRef.left - tooltipRect.width - offset;
+        left = triggerRect.left + viewport.scrollX - tooltipRect.width - offset;
         finalPlacement = placement.replace('right', 'left') as typeof placement;
       } else {
-        left = viewport.width - tooltipRect.width - 8;
+        left = viewport.scrollX + viewport.width - tooltipRect.width - minMargin;
       }
     }
 
     setPosition({ top, left });
     setActualPlacement(finalPlacement);
-  }, [placement, offset]);
+  }, [placement, offset, mounted]);
 
   // Show tooltip
   const showTooltip = useCallback(() => {
-    if (disabled || !content) return;
+    if (disabled || !content || !mounted) return;
 
     if (hideTimeoutRef.current !== undefined) {
       clearTimeout(hideTimeoutRef.current);
@@ -176,7 +185,7 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
     } else {
       executeShow();
     }
-  }, [disabled, content, delay, isControlled, onVisibleChange]);
+  }, [disabled, content, delay, isControlled, onVisibleChange, mounted]);
 
   // Hide tooltip
   const hideTooltip = useCallback(() => {
@@ -199,33 +208,37 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
     }
   }, [hideDelay, isControlled, onVisibleChange]);
 
-  // Event handlers - Fixed trigger logic
-  const handleMouseEnter = useCallback(() => {
+  // Event handlers
+  const handleMouseEnter = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
     if (trigger === 'hover') {
       showTooltip();
     }
   }, [trigger, showTooltip]);
 
-  const handleMouseLeave = useCallback(() => {
+  const handleMouseLeave = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
     if (trigger === 'hover') {
       hideTooltip();
     }
   }, [trigger, hideTooltip]);
 
-  const handleFocus = useCallback(() => {
+  const handleFocus = useCallback((e: React.FocusEvent) => {
     if (trigger === 'focus') {
       showTooltip();
     }
   }, [trigger, showTooltip]);
 
-  const handleBlur = useCallback(() => {
+  const handleBlur = useCallback((e: React.FocusEvent) => {
     if (trigger === 'focus') {
       hideTooltip();
     }
   }, [trigger, hideTooltip]);
 
-  const handleClick = useCallback(() => {
+  const handleClick = useCallback((e: React.MouseEvent) => {
     if (trigger === 'click') {
+      e.preventDefault();
+      e.stopPropagation();
       if (currentVisible) {
         hideTooltip();
       } else {
@@ -243,11 +256,12 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
 
   // Update position when visible
   useEffect(() => {
-    if (currentVisible) {
-      // Small delay to ensure DOM is ready
-      const timeoutId = setTimeout(() => {
-        calculatePosition();
-      }, 0);
+    if (currentVisible && mounted) {
+      // Calculate position immediately
+      calculatePosition();
+      
+      // Recalculate after a small delay to ensure DOM is updated
+      const positionTimeout = setTimeout(calculatePosition, 10);
       
       const handleResize = () => calculatePosition();
       const handleScroll = () => calculatePosition();
@@ -256,12 +270,12 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
       window.addEventListener('scroll', handleScroll, true);
       
       return () => {
-        clearTimeout(timeoutId);
+        clearTimeout(positionTimeout);
         window.removeEventListener('resize', handleResize);
         window.removeEventListener('scroll', handleScroll, true);
       };
     }
-  }, [currentVisible, calculatePosition]);
+  }, [currentVisible, calculatePosition, mounted]);
 
   // Cleanup timeouts
   useEffect(() => {
@@ -285,12 +299,12 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
     .filter(Boolean)
     .join(' ');
 
-  // Enhanced ref handling for triggerElement
+  // Create trigger element with event handlers
   const triggerElement = isValidElement(children) 
     ? cloneElement(children, {
         ref: (node: HTMLElement) => {
           triggerRef.current = node;
-          // Handle both function and object refs from the original child
+          // Handle original ref
           const originalRef = (children as any).ref;
           if (typeof originalRef === 'function') {
             originalRef(node);
@@ -299,30 +313,29 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
           }
         },
         onMouseEnter: (e: React.MouseEvent) => {
-          // Call original handler first
           const originalHandler = (children.props as any).onMouseEnter;
           if (originalHandler) originalHandler(e);
-          handleMouseEnter();
+          handleMouseEnter(e);
         },
         onMouseLeave: (e: React.MouseEvent) => {
           const originalHandler = (children.props as any).onMouseLeave;
           if (originalHandler) originalHandler(e);
-          handleMouseLeave();
+          handleMouseLeave(e);
         },
         onFocus: (e: React.FocusEvent) => {
           const originalHandler = (children.props as any).onFocus;
           if (originalHandler) originalHandler(e);
-          handleFocus();
+          handleFocus(e);
         },
         onBlur: (e: React.FocusEvent) => {
           const originalHandler = (children.props as any).onBlur;
           if (originalHandler) originalHandler(e);
-          handleBlur();
+          handleBlur(e);
         },
         onClick: (e: React.MouseEvent) => {
           const originalHandler = (children.props as any).onClick;
           if (originalHandler) originalHandler(e);
-          handleClick();
+          handleClick(e);
         },
         onKeyDown: (e: React.KeyboardEvent) => {
           const originalHandler = (children.props as any).onKeyDown;
@@ -334,7 +347,7 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
     : children;
 
   // Tooltip content
-  const tooltipContent = (
+  const tooltipContent = mounted && content ? (
     <div
       {...props}
       ref={(node) => {
@@ -348,13 +361,13 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
       id={tooltipId}
       className={classes}
       style={{
-        ...style,
         position: 'absolute',
         top: position.top,
         left: position.left,
         zIndex,
         maxWidth: typeof maxWidth === 'number' ? `${maxWidth}px` : maxWidth,
         pointerEvents: trigger === 'hover' ? 'none' : 'auto',
+        ...style,
       }}
       role="tooltip"
       aria-label={ariaLabel}
@@ -364,12 +377,12 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
       {content}
       {arrow && <div className="ui-tooltip-arrow" aria-hidden="true" />}
     </div>
-  );
+  ) : null;
 
   return (
     <>
       {triggerElement}
-      {content && (
+      {tooltipContent && (
         portal ? createPortal(tooltipContent, document.body) : tooltipContent
       )}
     </>
