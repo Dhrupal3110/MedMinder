@@ -1,378 +1,421 @@
-/* Badge Component - Ant Design Style */
-.ui-badge {
+/* Divider Component - Ant Design Style */
+.ui-divider {
   position: relative;
-  display: inline-flex;
-  align-items: center;
   box-sizing: border-box;
-  min-height: 20px;
-  padding: 0 6px;
-  color: #fff;
-  font-size: 12px;
+  margin: 0;
+  padding: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
   font-weight: 400;
   line-height: 1.5;
+  list-style: none;
+  font-feature-settings: 'tnum';
+  border: 0;
+  transition: all 0.2s ease;
+}
+
+/* Horizontal Divider (default) */
+.ui-divider--horizontal {
+  display: flex;
+  clear: both;
+  width: 100%;
+  min-width: 100%;
+  margin: 16px 0;
+  background-color: transparent;
+  border-top: 1px solid var(--border-color);
+  align-items: center;
+}
+
+.ui-divider--horizontal.ui-divider--with-text {
+  display: flex;
+  margin: 16px 0;
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 16px;
   white-space: nowrap;
   text-align: center;
-  background-color: var(--primary-color);
-  border: 0;
-  border-radius: 10px;
-  outline: none;
-  transition: all 0.2s;
-  user-select: none;
+  border-top: 0;
+  align-items: center;
 }
 
-.ui-badge:focus-visible {
-  outline: 4px solid rgba(24, 144, 255, 0.2);
-  outline-offset: 1px;
-}
-
-/* Badge Wrapper for relative positioning */
-.ui-badge-wrapper {
+/* Vertical Divider */
+.ui-divider--vertical {
   position: relative;
-  display: inline-block;
-}
-
-.ui-badge-wrapper .ui-badge {
-  position: absolute;
-  top: 0;
-  right: 0;
-  transform: translate(50%, -50%);
-  z-index: 10;
-}
-
-/* Badge Content */
-.ui-badge-content {
-  display: inline-block;
-}
-
-/* Close Button */
-.ui-badge-close {
+  top: -0.06em;
   display: inline-flex;
+  height: 0.9em;
+  margin: 0 8px;
+  vertical-align: middle;
+  border-top: 0;
+  border-left: 1px solid var(--border-color);
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 14px;
-  height: 14px;
-  margin-left: 4px;
-  background: none;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 12px;
-  line-height: 1;
-  color: inherit;
-  transition: all 0.2s;
-  outline: none;
-  padding: 0;
 }
 
-.ui-badge-close:hover:not(:disabled) {
-  background-color: rgba(255, 255, 255, 0.2);
+.ui-divider--vertical.ui-divider--with-text {
+  height: auto;
+  margin: 0 16px;
+  padding: 8px 0;
+  writing-mode: vertical-lr;
+  text-orientation: mixed;
 }
 
-.ui-badge-close:focus-visible {
-  outline: 1px solid rgba(255, 255, 255, 0.6);
-  outline-offset: 1px;
+/* Divider Lines */
+.ui-divider-line {
+  position: relative;
+  width: 100%;
+  border-top: 1px solid var(--border-color);
+  transform: translateY(50%);
+  transition: all 0.2s ease;
 }
 
-.ui-badge-close:active:not(:disabled) {
-  background-color: rgba(255, 255, 255, 0.3);
-  transform: scale(0.95);
+.ui-divider--vertical .ui-divider-line {
+  width: 1px;
+  height: 100%;
+  border-top: 0;
+  border-left: 1px solid var(--border-color);
+  transform: translateX(50%);
 }
 
-.ui-badge-close-icon {
-  display: block;
-  font-weight: bold;
+.ui-divider-line--before {
+  flex: 1 1 auto;
+  margin-right: 8px;
 }
 
-/* Closable Badge Adjustments */
-.ui-badge--closable {
-  padding-right: 4px;
+.ui-divider-line--after {
+  flex: 1 1 auto;
+  margin-left: 8px;
 }
 
-.ui-badge--closable .ui-badge-content {
-  margin-right: 2px;
+/* Text Content */
+.ui-divider-text {
+  position: relative;
+  display: inline-block;
+  padding: 0 16px;
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 16px;
+  white-space: nowrap;
+  text-align: center;
+  background-color: var(--background-color);
+  flex: 0 0 auto;
 }
 
-/* Size Variants */
-.ui-badge--sm {
-  min-height: 16px;
-  padding: 0 4px;
-  font-size: 10px;
-  border-radius: 8px;
+.ui-divider--vertical .ui-divider-text {
+  padding: 8px 0;
+  background-color: var(--background-color);
+  writing-mode: vertical-lr;
+  text-orientation: mixed;
 }
 
-.ui-badge--sm .ui-badge-close {
-  width: 12px;
-  height: 12px;
-  margin-left: 2px;
-  font-size: 10px;
+/* Text Alignment */
+.ui-divider--text-left .ui-divider-line--before {
+  flex: 0 0 5%;
 }
 
-.ui-badge--lg {
-  min-height: 24px;
-  padding: 0 8px;
-  font-size: 14px;
-  border-radius: 12px;
+.ui-divider--text-left .ui-divider-line--after {
+  flex: 1 1 auto;
 }
 
-.ui-badge--lg .ui-badge-close {
-  width: 16px;
-  height: 16px;
-  margin-left: 6px;
-  font-size: 14px;
+.ui-divider--text-right .ui-divider-line--before {
+  flex: 1 1 auto;
 }
 
-/* Dot Variant */
-.ui-badge--dot {
-  width: 8px;
-  height: 8px;
-  min-height: 8px;
-  padding: 0;
-  border-radius: 50%;
+.ui-divider--text-right .ui-divider-line--after {
+  flex: 0 0 5%;
 }
 
-.ui-badge--dot.ui-badge--sm {
-  width: 6px;
-  height: 6px;
-  min-height: 6px;
+/* Variants */
+.ui-divider--dashed .ui-divider-line,
+.ui-divider--dashed {
+  border-style: dashed;
 }
 
-.ui-badge--dot.ui-badge--lg {
-  width: 10px;
-  height: 10px;
-  min-height: 10px;
+.ui-divider--dotted .ui-divider-line,
+.ui-divider--dotted {
+  border-style: dotted;
 }
 
-/* Standalone Badge (no wrapper) */
-.ui-badge--standalone {
-  position: static;
-  transform: none;
+/* Thickness Variants */
+.ui-divider--medium .ui-divider-line,
+.ui-divider--medium {
+  border-width: 2px;
+}
+
+.ui-divider--thick .ui-divider-line,
+.ui-divider--thick {
+  border-width: 3px;
 }
 
 /* Color Variants */
-.ui-badge--secondary {
-  background-color: var(--secondary-color);
+.ui-divider--primary .ui-divider-line,
+.ui-divider--primary {
+  border-color: var(--primary-color);
 }
 
-.ui-badge--success {
-  background-color: var(--success-color);
+.ui-divider--primary .ui-divider-text {
+  color: var(--primary-color);
 }
 
-.ui-badge--warning {
-  background-color: var(--warning-color);
+.ui-divider--secondary .ui-divider-line,
+.ui-divider--secondary {
+  border-color: var(--secondary-color);
 }
 
-.ui-badge--danger {
-  background-color: var(--danger-color);
+.ui-divider--secondary .ui-divider-text {
+  color: var(--secondary-color);
 }
 
-.ui-badge--info {
-  background-color: var(--info-color);
+.ui-divider--success .ui-divider-line,
+.ui-divider--success {
+  border-color: var(--success-color);
 }
 
-/* Disabled State */
-.ui-badge--disabled {
-  cursor: not-allowed;
-  opacity: 0.4;
+.ui-divider--success .ui-divider-text {
+  color: var(--success-color);
 }
 
-.ui-badge--disabled .ui-badge-close {
-  cursor: not-allowed;
-  pointer-events: none;
+.ui-divider--warning .ui-divider-line,
+.ui-divider--warning {
+  border-color: var(--warning-color);
+}
+
+.ui-divider--warning .ui-divider-text {
+  color: var(--warning-color);
+}
+
+.ui-divider--danger .ui-divider-line,
+.ui-divider--danger {
+  border-color: var(--danger-color);
+}
+
+.ui-divider--danger .ui-divider-text {
+  color: var(--danger-color);
+}
+
+.ui-divider--info .ui-divider-line,
+.ui-divider--info {
+  border-color: var(--info-color);
+}
+
+.ui-divider--info .ui-divider-text {
+  color: var(--info-color);
+}
+
+/* Spacing Variants */
+.ui-divider--spacing-none {
+  margin: 0;
+}
+
+.ui-divider--spacing-xs {
+  margin: 4px 0;
+}
+
+.ui-divider--spacing-xs.ui-divider--vertical {
+  margin: 0 4px;
+}
+
+.ui-divider--spacing-sm {
+  margin: 8px 0;
+}
+
+.ui-divider--spacing-sm.ui-divider--vertical {
+  margin: 0 8px;
+}
+
+.ui-divider--spacing-lg {
+  margin: 24px 0;
+}
+
+.ui-divider--spacing-lg.ui-divider--vertical {
+  margin: 0 24px;
+}
+
+.ui-divider--spacing-xl {
+  margin: 32px 0;
+}
+
+.ui-divider--spacing-xl.ui-divider--vertical {
+  margin: 0 32px;
+}
+
+/* Plain Style */
+.ui-divider--plain .ui-divider-text {
+  color: var(--text-secondary);
+  font-weight: 400;
+  font-size: 14px;
 }
 
 /* Hover Effects */
-.ui-badge:hover:not(.ui-badge--disabled) {
-  background-color: var(--primary-hover);
-  transform: scale(1.05);
+.ui-divider:hover:not(.ui-divider--plain) .ui-divider-line {
+  border-color: var(--border-hover);
+  transition: border-color 0.2s ease;
 }
 
-.ui-badge--secondary:hover:not(.ui-badge--disabled) {
-  background-color: var(--secondary-hover);
+.ui-divider--primary:hover .ui-divider-line {
+  border-color: var(--primary-hover);
 }
 
-.ui-badge--success:hover:not(.ui-badge--disabled) {
-  background-color: var(--success-hover);
+.ui-divider--secondary:hover .ui-divider-line {
+  border-color: var(--secondary-hover);
 }
 
-.ui-badge--warning:hover:not(.ui-badge--disabled) {
-  background-color: var(--warning-hover);
+.ui-divider--success:hover .ui-divider-line {
+  border-color: var(--success-hover);
 }
 
-.ui-badge--danger:hover:not(.ui-badge--disabled) {
-  background-color: var(--danger-hover);
+.ui-divider--warning:hover .ui-divider-line {
+  border-color: var(--warning-hover);
 }
 
-.ui-badge--info:hover:not(.ui-badge--disabled) {
-  background-color: var(--info-hover);
+.ui-divider--danger:hover .ui-divider-line {
+  border-color: var(--danger-hover);
 }
 
-/* Hover effects for badges in wrapper (don't scale) */
-.ui-badge-wrapper .ui-badge:hover:not(.ui-badge--disabled) {
-  transform: translate(50%, -50%) scale(1.1);
+.ui-divider--info:hover .ui-divider-line {
+  border-color: var(--info-hover);
 }
 
 /* Dark Theme Support */
-[data-theme="dark"] .ui-badge {
-  color: rgba(255, 255, 255, 0.85);
+[data-theme="dark"] .ui-divider {
+  color: var(--text-secondary);
 }
 
-[data-theme="dark"] .ui-badge--secondary {
-  background-color: var(--secondary-color);
+[data-theme="dark"] .ui-divider-line {
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .ui-divider-text {
   color: var(--text-primary);
+  background-color: var(--background-color);
 }
 
-[data-theme="dark"] .ui-badge-close:hover:not(:disabled) {
-  background-color: rgba(255, 255, 255, 0.15);
-}
-
-[data-theme="dark"] .ui-badge-close:focus-visible {
-  outline: 1px solid rgba(255, 255, 255, 0.4);
-}
-
-[data-theme="dark"] .ui-badge-close:active:not(:disabled) {
-  background-color: rgba(255, 255, 255, 0.25);
-}
-
-/* Dark theme hover effects */
-[data-theme="dark"] .ui-badge:hover:not(.ui-badge--disabled) {
-  background-color: var(--primary-hover);
-}
-
-[data-theme="dark"] .ui-badge--secondary:hover:not(.ui-badge--disabled) {
-  background-color: var(--secondary-hover);
-}
-
-[data-theme="dark"] .ui-badge--success:hover:not(.ui-badge--disabled) {
-  background-color: var(--success-hover);
-}
-
-[data-theme="dark"] .ui-badge--warning:hover:not(.ui-badge--disabled) {
-  background-color: var(--warning-hover);
-}
-
-[data-theme="dark"] .ui-badge--danger:hover:not(.ui-badge--disabled) {
-  background-color: var(--danger-hover);
-}
-
-[data-theme="dark"] .ui-badge--info:hover:not(.ui-badge--disabled) {
-  background-color: var(--info-hover);
-}
-
-/* Focus states for dark theme */
-[data-theme="dark"] .ui-badge:focus-visible {
-  outline: 4px solid rgba(24, 144, 255, 0.2);
-  outline-offset: 1px;
+[data-theme="dark"] .ui-divider--plain .ui-divider-text {
+  color: var(--text-secondary);
 }
 
 /* High Contrast Mode */
 @media (prefers-contrast: high) {
-  .ui-badge {
-    border: 1px solid var(--border-color);
-    font-weight: 600;
+  .ui-divider-line,
+  .ui-divider {
+    border-color: var(--text-primary);
+    border-width: 2px;
   }
   
-  .ui-badge-close {
-    border: 1px solid rgba(255, 255, 255, 0.5);
+  .ui-divider-text {
+    font-weight: 600;
+    color: var(--text-primary);
   }
 }
 
 /* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
-  .ui-badge,
-  .ui-badge-close {
+  .ui-divider,
+  .ui-divider-line,
+  .ui-divider-text {
     transition: none;
-  }
-  
-  .ui-badge:hover:not(.ui-badge--disabled) {
-    transform: none;
-  }
-  
-  .ui-badge-wrapper .ui-badge:hover:not(.ui-badge--disabled) {
-    transform: translate(50%, -50%);
-  }
-  
-  .ui-badge-close:active:not(:disabled) {
-    transform: none;
   }
 }
 
 /* RTL Support */
-[dir="rtl"] .ui-badge-wrapper .ui-badge {
-  right: auto;
-  left: 0;
-  transform: translate(-50%, -50%);
-}
-
-[dir="rtl"] .ui-badge--closable {
-  padding-left: 4px;
-  padding-right: 6px;
-}
-
-[dir="rtl"] .ui-badge-close {
-  margin-left: 0;
-  margin-right: 4px;
-}
-
-[dir="rtl"] .ui-badge--closable .ui-badge-content {
-  margin-left: 2px;
+[dir="rtl"] .ui-divider-line--before {
   margin-right: 0;
+  margin-left: 8px;
 }
 
-[dir="rtl"] .ui-badge--sm .ui-badge-close {
-  margin-right: 2px;
+[dir="rtl"] .ui-divider-line--after {
+  margin-left: 0;
+  margin-right: 8px;
 }
 
-[dir="rtl"] .ui-badge--lg .ui-badge-close {
-  margin-right: 6px;
+[dir="rtl"] .ui-divider--text-left .ui-divider-line--before {
+  flex: 1 1 auto;
 }
 
-[dir="rtl"] .ui-badge-wrapper .ui-badge:hover:not(.ui-badge--disabled) {
-  transform: translate(-50%, -50%) scale(1.1);
+[dir="rtl"] .ui-divider--text-left .ui-divider-line--after {
+  flex: 0 0 5%;
+}
+
+[dir="rtl"] .ui-divider--text-right .ui-divider-line--before {
+  flex: 0 0 5%;
+}
+
+[dir="rtl"] .ui-divider--text-right .ui-divider-line--after {
+  flex: 1 1 auto;
 }
 
 /* Print Styles */
 @media print {
-  .ui-badge {
-    background-color: transparent !important;
-    color: var(--text-primary) !important;
-    border: 1px solid var(--border-color) !important;
+  .ui-divider-line,
+  .ui-divider {
+    border-color: #000 !important;
+    border-style: solid !important;
   }
   
-  .ui-badge-close {
-    display: none;
+  .ui-divider-text {
+    color: #000 !important;
+    background-color: #fff !important;
   }
 }
 
-/* Animation for dynamic badges */
-@keyframes ui-badge-appear {
+/* Animation for dynamic dividers */
+@keyframes ui-divider-appear {
   0% {
     opacity: 0;
-    transform: scale(0.5);
+    transform: scaleX(0);
   }
   100% {
     opacity: 1;
-    transform: scale(1);
+    transform: scaleX(1);
   }
 }
 
-.ui-badge--standalone {
-  animation: ui-badge-appear 0.2s ease-out;
+@keyframes ui-divider-appear-vertical {
+  0% {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
 }
 
-.ui-badge-wrapper .ui-badge {
-  animation: ui-badge-appear 0.2s ease-out;
+.ui-divider--horizontal .ui-divider-line {
+  animation: ui-divider-appear 0.3s ease-out;
+  transform-origin: center;
 }
 
-/* Ensure badges don't interfere with text selection */
-.ui-badge-wrapper {
-  user-select: none;
+.ui-divider--vertical .ui-divider-line {
+  animation: ui-divider-appear-vertical 0.3s ease-out;
+  transform-origin: center;
 }
 
-/* Ensure proper stacking context */
-.ui-badge-wrapper {
+/* Focus styles for accessibility */
+.ui-divider:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Ensure proper stacking */
+.ui-divider {
   z-index: 1;
 }
 
-.ui-badge {
+.ui-divider-text {
   z-index: 2;
+}
+
+/* Additional responsive considerations */
+@media (max-width: 768px) {
+  .ui-divider-text {
+    font-size: 14px;
+    padding: 0 12px;
+  }
+  
+  .ui-divider--vertical.ui-divider--with-text {
+    margin: 0 12px;
+  }
 }
