@@ -52,8 +52,9 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
   
   const triggerRef = useRef<HTMLElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
-  const showTimeoutRef = useRef<NodeJS.Timeout>();
-  const hideTimeoutRef = useRef<NodeJS.Timeout>();
+  // Fix: Use number instead of NodeJS.Timeout for browser compatibility
+  const showTimeoutRef = useRef<number>();
+  const hideTimeoutRef = useRef<number>();
   const tooltipId = useId();
 
   const isControlled = visible !== undefined;
@@ -159,10 +160,12 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
   const showTooltip = useCallback(() => {
     if (disabled || !content) return;
 
-    clearTimeout(hideTimeoutRef.current);
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+    }
 
     if (delay > 0) {
-      showTimeoutRef.current = setTimeout(() => {
+      showTimeoutRef.current = window.setTimeout(() => {
         if (!isControlled) {
           setInternalVisible(true);
         }
@@ -178,10 +181,12 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
 
   // Hide tooltip
   const hideTooltip = useCallback(() => {
-    clearTimeout(showTimeoutRef.current);
+    if (showTimeoutRef.current) {
+      clearTimeout(showTimeoutRef.current);
+    }
 
     if (hideDelay > 0) {
-      hideTimeoutRef.current = setTimeout(() => {
+      hideTimeoutRef.current = window.setTimeout(() => {
         if (!isControlled) {
           setInternalVisible(false);
         }
@@ -258,8 +263,12 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
   // Cleanup timeouts
   useEffect(() => {
     return () => {
-      clearTimeout(showTimeoutRef.current);
-      clearTimeout(hideTimeoutRef.current);
+      if (showTimeoutRef.current) {
+        clearTimeout(showTimeoutRef.current);
+      }
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -273,44 +282,52 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
     .filter(Boolean)
     .join(' ');
 
-  // Clone child with event handlers and ref
+  // Fix: Improved ref handling for triggerElement
   const triggerElement = isValidElement(children) 
     ? cloneElement(children, {
         ref: (node: HTMLElement) => {
           triggerRef.current = node;
-          // Handle both function and object refs
-          if (typeof children.ref === 'function') {
-            children.ref(node);
-          } else if (children.ref && typeof children.ref === 'object') {
-            (children.ref as React.MutableRefObject<HTMLElement>).current = node;
+          // Handle both function and object refs from the original child
+          const originalRef = (children as any).ref;
+          if (typeof originalRef === 'function') {
+            originalRef(node);
+          } else if (originalRef && typeof originalRef === 'object' && originalRef.hasOwnProperty('current')) {
+            originalRef.current = node;
           }
         },
         onMouseEnter: (e: React.MouseEvent) => {
-          children.props.onMouseEnter?.(e);
+          // Call original handler first
+          const originalHandler = (children.props as any).onMouseEnter;
+          if (originalHandler) originalHandler(e);
           handleMouseEnter();
         },
         onMouseLeave: (e: React.MouseEvent) => {
-          children.props.onMouseLeave?.(e);
+          const originalHandler = (children.props as any).onMouseLeave;
+          if (originalHandler) originalHandler(e);
           handleMouseLeave();
         },
         onFocus: (e: React.FocusEvent) => {
-          children.props.onFocus?.(e);
+          const originalHandler = (children.props as any).onFocus;
+          if (originalHandler) originalHandler(e);
           handleFocus();
         },
         onBlur: (e: React.FocusEvent) => {
-          children.props.onBlur?.(e);
+          const originalHandler = (children.props as any).onBlur;
+          if (originalHandler) originalHandler(e);
           handleBlur();
         },
         onClick: (e: React.MouseEvent) => {
-          children.props.onClick?.(e);
+          const originalHandler = (children.props as any).onClick;
+          if (originalHandler) originalHandler(e);
           handleClick();
         },
         onKeyDown: (e: React.KeyboardEvent) => {
-          children.props.onKeyDown?.(e);
+          const originalHandler = (children.props as any).onKeyDown;
+          if (originalHandler) originalHandler(e);
           handleKeyDown(e);
         },
-        'aria-describedby': currentVisible ? tooltipId : children.props['aria-describedby'] || ariaDescribedBy,
-      })
+        'aria-describedby': currentVisible ? tooltipId : (children.props as any)['aria-describedby'] || ariaDescribedBy,
+      } as any)
     : children;
 
   // Tooltip content
@@ -321,7 +338,7 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
         tooltipRef.current = node;
         if (typeof ref === 'function') {
           ref(node);
-        } else if (ref && typeof ref === 'object') {
+        } else if (ref && typeof ref === 'object' && ref.hasOwnProperty('current')) {
           (ref as React.MutableRefObject<HTMLDivElement>).current = node;
         }
       }}
