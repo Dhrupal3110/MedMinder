@@ -82,81 +82,81 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
     let left = 0;
     let finalPlacement = placement;
 
-    // Calculate base position with scroll offset
+    // Calculate base position without scroll offset for fixed positioning
     switch (placement) {
       case 'top':
       case 'top-start':
       case 'top-end':
-        top = triggerRect.top + viewport.scrollY - tooltipRect.height - offset;
+        top = triggerRect.top - tooltipRect.height - offset;
         left = placement === 'top-start' 
-          ? triggerRect.left + viewport.scrollX
+          ? triggerRect.left
           : placement === 'top-end'
-          ? triggerRect.right + viewport.scrollX - tooltipRect.width
-          : triggerRect.left + viewport.scrollX + triggerRect.width / 2 - tooltipRect.width / 2;
+          ? triggerRect.right - tooltipRect.width
+          : triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2;
         break;
       case 'bottom':
       case 'bottom-start':
       case 'bottom-end':
-        top = triggerRect.bottom + viewport.scrollY + offset;
+        top = triggerRect.bottom + offset;
         left = placement === 'bottom-start'
-          ? triggerRect.left + viewport.scrollX
+          ? triggerRect.left
           : placement === 'bottom-end'
-          ? triggerRect.right + viewport.scrollX - tooltipRect.width
-          : triggerRect.left + viewport.scrollX + triggerRect.width / 2 - tooltipRect.width / 2;
+          ? triggerRect.right - tooltipRect.width
+          : triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2;
         break;
       case 'left':
       case 'left-start':
       case 'left-end':
         top = placement === 'left-start'
-          ? triggerRect.top + viewport.scrollY
+          ? triggerRect.top
           : placement === 'left-end'
-          ? triggerRect.bottom + viewport.scrollY - tooltipRect.height
-          : triggerRect.top + viewport.scrollY + triggerRect.height / 2 - tooltipRect.height / 2;
-        left = triggerRect.left + viewport.scrollX - tooltipRect.width - offset;
+          ? triggerRect.bottom - tooltipRect.height
+          : triggerRect.top + triggerRect.height / 2 - tooltipRect.height / 2;
+        left = triggerRect.left - tooltipRect.width - offset;
         break;
       case 'right':
       case 'right-start':
       case 'right-end':
         top = placement === 'right-start'
-          ? triggerRect.top + viewport.scrollY
+          ? triggerRect.top
           : placement === 'right-end'
-          ? triggerRect.bottom + viewport.scrollY - tooltipRect.height
-          : triggerRect.top + viewport.scrollY + triggerRect.height / 2 - tooltipRect.height / 2;
-        left = triggerRect.right + viewport.scrollX + offset;
+          ? triggerRect.bottom - tooltipRect.height
+          : triggerRect.top + triggerRect.height / 2 - tooltipRect.height / 2;
+        left = triggerRect.right + offset;
         break;
     }
 
-    // Viewport collision detection and adjustment
+    // Viewport collision detection for fixed positioning
     const minMargin = 8;
-    if (top < viewport.scrollY + minMargin) {
+    if (top < minMargin) {
       if (placement.includes('top')) {
-        top = triggerRect.bottom + viewport.scrollY + offset;
+        top = triggerRect.bottom + offset;
         finalPlacement = placement.replace('top', 'bottom') as typeof placement;
       } else {
-        top = viewport.scrollY + minMargin;
+        top = minMargin;
       }
-    } else if (top + tooltipRect.height > viewport.scrollY + viewport.height - minMargin) {
+    } else if (top + tooltipRect.height > viewport.height - minMargin) {
       if (placement.includes('bottom')) {
-        top = triggerRect.top + viewport.scrollY - tooltipRect.height - offset;
+        top = triggerRect.top - tooltipRect.height - offset;
         finalPlacement = placement.replace('bottom', 'top') as typeof placement;
       } else {
-        top = viewport.scrollY + viewport.height - tooltipRect.height - minMargin;
+        top = viewport.height - tooltipRect.height - minMargin;
       }
     }
 
-    if (left < viewport.scrollX + minMargin) {
+    if (left < minMargin) {
       if (placement.includes('left')) {
-        left = triggerRect.right + viewport.scrollX + offset;
+        left = triggerRect.right + offset;
         finalPlacement = placement.replace('left', 'right') as typeof placement;
       } else {
-        left = viewport.scrollX + minMargin;
+        left = minMargin;
       }
-    } else if (left + tooltipRect.width > viewport.scrollX + viewport.width - minMargin) {
+    } else if (left + tooltipRect.width > viewport.width - minMargin) {
       if (placement.includes('right')) {
-        left = triggerRect.left + viewport.scrollX - tooltipRect.width - offset;
+        left = triggerRect.left - tooltipRect.width - offset;
         finalPlacement = placement.replace('right', 'left') as typeof placement;
       } else {
-        left = viewport.scrollX + viewport.width - tooltipRect.width - minMargin;
+        left = viewport.width - tooltipRect.width - minMargin;
       }
     }
 
@@ -346,7 +346,7 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
       } as any)
     : children;
 
-  // Tooltip content
+  // Tooltip content - always render but control visibility with CSS
   const tooltipContent = mounted && content ? (
     <div
       {...props}
@@ -361,16 +361,21 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
       id={tooltipId}
       className={classes}
       style={{
-        position: 'absolute',
+        position: 'fixed', // Use fixed instead of absolute to avoid positioning issues
         top: position.top,
         left: position.left,
-        zIndex,
+        zIndex: 2147483647, // Maximum z-index to ensure it's above everything
         maxWidth: typeof maxWidth === 'number' ? `${maxWidth}px` : maxWidth,
         pointerEvents: trigger === 'hover' ? 'none' : 'auto',
+        // Force visibility properties to ensure it shows
+        display: 'block',
+        visibility: currentVisible ? 'visible' : 'hidden',
+        opacity: currentVisible ? 1 : 0,
         ...style,
       }}
       role="tooltip"
       aria-label={ariaLabel}
+      data-tooltip-visible={currentVisible} // Debug attribute
       onMouseEnter={trigger === 'hover' ? handleMouseEnter : undefined}
       onMouseLeave={trigger === 'hover' ? handleMouseLeave : undefined}
     >
@@ -382,9 +387,8 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
   return (
     <>
       {triggerElement}
-      {tooltipContent && (
-        portal ? createPortal(tooltipContent, document.body) : tooltipContent
-      )}
+      {/* Always render tooltip content, don't use conditional rendering that might be blocked */}
+      {tooltipContent}
     </>
   );
 });
