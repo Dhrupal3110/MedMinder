@@ -1,10 +1,26 @@
-import React, { forwardRef, useState, useRef, useCallback, useEffect, useId, cloneElement, isValidElement } from 'react';
+import React, {
+  forwardRef,
+  useState,
+  useRef,
+  useCallback,
+  useEffect,
+  useId,
+  cloneElement,
+  isValidElement,
+  ReactElement,
+  MutableRefObject
+} from 'react';
 import { createPortal } from 'react-dom';
 import './Tooltip.css';
 
 export interface TooltipProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'content'> {
   content?: React.ReactNode;
-  placement?: 'top' | 'bottom' | 'left' | 'right' | 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end' | 'left-start' | 'left-end' | 'right-start' | 'right-end';
+  placement?:
+    | 'top' | 'bottom' | 'left' | 'right'
+    | 'top-start' | 'top-end'
+    | 'bottom-start' | 'bottom-end'
+    | 'left-start' | 'left-end'
+    | 'right-start' | 'right-end';
   trigger?: 'hover' | 'focus' | 'click' | 'manual';
   delay?: number;
   hideDelay?: number;
@@ -18,7 +34,7 @@ export interface TooltipProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
   maxWidth?: string | number;
   className?: string;
   style?: React.CSSProperties;
-  children: React.ReactElement;
+  children: ReactElement;
   onVisibleChange?: (visible: boolean) => void;
   'aria-label'?: string;
   'aria-describedby'?: string;
@@ -49,42 +65,37 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
   const [internalVisible, setInternalVisible] = useState(defaultVisible);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const [actualPlacement, setActualPlacement] = useState(placement);
-  
-  const triggerRef = useRef<HTMLElement>(null);
-  const tooltipRef = useRef<HTMLDivElement>(null);
-  const showTimeoutRef = useRef<NodeJS.Timeout>();
-  const hideTimeoutRef = useRef<NodeJS.Timeout>();
+
+  const triggerRef = useRef<HTMLElement | null>(null);
+  const tooltipRef = useRef<HTMLDivElement | null>(null);
+  const showTimeoutRef = useRef<number | null>(null);
+  const hideTimeoutRef = useRef<number | null>(null);
   const tooltipId = useId();
 
   const isControlled = visible !== undefined;
   const currentVisible = isControlled ? visible : internalVisible;
 
-  // Calculate tooltip position
   const calculatePosition = useCallback(() => {
     if (!triggerRef.current || !tooltipRef.current) return;
 
     const triggerRect = triggerRef.current.getBoundingClientRect();
     const tooltipRect = tooltipRef.current.getBoundingClientRect();
-    const viewport = {
-      width: window.innerWidth,
-      height: window.innerHeight,
-    };
+    const viewport = { width: window.innerWidth, height: window.innerHeight };
 
     let top = 0;
     let left = 0;
     let finalPlacement = placement;
 
-    // Calculate base position
     switch (placement) {
       case 'top':
       case 'top-start':
       case 'top-end':
         top = triggerRect.top - tooltipRect.height - offset;
-        left = placement === 'top-start' 
+        left = placement === 'top-start'
           ? triggerRect.left
           : placement === 'top-end'
-          ? triggerRect.right - tooltipRect.width
-          : triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2;
+            ? triggerRect.right - tooltipRect.width
+            : triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2;
         break;
       case 'bottom':
       case 'bottom-start':
@@ -93,8 +104,8 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
         left = placement === 'bottom-start'
           ? triggerRect.left
           : placement === 'bottom-end'
-          ? triggerRect.right - tooltipRect.width
-          : triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2;
+            ? triggerRect.right - tooltipRect.width
+            : triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2;
         break;
       case 'left':
       case 'left-start':
@@ -102,8 +113,8 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
         top = placement === 'left-start'
           ? triggerRect.top
           : placement === 'left-end'
-          ? triggerRect.bottom - tooltipRect.height
-          : triggerRect.top + triggerRect.height / 2 - tooltipRect.height / 2;
+            ? triggerRect.bottom - tooltipRect.height
+            : triggerRect.top + triggerRect.height / 2 - tooltipRect.height / 2;
         left = triggerRect.left - tooltipRect.width - offset;
         break;
       case 'right':
@@ -112,13 +123,13 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
         top = placement === 'right-start'
           ? triggerRect.top
           : placement === 'right-end'
-          ? triggerRect.bottom - tooltipRect.height
-          : triggerRect.top + triggerRect.height / 2 - tooltipRect.height / 2;
+            ? triggerRect.bottom - tooltipRect.height
+            : triggerRect.top + triggerRect.height / 2 - tooltipRect.height / 2;
         left = triggerRect.right + offset;
         break;
     }
 
-    // Viewport collision detection and adjustment
+    // Collision detection
     if (top < 0) {
       if (placement.includes('top')) {
         top = triggerRect.bottom + offset;
@@ -155,115 +166,76 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
     setActualPlacement(finalPlacement);
   }, [placement, offset]);
 
-  // Show tooltip
   const showTooltip = useCallback(() => {
     if (disabled || !content) return;
-
-    clearTimeout(hideTimeoutRef.current);
+    if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
 
     if (delay > 0) {
-      showTimeoutRef.current = setTimeout(() => {
-        if (!isControlled) {
-          setInternalVisible(true);
-        }
+      showTimeoutRef.current = window.setTimeout(() => {
+        if (!isControlled) setInternalVisible(true);
         onVisibleChange?.(true);
       }, delay);
     } else {
-      if (!isControlled) {
-        setInternalVisible(true);
-      }
+      if (!isControlled) setInternalVisible(true);
       onVisibleChange?.(true);
     }
-  }, [disabled, content, delay, isControlled, onVisibleChange]);
+  }, [delay, disabled, content, isControlled, onVisibleChange]);
 
-  // Hide tooltip
   const hideTooltip = useCallback(() => {
-    clearTimeout(showTimeoutRef.current);
+    if (showTimeoutRef.current) clearTimeout(showTimeoutRef.current);
 
     if (hideDelay > 0) {
-      hideTimeoutRef.current = setTimeout(() => {
-        if (!isControlled) {
-          setInternalVisible(false);
-        }
+      hideTimeoutRef.current = window.setTimeout(() => {
+        if (!isControlled) setInternalVisible(false);
         onVisibleChange?.(false);
       }, hideDelay);
     } else {
-      if (!isControlled) {
-        setInternalVisible(false);
-      }
+      if (!isControlled) setInternalVisible(false);
       onVisibleChange?.(false);
     }
   }, [hideDelay, isControlled, onVisibleChange]);
 
-  // Event handlers
-  const handleMouseEnter = useCallback(() => {
-    if (trigger === 'hover' || trigger === 'manual') {
-      showTooltip();
-    }
-  }, [trigger, showTooltip]);
-
-  const handleMouseLeave = useCallback(() => {
-    if (trigger === 'hover' || trigger === 'manual') {
-      hideTooltip();
-    }
-  }, [trigger, hideTooltip]);
-
-  const handleFocus = useCallback(() => {
-    if (trigger === 'focus' || trigger === 'manual') {
-      showTooltip();
-    }
-  }, [trigger, showTooltip]);
-
-  const handleBlur = useCallback(() => {
-    if (trigger === 'focus' || trigger === 'manual') {
-      hideTooltip();
-    }
-  }, [trigger, hideTooltip]);
-
-  const handleClick = useCallback(() => {
-    if (trigger === 'click') {
-      if (currentVisible) {
-        hideTooltip();
-      } else {
-        showTooltip();
-      }
-    }
-  }, [trigger, currentVisible, showTooltip, hideTooltip]);
-
-  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+  const handleMouseEnter = () => {
+    if (trigger === 'hover' || trigger === 'manual') showTooltip();
+  };
+  const handleMouseLeave = () => {
+    if (trigger === 'hover' || trigger === 'manual') hideTooltip();
+  };
+  const handleFocus = () => {
+    if (trigger === 'focus' || trigger === 'manual') showTooltip();
+  };
+  const handleBlur = () => {
+    if (trigger === 'focus' || trigger === 'manual') hideTooltip();
+  };
+  const handleClick = () => {
+    if (trigger === 'click') currentVisible ? hideTooltip() : showTooltip();
+  };
+  const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Escape' && currentVisible) {
       hideTooltip();
       triggerRef.current?.focus();
     }
-  }, [currentVisible, hideTooltip]);
+  };
 
-  // Update position when visible
   useEffect(() => {
     if (currentVisible) {
       calculatePosition();
-      
-      const handleResize = () => calculatePosition();
-      const handleScroll = () => calculatePosition();
-      
-      window.addEventListener('resize', handleResize);
-      window.addEventListener('scroll', handleScroll, true);
-      
+      window.addEventListener('resize', calculatePosition);
+      window.addEventListener('scroll', calculatePosition, true);
       return () => {
-        window.removeEventListener('resize', handleResize);
-        window.removeEventListener('scroll', handleScroll, true);
+        window.removeEventListener('resize', calculatePosition);
+        window.removeEventListener('scroll', calculatePosition, true);
       };
     }
   }, [currentVisible, calculatePosition]);
 
-  // Cleanup timeouts
   useEffect(() => {
     return () => {
-      clearTimeout(showTimeoutRef.current);
-      clearTimeout(hideTimeoutRef.current);
+      if (showTimeoutRef.current) clearTimeout(showTimeoutRef.current);
+      if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
     };
   }, []);
 
-  // Build class names
   const baseClass = 'ui-tooltip';
   const placementClass = `ui-tooltip--${actualPlacement}`;
   const visibleClass = currentVisible ? 'ui-tooltip--visible' : '';
@@ -273,47 +245,49 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
     .filter(Boolean)
     .join(' ');
 
-  // Clone child with event handlers and ref
-  const triggerElement = isValidElement(children) 
-    ? cloneElement(children, {
-        ref: (node: HTMLElement) => {
+  const childElement = children as ReactElement<any>;
+
+  const triggerElement = isValidElement(childElement)
+    ? cloneElement(childElement, {
+        ref: (node: HTMLElement | null) => {
           triggerRef.current = node;
-          // Handle both function and object refs
-          if (typeof children.ref === 'function') {
-            children.ref(node);
-          } else if (children.ref && typeof children.ref === 'object') {
-            (children.ref as React.MutableRefObject<HTMLElement>).current = node;
+          const childRef = childElement.ref;
+          if (typeof childRef === 'function') {
+            childRef(node);
+          } else if (childRef && typeof childRef === 'object') {
+            (childRef as MutableRefObject<HTMLElement | null>).current = node;
           }
         },
         onMouseEnter: (e: React.MouseEvent) => {
-          children.props.onMouseEnter?.(e);
+          childElement.props.onMouseEnter?.(e);
           handleMouseEnter();
         },
         onMouseLeave: (e: React.MouseEvent) => {
-          children.props.onMouseLeave?.(e);
+          childElement.props.onMouseLeave?.(e);
           handleMouseLeave();
         },
         onFocus: (e: React.FocusEvent) => {
-          children.props.onFocus?.(e);
+          childElement.props.onFocus?.(e);
           handleFocus();
         },
         onBlur: (e: React.FocusEvent) => {
-          children.props.onBlur?.(e);
+          childElement.props.onBlur?.(e);
           handleBlur();
         },
         onClick: (e: React.MouseEvent) => {
-          children.props.onClick?.(e);
+          childElement.props.onClick?.(e);
           handleClick();
         },
         onKeyDown: (e: React.KeyboardEvent) => {
-          children.props.onKeyDown?.(e);
+          childElement.props.onKeyDown?.(e);
           handleKeyDown(e);
         },
-        'aria-describedby': currentVisible ? tooltipId : children.props['aria-describedby'] || ariaDescribedBy,
+        'aria-describedby': currentVisible
+          ? tooltipId
+          : childElement.props['aria-describedby'] || ariaDescribedBy,
       })
-    : children;
+    : childElement;
 
-  // Tooltip content
   const tooltipContent = (
     <div
       {...props}
@@ -322,7 +296,7 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
         if (typeof ref === 'function') {
           ref(node);
         } else if (ref && typeof ref === 'object') {
-          (ref as React.MutableRefObject<HTMLDivElement>).current = node;
+          (ref as MutableRefObject<HTMLDivElement | null>).current = node;
         }
       }}
       id={tooltipId}
