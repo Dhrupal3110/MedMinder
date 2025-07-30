@@ -11,12 +11,12 @@ export interface ButtonProps {
   loading?: boolean;
   icon?: React.ReactNode;
   iconPosition?: 'start' | 'end';
-  onClick?: (event: React.MouseEvent) => void;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => void;
   type?: 'button' | 'submit' | 'reset';
   className?: string;
   style?: React.CSSProperties;
   href?: string;
-  ariaLabel?: string; // ✅ Optional label for accessibility (for icon-only buttons)
+  title?: string; // optional title for icon-only buttons
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -25,17 +25,19 @@ export const Button: React.FC<ButtonProps> = ({
   variant = 'solid',
   size = 'medium',
   shape = 'default',
-  icon,
-  iconPosition = 'start',
   disabled = false,
   loading = false,
+  icon,
+  iconPosition = 'start',
   onClick,
   type = 'button',
   className = '',
   style,
   href,
-  ariaLabel
+  title
 }) => {
+  const isIconOnly = icon && !children;
+
   const baseClass = 'ui-button';
   const colorClass = `ui-button--${color}`;
   const variantClass = `ui-button--${variant}`;
@@ -43,7 +45,7 @@ export const Button: React.FC<ButtonProps> = ({
   const shapeClass = `ui-button--${shape}`;
   const disabledClass = disabled || loading ? 'ui-button--disabled' : '';
   const loadingClass = loading ? 'ui-button--loading' : '';
-  const iconOnlyClass = icon && !children ? 'ui-button--icon-only' : '';
+  const iconOnlyClass = isIconOnly ? 'ui-button--icon-only' : '';
 
   const classes = [
     baseClass,
@@ -55,22 +57,20 @@ export const Button: React.FC<ButtonProps> = ({
     loadingClass,
     iconOnlyClass,
     className
-  ].filter(Boolean).join(' ');
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   const renderIcon = (iconElement: React.ReactNode, position: 'start' | 'end') => {
-    if (!iconElement) return null;
     const iconClass = `ui-button__icon ui-button__icon--${position}`;
     return <span className={iconClass}>{iconElement}</span>;
   };
 
   const spinner = <span className="ui-button__spinner" />;
-
   const buttonContent = (
     <>
       {loading && iconPosition === 'start' && (
-        <span className="ui-button__icon ui-button__icon--start ui-button__icon--loading">
-          {spinner}
-        </span>
+        <span className="ui-button__icon ui-button__icon--start ui-button__icon--loading">{spinner}</span>
       )}
 
       {!loading && icon && iconPosition === 'start' && renderIcon(icon, 'start')}
@@ -80,26 +80,24 @@ export const Button: React.FC<ButtonProps> = ({
       {!loading && icon && iconPosition === 'end' && renderIcon(icon, 'end')}
 
       {loading && iconPosition === 'end' && (
-        <span className="ui-button__icon ui-button__icon--end ui-button__icon--loading">
-          {spinner}
-        </span>
+        <span className="ui-button__icon ui-button__icon--end ui-button__icon--loading">{spinner}</span>
       )}
     </>
   );
 
-  const commonAccessibilityProps = !children && ariaLabel
-    ? { 'aria-label': ariaLabel, title: ariaLabel }
-    : {};
+  const accessibilityLabel = isIconOnly
+    ? title || (typeof icon === 'string' ? icon : 'Button')
+    : undefined;
 
   if (variant === 'link' && href) {
     return (
       <a
         href={href}
         className={classes}
-        onClick={onClick as any}
+        onClick={onClick}
         aria-disabled={disabled || loading}
         style={style}
-        {...commonAccessibilityProps}
+        title={accessibilityLabel}
       >
         {buttonContent}
       </a>
@@ -111,9 +109,10 @@ export const Button: React.FC<ButtonProps> = ({
       type={type}
       className={classes}
       disabled={disabled || loading}
-      style={style}
       onClick={onClick}
-      {...commonAccessibilityProps}
+      style={style}
+      aria-label={accessibilityLabel}
+      title={accessibilityLabel}
     >
       {buttonContent}
     </button>
