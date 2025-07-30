@@ -1,153 +1,359 @@
-import React, { forwardRef } from 'react';
-import './Divider.css';
+import React, { forwardRef, useState, useRef, useCallback, useEffect, useId, cloneElement, isValidElement } from 'react';
+import { createPortal } from 'react-dom';
+import './Tooltip.css';
 
-export interface DividerProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children'> {
-  vertical?: boolean;
-  direction?: 'horizontal' | 'vertical';
-  variant?: 'solid' | 'dashed' | 'dotted';
-  textAlign?: 'left' | 'center' | 'right';
-  spacing?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-  margin?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-  thickness?: 'thin' | 'medium' | 'thick';
-  color?: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info';
-  plain?: boolean;
-  dashed?: boolean;
-  dotted?: boolean;
+export interface TooltipProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'content'> {
+  content?: React.ReactNode;
+  placement?: 'top' | 'bottom' | 'left' | 'right' | 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end' | 'left-start' | 'left-end' | 'right-start' | 'right-end';
+  trigger?: 'hover' | 'focus' | 'click' | 'manual';
+  delay?: number;
+  hideDelay?: number;
+  disabled?: boolean;
+  visible?: boolean;
+  defaultVisible?: boolean;
+  arrow?: boolean;
+  offset?: number;
+  portal?: boolean;
+  zIndex?: number;
+  maxWidth?: string | number;
   className?: string;
   style?: React.CSSProperties;
-  children?: React.ReactNode;
-  label?: React.ReactNode;
+  children: React.ReactElement;
+  onVisibleChange?: (visible: boolean) => void;
   'aria-label'?: string;
-  'aria-orientation'?: 'horizontal' | 'vertical';
+  'aria-describedby'?: string;
 }
 
-export const Divider = forwardRef<HTMLDivElement, DividerProps>(({
-  vertical = false,
-  direction,
-  variant = 'solid',
-  textAlign = 'center',
-  spacing = 'md',
-  margin,
-  thickness = 'thin',
-  color = 'default',
-  plain = false,
-  dashed = false,
-  dotted = false,
+export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
+  content,
+  placement = 'top',
+  trigger = 'hover',
+  delay = 100,
+  hideDelay = 100,
+  disabled = false,
+  visible,
+  defaultVisible = false,
+  arrow = true,
+  offset = 8,
+  portal = true,
+  zIndex = 9999,
+  maxWidth = 250,
   className = '',
   style,
   children,
-  label,
+  onVisibleChange,
   'aria-label': ariaLabel,
-  'aria-orientation': ariaOrientation,
+  'aria-describedby': ariaDescribedBy,
   ...props
 }, ref) => {
-
-  // Determine orientation
-  const isVertical = vertical || direction === 'vertical';
+  const [internalVisible, setInternalVisible] = useState(defaultVisible);
+  const [position, setPosition] = useState({ top: 0, left: 0 });
+  const [actualPlacement, setActualPlacement] = useState(placement);
   
-  // Determine variant from boolean props or variant prop
-  const getVariant = (): 'solid' | 'dashed' | 'dotted' => {
-    if (dotted) return 'dotted';
-    if (dashed) return 'dashed';
-    return variant;
-  };
+  const triggerRef = useRef<HTMLElement>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const showTimeoutRef = useRef<NodeJS.Timeout>();
+  const hideTimeoutRef = useRef<NodeJS.Timeout>();
+  const tooltipId = useId();
 
-  const currentVariant = getVariant();
-  const effectiveSpacing = margin || spacing;
-  const content = children || label;
-  const hasContent = content !== undefined && content !== null && content !== '';
+  const isControlled = visible !== undefined;
+  const currentVisible = isControlled ? visible : internalVisible;
+
+  // Calculate tooltip position
+  const calculatePosition = useCallback(() => {
+    if (!triggerRef.current || !tooltipRef.current) return;
+
+    const triggerRect = triggerRef.current.getBoundingClientRect();
+    const tooltipRect = tooltipRef.current.getBoundingClientRect();
+    const viewport = {
+      width: window.innerWidth,
+      height: window.innerHeight,
+    };
+
+    let top = 0;
+    let left = 0;
+    let finalPlacement = placement;
+
+    // Calculate base position
+    switch (placement) {
+      case 'top':
+      case 'top-start':
+      case 'top-end':
+        top = triggerRect.top - tooltipRect.height - offset;
+        left = placement === 'top-start' 
+          ? triggerRect.left
+          : placement === 'top-end'
+          ? triggerRect.right - tooltipRect.width
+          : triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2;
+        break;
+      case 'bottom':
+      case 'bottom-start':
+      case 'bottom-end':
+        top = triggerRect.bottom + offset;
+        left = placement === 'bottom-start'
+          ? triggerRect.left
+          : placement === 'bottom-end'
+          ? triggerRect.right - tooltipRect.width
+          : triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2;
+        break;
+      case 'left':
+      case 'left-start':
+      case 'left-end':
+        top = placement === 'left-start'
+          ? triggerRect.top
+          : placement === 'left-end'
+          ? triggerRect.bottom - tooltipRect.height
+          : triggerRect.top + triggerRect.height / 2 - tooltipRect.height / 2;
+        left = triggerRect.left - tooltipRect.width - offset;
+        break;
+      case 'right':
+      case 'right-start':
+      case 'right-end':
+        top = placement === 'right-start'
+          ? triggerRect.top
+          : placement === 'right-end'
+          ? triggerRect.bottom - tooltipRect.height
+          : triggerRect.top + triggerRect.height / 2 - tooltipRect.height / 2;
+        left = triggerRect.right + offset;
+        break;
+    }
+
+    // Viewport collision detection and adjustment
+    if (top < 0) {
+      if (placement.includes('top')) {
+        top = triggerRect.bottom + offset;
+        finalPlacement = placement.replace('top', 'bottom') as typeof placement;
+      } else {
+        top = 8;
+      }
+    } else if (top + tooltipRect.height > viewport.height) {
+      if (placement.includes('bottom')) {
+        top = triggerRect.top - tooltipRect.height - offset;
+        finalPlacement = placement.replace('bottom', 'top') as typeof placement;
+      } else {
+        top = viewport.height - tooltipRect.height - 8;
+      }
+    }
+
+    if (left < 0) {
+      if (placement.includes('left')) {
+        left = triggerRect.right + offset;
+        finalPlacement = placement.replace('left', 'right') as typeof placement;
+      } else {
+        left = 8;
+      }
+    } else if (left + tooltipRect.width > viewport.width) {
+      if (placement.includes('right')) {
+        left = triggerRect.left - tooltipRect.width - offset;
+        finalPlacement = placement.replace('right', 'left') as typeof placement;
+      } else {
+        left = viewport.width - tooltipRect.width - 8;
+      }
+    }
+
+    setPosition({ top, left });
+    setActualPlacement(finalPlacement);
+  }, [placement, offset]);
+
+  // Show tooltip
+  const showTooltip = useCallback(() => {
+    if (disabled || !content) return;
+
+    clearTimeout(hideTimeoutRef.current);
+
+    if (delay > 0) {
+      showTimeoutRef.current = setTimeout(() => {
+        if (!isControlled) {
+          setInternalVisible(true);
+        }
+        onVisibleChange?.(true);
+      }, delay);
+    } else {
+      if (!isControlled) {
+        setInternalVisible(true);
+      }
+      onVisibleChange?.(true);
+    }
+  }, [disabled, content, delay, isControlled, onVisibleChange]);
+
+  // Hide tooltip
+  const hideTooltip = useCallback(() => {
+    clearTimeout(showTimeoutRef.current);
+
+    if (hideDelay > 0) {
+      hideTimeoutRef.current = setTimeout(() => {
+        if (!isControlled) {
+          setInternalVisible(false);
+        }
+        onVisibleChange?.(false);
+      }, hideDelay);
+    } else {
+      if (!isControlled) {
+        setInternalVisible(false);
+      }
+      onVisibleChange?.(false);
+    }
+  }, [hideDelay, isControlled, onVisibleChange]);
+
+  // Event handlers
+  const handleMouseEnter = useCallback(() => {
+    if (trigger === 'hover' || trigger === 'manual') {
+      showTooltip();
+    }
+  }, [trigger, showTooltip]);
+
+  const handleMouseLeave = useCallback(() => {
+    if (trigger === 'hover' || trigger === 'manual') {
+      hideTooltip();
+    }
+  }, [trigger, hideTooltip]);
+
+  const handleFocus = useCallback(() => {
+    if (trigger === 'focus' || trigger === 'manual') {
+      showTooltip();
+    }
+  }, [trigger, showTooltip]);
+
+  const handleBlur = useCallback(() => {
+    if (trigger === 'focus' || trigger === 'manual') {
+      hideTooltip();
+    }
+  }, [trigger, hideTooltip]);
+
+  const handleClick = useCallback(() => {
+    if (trigger === 'click') {
+      if (currentVisible) {
+        hideTooltip();
+      } else {
+        showTooltip();
+      }
+    }
+  }, [trigger, currentVisible, showTooltip, hideTooltip]);
+
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === 'Escape' && currentVisible) {
+      hideTooltip();
+      triggerRef.current?.focus();
+    }
+  }, [currentVisible, hideTooltip]);
+
+  // Update position when visible
+  useEffect(() => {
+    if (currentVisible) {
+      calculatePosition();
+      
+      const handleResize = () => calculatePosition();
+      const handleScroll = () => calculatePosition();
+      
+      window.addEventListener('resize', handleResize);
+      window.addEventListener('scroll', handleScroll, true);
+      
+      return () => {
+        window.removeEventListener('resize', handleResize);
+        window.removeEventListener('scroll', handleScroll, true);
+      };
+    }
+  }, [currentVisible, calculatePosition]);
+
+  // Cleanup timeouts
+  useEffect(() => {
+    return () => {
+      clearTimeout(showTimeoutRef.current);
+      clearTimeout(hideTimeoutRef.current);
+    };
+  }, []);
 
   // Build class names
-  const baseClass = 'ui-divider';
-  const orientationClass = isVertical ? 'ui-divider--vertical' : 'ui-divider--horizontal';
-  const variantClass = currentVariant !== 'solid' ? `ui-divider--${currentVariant}` : '';
-  const spacingClass = effectiveSpacing !== 'md' ? `ui-divider--spacing-${effectiveSpacing}` : '';
-  const thicknessClass = thickness !== 'thin' ? `ui-divider--${thickness}` : '';
-  const colorClass = color !== 'default' ? `ui-divider--${color}` : '';
-  const textAlignClass = hasContent && textAlign !== 'center' ? `ui-divider--text-${textAlign}` : '';
-  const plainClass = plain ? 'ui-divider--plain' : '';
-  const withTextClass = hasContent ? 'ui-divider--with-text' : '';
+  const baseClass = 'ui-tooltip';
+  const placementClass = `ui-tooltip--${actualPlacement}`;
+  const visibleClass = currentVisible ? 'ui-tooltip--visible' : '';
+  const arrowClass = arrow ? 'ui-tooltip--arrow' : '';
 
-  const classes = [
-    baseClass,
-    orientationClass,
-    variantClass,
-    spacingClass,
-    thicknessClass,
-    colorClass,
-    textAlignClass,
-    plainClass,
-    withTextClass,
-    className
-  ].filter(Boolean).join(' ');
+  const classes = [baseClass, placementClass, visibleClass, arrowClass, className]
+    .filter(Boolean)
+    .join(' ');
 
-  // Determine ARIA attributes
-  const getAriaLabel = (): string | undefined => {
-    if (ariaLabel) return ariaLabel;
-    if (hasContent) return `Divider: ${content}`;
-    return undefined;
-  };
+  // Clone child with event handlers and ref
+  const triggerElement = isValidElement(children) 
+    ? cloneElement(children, {
+        ref: (node: HTMLElement) => {
+          triggerRef.current = node;
+          // Handle both function and object refs
+          if (typeof children.ref === 'function') {
+            children.ref(node);
+          } else if (children.ref && typeof children.ref === 'object') {
+            (children.ref as React.MutableRefObject<HTMLElement>).current = node;
+          }
+        },
+        onMouseEnter: (e: React.MouseEvent) => {
+          children.props.onMouseEnter?.(e);
+          handleMouseEnter();
+        },
+        onMouseLeave: (e: React.MouseEvent) => {
+          children.props.onMouseLeave?.(e);
+          handleMouseLeave();
+        },
+        onFocus: (e: React.FocusEvent) => {
+          children.props.onFocus?.(e);
+          handleFocus();
+        },
+        onBlur: (e: React.FocusEvent) => {
+          children.props.onBlur?.(e);
+          handleBlur();
+        },
+        onClick: (e: React.MouseEvent) => {
+          children.props.onClick?.(e);
+          handleClick();
+        },
+        onKeyDown: (e: React.KeyboardEvent) => {
+          children.props.onKeyDown?.(e);
+          handleKeyDown(e);
+        },
+        'aria-describedby': currentVisible ? tooltipId : children.props['aria-describedby'] || ariaDescribedBy,
+      })
+    : children;
 
-  const getAriaOrientation = (): 'horizontal' | 'vertical' => {
-    if (ariaOrientation) return ariaOrientation;
-    return isVertical ? 'vertical' : 'horizontal';
-  };
-
-  // For vertical dividers, we need different HTML structure
-  if (isVertical) {
-    return (
-      <div
-        {...props}
-        ref={ref}
-        className={classes}
-        style={style}
-        role="separator"
-        aria-orientation={getAriaOrientation()}
-        aria-label={getAriaLabel()}
-      >
-        {hasContent && (
-          <span className="ui-divider-text" aria-hidden="false">
-            {content}
-          </span>
-        )}
-        <div className="ui-divider-line" aria-hidden="true" />
-      </div>
-    );
-  }
-
-  // For horizontal dividers, we can use semantic HR when appropriate
-  if (!hasContent) {
-    return (
-      <hr
-        {...props}
-        ref={ref as React.ForwardedRef<HTMLHRElement>}
-        className={classes}
-        style={style}
-        role="separator"
-        aria-orientation={getAriaOrientation()}
-        aria-label={getAriaLabel()}
-      />
-    );
-  }
-
-  // Horizontal divider with content
-  return (
+  // Tooltip content
+  const tooltipContent = (
     <div
       {...props}
-      ref={ref}
+      ref={(node) => {
+        tooltipRef.current = node;
+        if (typeof ref === 'function') {
+          ref(node);
+        } else if (ref && typeof ref === 'object') {
+          (ref as React.MutableRefObject<HTMLDivElement>).current = node;
+        }
+      }}
+      id={tooltipId}
       className={classes}
-      style={style}
-      role="separator"
-      aria-orientation={getAriaOrientation()}
-      aria-label={getAriaLabel()}
+      style={{
+        ...style,
+        position: 'absolute',
+        top: position.top,
+        left: position.left,
+        zIndex,
+        maxWidth: typeof maxWidth === 'number' ? `${maxWidth}px` : maxWidth,
+        pointerEvents: trigger === 'hover' ? 'none' : 'auto',
+      }}
+      role="tooltip"
+      aria-label={ariaLabel}
+      onMouseEnter={trigger === 'hover' ? handleMouseEnter : undefined}
+      onMouseLeave={trigger === 'hover' ? handleMouseLeave : undefined}
     >
-      <div className="ui-divider-line ui-divider-line--before" aria-hidden="true" />
-      <span className="ui-divider-text" aria-hidden="false">
-        {content}
-      </span>
-      <div className="ui-divider-line ui-divider-line--after" aria-hidden="true" />
+      {content}
+      {arrow && <div className="ui-tooltip-arrow" aria-hidden="true" />}
     </div>
+  );
+
+  return (
+    <>
+      {triggerElement}
+      {currentVisible && content && (
+        portal ? createPortal(tooltipContent, document.body) : tooltipContent
+      )}
+    </>
   );
 });
 
-Divider.displayName = 'Divider';
+Tooltip.displayName = 'Tooltip';
