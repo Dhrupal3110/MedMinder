@@ -1,597 +1,569 @@
 import React, { useState } from "react";
 import { ExampleContainer } from "../Shared/ExampleContainer";
-import { Toast, type ToastType } from "./Toast";
+import { Typography } from "./Typography";
 import { Button } from "../Button/Button";
 import { APITable, type APITableRow } from "../Shared/APITable";
-import { AlertCircle, CheckCircle, Info, XCircle } from "lucide-react";
 
-const toastProps: APITableRow[] = [
+const typographyProps: APITableRow[] = [
   {
-    property: "message",
-    description: "The content to display in the toast. Can be a string or React node.",
-    type: "string | ReactNode",
+    property: "variant",
+    description: "The typographic variant to apply. Determines font size, weight, and spacing.",
+    type: "'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'subtitle1' | 'subtitle2' | 'body1' | 'body2' | 'caption' | 'overline' | 'code'",
+    default: "'body1'",
+  },
+  {
+    property: "as",
+    description: "The HTML element to render. Overrides the default element for the variant.",
+    type: "keyof JSX.IntrinsicElements",
+    default: "Auto-determined by variant",
+  },
+  {
+    property: "component",
+    description: "Alias for 'as' prop for backward compatibility.",
+    type: "keyof JSX.IntrinsicElements",
+    default: "Auto-determined by variant",
+  },
+  {
+    property: "color",
+    description: "Color variant to apply to the text.",
+    type: "'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info' | 'inherit'",
+    default: "'inherit'",
+  },
+  {
+    property: "align",
+    description: "Text alignment.",
+    type: "'left' | 'center' | 'right' | 'justify'",
     default: "-",
   },
   {
-    property: "type",
-    description: "The type of toast which determines the icon and color scheme.",
-    type: "'success' | 'error' | 'info' | 'warning'",
-    default: "-",
+    property: "weight",
+    description: "Font weight to apply.",
+    type: "'light' | 'normal' | 'medium' | 'semibold' | 'bold'",
+    default: "Determined by variant",
   },
   {
-    property: "duration",
-    description: "Auto-dismiss duration in milliseconds. Set to 0 to disable auto-dismiss.",
-    type: "number",
-    default: "5000",
-  },
-  {
-    property: "dismissible",
-    description: "Whether the toast can be manually dismissed with a close button.",
+    property: "italic",
+    description: "Whether to apply italic styling.",
     type: "boolean",
-    default: "true",
+    default: "false",
   },
   {
-    property: "onClose",
-    description: "Callback function when the toast is closed (manually or automatically).",
-    type: "() => void",
-    default: "-",
+    property: "truncate",
+    description: "Truncate text with ellipsis. Use number for line clamping.",
+    type: "boolean | number",
+    default: "false",
   },
   {
-    property: "icon",
-    description: "Custom icon to override the default type icon.",
-    type: "ReactNode",
-    default: "Auto-determined by type",
-  },
-  {
-    property: "isVisible",
-    description: "Controls toast visibility externally for custom animation control.",
+    property: "noWrap",
+    description: "Prevent text from wrapping to new lines.",
     type: "boolean",
-    default: "-",
+    default: "false",
+  },
+  {
+    property: "gutterBottom",
+    description: "Add bottom margin for spacing.",
+    type: "boolean",
+    default: "false",
   },
   {
     property: "className",
-    description: "Additional CSS class name for the toast.",
+    description: "Additional class name for the typography element.",
     type: "string",
     default: "-",
   },
   {
     property: "style",
-    description: "Inline style for the toast.",
+    description: "Inline style for the typography element.",
     type: "React.CSSProperties",
     default: "-",
   },
   {
+    property: "children",
+    description: "The content to display.",
+    type: "ReactNode",
+    default: "-",
+  },
+  {
     property: "aria-label",
-    description: "Accessible label for the toast notification.",
+    description: "Accessible label for the typography element.",
     type: "string",
-    default: "Auto-generated from type and message",
+    default: "-",
   },
   {
     property: "aria-describedby",
-    description: "ID of element that describes the toast.",
+    description: "ID of element that describes the typography.",
     type: "string",
     default: "-",
   },
 ];
 
-const toastMethods: APITableRow[] = [
+const typographyMethods: APITableRow[] = [
   {
     property: "focus",
-    description: "Focus the toast element (specifically the close button if dismissible).",
+    description: "Focus the typography element.",
     type: "() => void",
     default: "-",
   },
   {
     property: "blur",
-    description: "Blur the toast element.",
+    description: "Blur the typography element.",
     type: "() => void",
     default: "-",
   },
 ];
 
-export const ToastDocs: React.FC = () => {
-  const [toasts, setToasts] = useState<Array<{ id: number; type: ToastType; message: string; duration?: number }>>([]);
-  const [toastCounter, setToastCounter] = useState(0);
-  const [selectedType, setSelectedType] = useState<ToastType>('success');
-  const [customMessage, setCustomMessage] = useState('This is a custom toast message');
-  const [customDuration, setCustomDuration] = useState(3000);
-  const [showPersistentToast, setShowPersistentToast] = useState(false);
-  const [showControlledToast, setShowControlledToast] = useState(false);
+export const TypographyDocs: React.FC = () => {
+  const [truncateLines, setTruncateLines] = useState(2);
+  const [selectedAlign, setSelectedAlign] = useState<'left' | 'center' | 'right' | 'justify'>('left');
+  const [selectedWeight, setSelectedWeight] = useState<'light' | 'normal' | 'medium' | 'semibold' | 'bold'>('normal');
 
-  const addToast = (type: ToastType, message: string, duration?: number) => {
-    const id = toastCounter + 1;
-    setToastCounter(id);
-    setToasts(prev => [...prev, { id, type, message, duration }]);
-  };
-
-  const removeToast = (id: number) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
-  };
-
-  const showBasicToast = (type: ToastType) => {
-    const messages = {
-      success: 'Operation completed successfully!',
-      error: 'Something went wrong. Please try again.',
-      warning: 'Please review your input before proceeding.',
-      info: 'New updates are available for download.'
-    };
-    addToast(type, messages[type]);
-  };
-
-  const showCustomToast = () => {
-    addToast(selectedType, customMessage, customDuration);
-  };
-
-  const clearAllToasts = () => {
-    setToasts([]);
-  };
+  const longText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.";
 
   return (
     <div className="component-docs">
       <div className="docs-header">
-        <h1>Toast</h1>
-        <p>Toast notifications provide brief messages about app processes at the bottom or top of the screen. They inform users of processes that the app has performed or will perform.</p>
+        <h1>Typography</h1>
+        <p>Typography component for consistent text styling across your application. Provides semantic HTML elements with design system typography scales.</p>
       </div>
 
       <div className="docs-section">
         <h2>When To Use</h2>
         <ul>
-          <li>Provide feedback for user actions like form submissions, file uploads, or API calls.</li>
-          <li>Show system notifications that don't require immediate action.</li>
-          <li>Display temporary status messages that auto-dismiss after a few seconds.</li>
-          <li>Communicate non-critical information that doesn't interrupt the user's workflow.</li>
-          <li>Avoid using toasts for critical errors that require user acknowledgment - use modals instead.</li>
+          <li>Use Typography to create consistent text hierarchy and maintain design system compliance.</li>
+          <li>Apply different typographic variants to establish visual hierarchy (headings, body text, captions).</li>
+          <li>Ensure semantic HTML structure while maintaining visual consistency.</li>
+          <li>Handle text truncation, alignment, and responsive typography needs.</li>
+          <li>Provide accessible text with proper semantic roles and ARIA attributes.</li>
         </ul>
       </div>
 
       <div className="docs-section">
         <h2>Examples</h2>
 
-        {/* Basic Types */}
+        {/* Headings */}
         <ExampleContainer
-          title="Basic Types"
-          description="Four toast types for different message contexts."
-          style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}
-          code={`<Toast type="success" message="Operation completed successfully!" />
-<Toast type="error" message="Something went wrong." />
-<Toast type="warning" message="Please review your input." />
-<Toast type="info" message="New updates available." />`}
-        >
-          <>
-            <Button onClick={() => showBasicToast('success')}>Success Toast</Button>
-            <Button onClick={() => showBasicToast('error')}>Error Toast</Button>
-            <Button onClick={() => showBasicToast('warning')}>Warning Toast</Button>
-            <Button onClick={() => showBasicToast('info')}>Info Toast</Button>
-          </>
-        </ExampleContainer>
-
-        {/* Static Examples */}
-        <ExampleContainer
-          title="Static Examples"
-          description="Visual examples of each toast type (non-interactive)."
-          style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
-          code={`// These are shown for visual reference
-<Toast type="success" message="File uploaded successfully!" />
-<Toast type="error" message="Failed to connect to server" />
-<Toast type="warning" message="Session will expire in 5 minutes" />
-<Toast type="info" message="Remember to save your work regularly" />`}
-        >
-          <>
-            <Toast 
-              type="success" 
-              message="File uploaded successfully!" 
-              onClose={() => {}} 
-              duration={0}
-            />
-            <Toast 
-              type="error" 
-              message="Failed to connect to server" 
-              onClose={() => {}} 
-              duration={0}
-            />
-            <Toast 
-              type="warning" 
-              message="Session will expire in 5 minutes" 
-              onClose={() => {}} 
-              duration={0}
-            />
-            <Toast 
-              type="info" 
-              message="Remember to save your work regularly" 
-              onClose={() => {}} 
-              duration={0}
-            />
-          </>
-        </ExampleContainer>
-
-        {/* Custom Icons */}
-        <ExampleContainer
-          title="Custom Icons"
-          description="Override default icons with custom ones."
-          style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
-          code={`<Toast 
-  type="success" 
-  message="Profile updated successfully!"
-  icon={<CheckCircle size={20} />}
-/>
-
-<Toast 
-  type="error" 
-  message="Network connection failed"
-  icon={<XCircle size={20} />}
-/>`}
-        >
-          <>
-            <Toast 
-              type="success" 
-              message="Profile updated successfully!"
-              icon={<CheckCircle size={20} />}
-              onClose={() => {}} 
-              duration={0}
-            />
-            <Toast 
-              type="error" 
-              message="Network connection failed"
-              icon={<XCircle size={20} />}
-              onClose={() => {}} 
-              duration={0}
-            />
-            <Toast 
-              type="warning" 
-              message="Storage space running low"
-              icon={<AlertCircle size={20} />}
-              onClose={() => {}} 
-              duration={0}
-            />
-            <Toast 
-              type="info" 
-              message="System maintenance scheduled"
-              icon={<Info size={20} />}
-              onClose={() => {}} 
-              duration={0}
-            />
-          </>
-        </ExampleContainer>
-
-        {/* Rich Content */}
-        <ExampleContainer
-          title="Rich Content"
-          description="Toast with React node content instead of plain text."
-          style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
-          code={`<Toast 
-  type="success" 
-  message={
-    <div>
-      <strong>Upload Complete!</strong>
-      <br />
-      <span style={{ fontSize: '14px' }}>3 files processed successfully</span>
-    </div>
-  }
-/>`}
-        >
-          <>
-            <Toast 
-              type="success" 
-              message={
-                <div>
-                  <strong>Upload Complete!</strong>
-                  <br />
-                  <span style={{ fontSize: '14px', opacity: 0.8 }}>3 files processed successfully</span>
-                </div>
-              }
-              onClose={() => {}} 
-              duration={0}
-            />
-            <Toast 
-              type="info" 
-              message={
-                <div>
-                  <div style={{ fontWeight: 500 }}>New Message</div>
-                  <div style={{ fontSize: '14px', opacity: 0.8 }}>From: john@example.com</div>
-                </div>
-              }
-              onClose={() => {}} 
-              duration={0}
-            />
-          </>
-        </ExampleContainer>
-
-        {/* Duration Control */}
-        <ExampleContainer
-          title="Duration Control"
-          description="Control auto-dismiss timing or disable it entirely."
-          style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}
-          code={`// Quick toast (2 seconds)
-<Toast type="info" message="Quick message" duration={2000} />
-
-// Standard toast (5 seconds - default)
-<Toast type="success" message="Standard message" duration={5000} />
-
-// Long toast (10 seconds)
-<Toast type="warning" message="Important message" duration={10000} />
-
-// Persistent toast (no auto-dismiss)
-<Toast type="error" message="Manual dismiss only" duration={0} />`}
-        >
-          <>
-            <Button onClick={() => addToast('info', 'Quick message (2s)', 2000)}>
-              2 Second Toast
-            </Button>
-            <Button onClick={() => addToast('success', 'Standard message (5s)', 5000)}>
-              5 Second Toast
-            </Button>
-            <Button onClick={() => addToast('warning', 'Long message (10s)', 10000)}>
-              10 Second Toast
-            </Button>
-            <Button onClick={() => setShowPersistentToast(true)}>
-              Persistent Toast
-            </Button>
-            {showPersistentToast && (
-              <Toast 
-                type="error" 
-                message="This toast won't auto-dismiss" 
-                duration={0}
-                onClose={() => setShowPersistentToast(false)}
-              />
-            )}
-          </>
-        </ExampleContainer>
-
-        {/* Non-dismissible */}
-        <ExampleContainer
-          title="Non-dismissible"
-          description="Toasts without close buttons for system messages."
-          style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
-          code={`<Toast 
-  type="info" 
-  message="System is updating..." 
-  dismissible={false}
-  duration={0}
-/>`}
-        >
-          <>
-            <Toast 
-              type="info" 
-              message="System is updating... Please wait" 
-              dismissible={false}
-              duration={0}
-              onClose={() => {}}
-            />
-            <Toast 
-              type="warning" 
-              message="Maintenance mode active" 
-              dismissible={false}
-              duration={0}
-              onClose={() => {}}
-            />
-          </>
-        </ExampleContainer>
-
-        {/* Controlled Visibility */}
-        <ExampleContainer
-          title="Controlled Visibility"
-          description="External control over toast visibility for custom animations."
-          style={{ display: 'flex', gap: '8px', alignItems: 'center' }}
-          code={`const [isVisible, setIsVisible] = useState(false);
-
-<Toast 
-  type="success" 
-  message="Controlled toast visibility" 
-  isVisible={isVisible}
-  onClose={() => setIsVisible(false)}
-/>`}
-        >
-          <>
-            <Button onClick={() => setShowControlledToast(true)}>
-              Show Controlled Toast
-            </Button>
-            <Button onClick={() => setShowControlledToast(false)}>
-              Hide Controlled Toast
-            </Button>
-            {showControlledToast && (
-              <Toast 
-                type="success" 
-                message="This toast is externally controlled" 
-                isVisible={showControlledToast}
-                onClose={() => setShowControlledToast(false)}
-                duration={0}
-              />
-            )}
-          </>
-        </ExampleContainer>
-
-        {/* Interactive Demo */}
-        <ExampleContainer
-          title="Interactive Demo"
-          description="Create custom toasts with different options."
+          title="Headings"
+          description="Typography variants for headings with proper semantic hierarchy."
           style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
-          code={`const [type, setType] = useState('success');
-const [message, setMessage] = useState('Custom message');
-const [duration, setDuration] = useState(3000);
-
-const showToast = () => {
-  // Add toast to queue
-  addToast(type, message, duration);
-};`}
+          code={`<Typography variant="h1">Heading 1</Typography>
+<Typography variant="h2">Heading 2</Typography>
+<Typography variant="h3">Heading 3</Typography>
+<Typography variant="h4">Heading 4</Typography>
+<Typography variant="h5">Heading 5</Typography>
+<Typography variant="h6">Heading 6</Typography>`}
         >
           <>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '16px', border: '1px solid #e0e0e0', borderRadius: '8px' }}>
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <label style={{ minWidth: '60px' }}>Type:</label>
-                <div style={{ display: 'flex', gap: '4px' }}>
-                  {(['success', 'error', 'warning', 'info'] as ToastType[]).map((type) => (
-                    <Button
-                      key={type}
-                      size="sm"
-                      variant={selectedType === type ? 'primary' : 'secondary'}
-                      onClick={() => setSelectedType(type)}
-                    >
-                      {type}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-              
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <label style={{ minWidth: '60px' }}>Message:</label>
-                <input
-                  type="text"
-                  value={customMessage}
-                  onChange={(e) => setCustomMessage(e.target.value)}
-                  style={{ flex: 1, padding: '4px 8px', border: '1px solid #ccc', borderRadius: '4px' }}
-                />
-              </div>
-              
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <label style={{ minWidth: '60px' }}>Duration:</label>
-                <input
-                  type="number"
-                  value={customDuration}
-                  onChange={(e) => setCustomDuration(Number(e.target.value))}
-                  min="0"
-                  step="1000"
-                  style={{ width: '100px', padding: '4px 8px', border: '1px solid #ccc', borderRadius: '4px' }}
-                />
-                <span style={{ fontSize: '14px', color: '#666' }}>ms (0 = persistent)</span>
-              </div>
-              
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <Button onClick={showCustomToast}>Show Toast</Button>
-                <Button variant="secondary" onClick={clearAllToasts}>Clear All</Button>
-              </div>
+            <Typography variant="h1">Heading 1</Typography>
+            <Typography variant="h2">Heading 2</Typography>
+            <Typography variant="h3">Heading 3</Typography>
+            <Typography variant="h4">Heading 4</Typography>
+            <Typography variant="h5">Heading 5</Typography>
+            <Typography variant="h6">Heading 6</Typography>
+          </>
+        </ExampleContainer>
+
+        {/* Subtitles */}
+        <ExampleContainer
+          title="Subtitles"
+          description="Subtitle variants for secondary headings and section descriptions."
+          style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+          code={`<Typography variant="subtitle1">Subtitle 1 - Larger secondary text</Typography>
+<Typography variant="subtitle2">Subtitle 2 - Smaller secondary text</Typography>`}
+        >
+          <>
+            <Typography variant="subtitle1">Subtitle 1 - Larger secondary text</Typography>
+            <Typography variant="subtitle2">Subtitle 2 - Smaller secondary text</Typography>
+          </>
+        </ExampleContainer>
+
+        {/* Body Text */}
+        <ExampleContainer
+          title="Body Text"
+          description="Standard body text variants for paragraphs and general content."
+          style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+          code={`<Typography variant="body1">
+  Body 1 - This is the default body text variant used for most paragraph content.
+</Typography>
+<Typography variant="body2">
+  Body 2 - Smaller body text variant for secondary content and descriptions.
+</Typography>`}
+        >
+          <>
+            <Typography variant="body1">
+              Body 1 - This is the default body text variant used for most paragraph content. It provides excellent readability and is suitable for longer text blocks.
+            </Typography>
+            <Typography variant="body2">
+              Body 2 - Smaller body text variant for secondary content and descriptions. Perfect for supporting information and metadata.
+            </Typography>
+          </>
+        </ExampleContainer>
+
+        {/* Small Text Variants */}
+        <ExampleContainer
+          title="Small Text Variants"
+          description="Caption and overline text for labels, metadata, and fine print."
+          style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+          code={`<Typography variant="caption">Caption text - Used for image captions, help text, and metadata</Typography>
+<Typography variant="overline">Overline text - All caps label style</Typography>
+<Typography variant="code">inline code snippet</Typography>`}
+        >
+          <>
+            <Typography variant="caption">Caption text - Used for image captions, help text, and metadata</Typography>
+            <Typography variant="overline">Overline text - All caps label style</Typography>
+            <Typography variant="code">inline code snippet</Typography>
+          </>
+        </ExampleContainer>
+
+        {/* Color Variants */}
+        <ExampleContainer
+          title="Color Variants"
+          description="Different color variants for various contexts and states."
+          style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
+          code={`<Typography color="primary">Primary color text</Typography>
+<Typography color="secondary">Secondary color text</Typography>
+<Typography color="success">Success color text</Typography>
+<Typography color="warning">Warning color text</Typography>
+<Typography color="danger">Danger color text</Typography>
+<Typography color="info">Info color text</Typography>`}
+        >
+          <>
+            <Typography color="primary">Primary color text</Typography>
+            <Typography color="secondary">Secondary color text</Typography>
+            <Typography color="success">Success color text</Typography>
+            <Typography color="warning">Warning color text</Typography>
+            <Typography color="danger">Danger color text</Typography>
+            <Typography color="info">Info color text</Typography>
+          </>
+        </ExampleContainer>
+
+        {/* Alignment */}
+        <ExampleContainer
+          title="Text Alignment"
+          description="Control text alignment with the align prop."
+          style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+          code={`<Typography align="left">Left aligned text</Typography>
+<Typography align="center">Center aligned text</Typography>
+<Typography align="right">Right aligned text</Typography>
+<Typography align="justify">Justified text that spreads across the full width...</Typography>`}
+        >
+          <>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+              {(['left', 'center', 'right', 'justify'] as const).map((align) => (
+                <Button
+                  key={align}
+                  size="sm"
+                  variant={selectedAlign === align ? 'primary' : 'secondary'}
+                  onClick={() => setSelectedAlign(align)}
+                >
+                  {align}
+                </Button>
+              ))}
+            </div>
+            <Typography align={selectedAlign}>
+              This text alignment can be controlled dynamically. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            </Typography>
+          </>
+        </ExampleContainer>
+
+        {/* Font Weights */}
+        <ExampleContainer
+          title="Font Weights"
+          description="Different font weights for emphasis and hierarchy."
+          style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+          code={`<Typography weight="light">Light weight text</Typography>
+<Typography weight="normal">Normal weight text</Typography>
+<Typography weight="medium">Medium weight text</Typography>
+<Typography weight="semibold">Semibold weight text</Typography>
+<Typography weight="bold">Bold weight text</Typography>`}
+        >
+          <>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+              {(['light', 'normal', 'medium', 'semibold', 'bold'] as const).map((weight) => (
+                <Button
+                  key={weight}
+                  size="sm"
+                  variant={selectedWeight === weight ? 'primary' : 'secondary'}
+                  onClick={() => setSelectedWeight(weight)}
+                >
+                  {weight}
+                </Button>
+              ))}
+            </div>
+            <Typography weight={selectedWeight}>
+              This text uses {selectedWeight} font weight. You can see how different weights affect the visual hierarchy and emphasis of the text.
+            </Typography>
+          </>
+        </ExampleContainer>
+
+        {/* Text Styling */}
+        <ExampleContainer
+          title="Text Styling"
+          description="Additional text styling options like italic and combinations."
+          style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
+          code={`<Typography italic>Italic text for emphasis</Typography>
+<Typography weight="bold" italic>Bold italic combination</Typography>
+<Typography variant="h4" color="primary" italic>Styled heading with color and italic</Typography>`}
+        >
+          <>
+            <Typography italic>Italic text for emphasis</Typography>
+            <Typography weight="bold" italic>Bold italic combination</Typography>
+            <Typography variant="h4" color="primary" italic>Styled heading with color and italic</Typography>
+          </>
+        </ExampleContainer>
+
+        {/* Text Truncation */}
+        <ExampleContainer
+          title="Text Truncation"
+          description="Control text overflow with truncate options."
+          style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+          code={`// Single line truncation
+<Typography truncate style={{ width: '200px' }}>
+  {longText}
+</Typography>
+
+// Multi-line truncation (line clamping)
+<Typography truncate={2} style={{ width: '300px' }}>
+  {longText}
+</Typography>`}
+        >
+          <>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+              <Button size="sm" onClick={() => setTruncateLines(1)}>1 Line</Button>
+              <Button size="sm" onClick={() => setTruncateLines(2)}>2 Lines</Button>
+              <Button size="sm" onClick={() => setTruncateLines(3)}>3 Lines</Button>
             </div>
             
-            <div style={{ fontSize: '14px', color: '#666' }}>
-              Active toasts: {toasts.length}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div>
+                <Typography variant="caption" gutterBottom>Single line truncation:</Typography>
+                <Typography truncate style={{ width: '250px', border: '1px dashed #ccc', padding: '8px' }}>
+                  {longText}
+                </Typography>
+              </div>
+              
+              <div>
+                <Typography variant="caption" gutterBottom>Multi-line truncation ({truncateLines} lines):</Typography>
+                <Typography truncate={truncateLines} style={{ width: '300px', border: '1px dashed #ccc', padding: '8px' }}>
+                  {longText}
+                </Typography>
+              </div>
             </div>
           </>
         </ExampleContainer>
 
-        {/* Toast Queue */}
+        {/* No Wrap */}
         <ExampleContainer
-          title="Toast Queue System"
-          description="Multiple toasts showing queue behavior (scroll down to see active toasts)."
-          style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}
-          code={`// Show multiple toasts in sequence
-const showMultipleToasts = () => {
-  addToast('info', 'Starting process...', 2000);
-  setTimeout(() => addToast('warning', 'Validating data...', 2000), 500);
-  setTimeout(() => addToast('success', 'Process completed!', 3000), 1000);
-};`}
+          title="No Wrap"
+          description="Prevent text from wrapping to new lines."
+          style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+          code={`<Typography noWrap style={{ width: '200px' }}>
+  This text will not wrap to new lines even in a narrow container
+</Typography>`}
         >
           <>
-            <Button onClick={() => {
-              addToast('info', 'Starting process...', 2000);
-              setTimeout(() => addToast('warning', 'Validating data...', 2000), 500);
-              setTimeout(() => addToast('success', 'Process completed!', 3000), 1000);
+            <Typography variant="caption" gutterBottom>Normal text (wraps):</Typography>
+            <Typography style={{ width: '200px', border: '1px dashed #ccc', padding: '8px', marginBottom: '12px' }}>
+              This text will wrap to new lines when it reaches the container width
+            </Typography>
+            
+            <Typography variant="caption" gutterBottom>No wrap text (overflows):</Typography>
+            <Typography noWrap style={{ width: '200px', border: '1px dashed #ccc', padding: '8px' }}>
+              This text will not wrap to new lines even in a narrow container
+            </Typography>
+          </>
+        </ExampleContainer>
+
+        {/* Semantic Elements */}
+        <ExampleContainer
+          title="Semantic Elements"
+          description="Use different HTML elements while maintaining visual consistency."
+          style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
+          code={`<Typography variant="h3" as="h1">Visual h3, semantic h1</Typography>
+<Typography variant="body1" as="label">Body text as label</Typography>
+<Typography variant="caption" as="span">Caption as span</Typography>
+<Typography variant="body2" as="strong">Body text as strong</Typography>`}
+        >
+          <>
+            <Typography variant="h3" as="h1">Visual h3, semantic h1</Typography>
+            <Typography variant="body1" as="label">Body text as label element</Typography>
+            <Typography variant="caption" as="span">Caption as span element</Typography>
+            <Typography variant="body2" as="strong">Body text as strong element</Typography>
+          </>
+        </ExampleContainer>
+
+        {/* Gutter Bottom */}
+        <ExampleContainer
+          title="Gutter Bottom"
+          description="Add consistent bottom spacing with gutterBottom prop."
+          style={{ display: 'flex', flexDirection: 'column' }}
+          code={`<Typography variant="h4" gutterBottom>Heading with gutter</Typography>
+<Typography variant="body1" gutterBottom>
+  First paragraph with bottom spacing.
+</Typography>
+<Typography variant="body1">
+  Second paragraph without additional spacing follows naturally.
+</Typography>`}
+        >
+          <>
+            <Typography variant="h4" gutterBottom>Heading with gutter</Typography>
+            <Typography variant="body1" gutterBottom>
+              First paragraph with bottom spacing. This creates consistent vertical rhythm in your layout.
+            </Typography>
+            <Typography variant="body1">
+              Second paragraph without additional spacing follows naturally with the component's default margins.
+            </Typography>
+          </>
+        </ExampleContainer>
+
+        {/* Interactive Typography */}
+        <ExampleContainer
+          title="Interactive Typography"
+          description="Typography with interactive behaviors and focus states."
+          style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
+          code={`<Typography 
+  color="primary" 
+  role="button" 
+  tabIndex={0}
+  onClick={() => alert('Typography clicked!')}
+>
+  Clickable typography
+</Typography>`}
+        >
+          <>
+            <Typography 
+              color="primary" 
+              role="button" 
+              tabIndex={0}
+              onClick={() => alert('Typography clicked!')}
+              style={{ cursor: 'pointer' }}
+            >
+              Clickable typography (try clicking)
+            </Typography>
+            <Typography 
+              color="info" 
+              tabIndex={0}
+              style={{ cursor: 'pointer' }}
+            >
+              Focusable typography (try tabbing to it)
+            </Typography>
+          </>
+        </ExampleContainer>
+
+        {/* Real-world Example */}
+        <ExampleContainer
+          title="Real-world Example"
+          description="A complete article layout using various typography variants."
+          style={{ maxWidth: '600px' }}
+          code={`<article>
+  <Typography variant="overline" color="primary">Technology</Typography>
+  <Typography variant="h2" gutterBottom>
+    The Future of Web Development
+  </Typography>
+  <Typography variant="subtitle1" color="secondary" gutterBottom>
+    Exploring modern frameworks and development practices
+  </Typography>
+  <Typography variant="body1" gutterBottom>
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit...
+  </Typography>
+  <Typography variant="caption" color="secondary">
+    Published on March 15, 2024
+  </Typography>
+</article>`}
+        >
+          <article>
+            <Typography variant="overline" color="primary">Technology</Typography>
+            <Typography variant="h2" gutterBottom>
+              The Future of Web Development
+            </Typography>
+            <Typography variant="subtitle1" color="secondary" gutterBottom>
+              Exploring modern frameworks and development practices that are shaping the industry
+            </Typography>
+            <Typography variant="body1" gutterBottom>
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+            </Typography>
+            <Typography variant="body1" gutterBottom>
+              Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+            </Typography>
+            <Typography variant="caption" color="secondary">
+              Published on March 15, 2024 • 5 min read
+            </Typography>
+          </article>
+        </ExampleContainer>
+
+        {/* Code Blocks */}
+        <ExampleContainer
+          title="Code Typography"
+          description="Typography variant for inline code and code snippets."
+          style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+          code={`<Typography variant="body1">
+  Use the <Typography variant="code" as="code">useState</Typography> hook for state management.
+</Typography>
+
+<Typography variant="code" as="pre" style={{ padding: '16px', display: 'block' }}>
+  const [count, setCount] = useState(0);
+</Typography>`}
+        >
+          <>
+            <Typography variant="body1">
+              Use the <Typography variant="code" as="code">useState</Typography> hook for state management in React components.
+            </Typography>
+            
+            <Typography variant="code" as="pre" style={{ 
+              padding: '16px', 
+              display: 'block',
+              backgroundColor: 'var(--background-code)',
+              borderRadius: '4px',
+              overflow: 'auto'
             }}>
-              Show Sequence
-            </Button>
-            <Button onClick={() => {
-              addToast('success', 'Item 1 saved');
-              addToast('success', 'Item 2 saved');
-              addToast('success', 'Item 3 saved');
-              addToast('info', 'All items processed');
-            }}>
-              Bulk Actions
-            </Button>
-            <Button onClick={() => {
-              addToast('error', 'Connection failed');
-              addToast('warning', 'Retrying...');
-              setTimeout(() => addToast('success', 'Connection restored'), 2000);
-            }}>
-              Error Recovery
-            </Button>
+              {`const [count, setCount] = useState(0);
+              
+const increment = () => {
+  setCount(prev => prev + 1);
+};`}
+            </Typography>
           </>
         </ExampleContainer>
       </div>
 
-      {/* Active Toasts Container */}
-      {toasts.length > 0 && (
-        <div style={{ 
-          position: 'fixed', 
-          bottom: '20px', 
-          right: '20px', 
-          zIndex: 1000,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '8px',
-          maxWidth: '400px'
-        }}>
-          {toasts.map((toast) => (
-            <Toast
-              key={toast.id}
-              type={toast.type}
-              message={toast.message}
-              duration={toast.duration}
-              onClose={() => removeToast(toast.id)}
-            />
-          ))}
-        </div>
-      )}
-
       <div className="docs-section">
         <h2>API</h2>
-        <p>This section describes all the available props for the <strong>Toast</strong> component. 
-          You can use these properties to control behavior, appearance, and interactivity.</p>
-        <APITable props={toastProps} />
+        <p>This section describes all the available props for the <strong>Typography</strong> component. 
+          You can use these properties to control appearance, behavior, and semantic structure.</p>
+        <APITable props={typographyProps} />
       </div>
 
       <div className="docs-section">
         <h2>Methods</h2>
-        <p>These methods are available on the <strong>Toast</strong> component via ref. 
-          They allow you to programmatically control the toast's behavior.</p>
-        <APITable props={toastMethods} />
+        <p>These methods are available on the <strong>Typography</strong> component via ref. 
+          They allow you to programmatically control the typography element's behavior.</p>
+        <APITable props={typographyMethods} />
       </div>
 
       <div className="docs-section">
-        <h2>Toast Manager Integration</h2>
+        <h2>Design Guidelines</h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div>
-            <h4>Recommended Usage Pattern</h4>
-            <p>For production applications, consider implementing a Toast Manager or Context:</p>
-            <pre style={{ 
-              backgroundColor: '#f5f5f5', 
-              padding: '16px', 
-              borderRadius: '4px', 
-              overflow: 'auto',
-              fontSize: '14px'
-            }}>
-{`// ToastContext.tsx
-export const useToast = () => {
-  const addToast = (type, message, options) => {
-    // Add to global toast queue
-  };
-  
-  return { addToast };
-};
-
-// Usage in components
-const { addToast } = useToast();
-addToast('success', 'Data saved successfully!');`}
-            </pre>
+            <Typography variant="h5" gutterBottom>Typography Hierarchy</Typography>
+            <Typography variant="body1">
+              Use consistent typography hierarchy to establish clear information architecture. 
+              Headings should decrease in size and importance from h1 to h6, with proper semantic nesting.
+            </Typography>
           </div>
           
           <div>
-            <h4>Accessibility Guidelines</h4>
-            <ul>
-              <li>Success and info toasts use <code>aria-live="polite"</code></li>
-              <li>Error toasts use <code>aria-live="assertive"</code> and <code>role="alert"</code></li>
-              <li>Close buttons have proper ARIA labels</li>
-              <li>Keyboard navigation support (Enter/Space to dismiss)</li>
-              <li>Screen reader friendly with descriptive labels</li>
-            </ul>
+            <Typography variant="h5" gutterBottom>Color Usage</Typography>
+            <Typography variant="body1">
+              Use color variants purposefully - primary for key actions, success for positive states, 
+              warning for cautions, and danger for errors. Avoid overusing colored text.
+            </Typography>
           </div>
           
           <div>
-            <h4>Best Practices</h4>
-            <ul>
-              <li>Keep messages concise and actionable</li>
-              <li>Use appropriate toast types for the context</li>
-              <li>Don't overuse toasts - they can become annoying</li>
-              <li>Consider toast positioning for mobile devices</li>
-              <li>Provide alternative ways to access information in toasts</li>
-            </ul>
+            <Typography variant="h5" gutterBottom>Accessibility</Typography>
+            <Typography variant="body1">
+              Always consider semantic HTML structure. Use proper heading hierarchy, 
+              ensure sufficient color contrast, and provide meaningful text for screen readers.
+            </Typography>
           </div>
         </div>
       </div>
