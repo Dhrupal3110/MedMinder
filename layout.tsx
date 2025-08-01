@@ -1,4 +1,4 @@
-import React, { forwardRef, useState, useRef, useCallback, useEffect, useId, cloneElement, isValidElement } from 'react';
+import React, { forwardRef, useState, useRef, useCallback, useEffect, useId } from 'react';
 import { createPortal } from 'react-dom';
 import './Tooltip.css';
 
@@ -22,6 +22,7 @@ export interface TooltipProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
   onVisibleChange?: (visible: boolean) => void;
   'aria-label'?: string;
   'aria-describedby'?: string;
+  useWrapper?: boolean; // New prop to force wrapper usage
 }
 
 export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
@@ -44,189 +45,201 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
   onVisibleChange,
   'aria-label': ariaLabel,
   'aria-describedby': ariaDescribedBy,
+  useWrapper = false, // Default to false for backward compatibility
   ...props
 }, ref) => {
   const [internalVisible, setInternalVisible] = useState(defaultVisible);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const [actualPlacement, setActualPlacement] = useState(placement);
-  
+  const [mounted, setMounted] = useState(false);
+
   const triggerRef = useRef<HTMLElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
-  // Fix: Use number instead of NodeJS.Timeout for browser compatibility
-  const showTimeoutRef = useRef<number>();
-  const hideTimeoutRef = useRef<number>();
+  const showTimeoutRef = useRef<number | undefined>(undefined);
+  const hideTimeoutRef = useRef<number | undefined>(undefined);
   const tooltipId = useId();
 
   const isControlled = visible !== undefined;
   const currentVisible = isControlled ? visible : internalVisible;
 
-  // Calculate tooltip position
-  const calculatePosition = useCallback(() => {
-    if (!triggerRef.current || !tooltipRef.current) return;
+  // Ensure component is mounted before showing tooltip
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-    const triggerRect = triggerRef.current.getBoundingClientRect();
+  // Calculate tooltip position (same as original)
+  const calculatePosition = useCallback(() => {
+    const targetRef = useWrapper ? wrapperRef.current : triggerRef.current;
+    if (!targetRef || !tooltipRef.current || !mounted) return;
+
+    const triggerRect = targetRef.getBoundingClientRect();
     const tooltipRect = tooltipRef.current.getBoundingClientRect();
     const viewport = {
       width: window.innerWidth,
       height: window.innerHeight,
+      scrollX: window.scrollX,
+      scrollY: window.scrollY,
     };
 
     let top = 0;
     let left = 0;
     let finalPlacement = placement;
 
-    // Calculate base position
+    // Same positioning logic as original...
     switch (placement) {
       case 'top':
       case 'top-start':
       case 'top-end':
-        top = triggerRect.top - tooltipRect.height - offset;
+        top = triggerRect.top + viewport.scrollY - tooltipRect.height - offset;
         left = placement === 'top-start' 
-          ? triggerRect.left
+          ? triggerRect.left + viewport.scrollX
           : placement === 'top-end'
-          ? triggerRect.right - tooltipRect.width
-          : triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2;
+          ? triggerRect.right + viewport.scrollX - tooltipRect.width
+          : triggerRect.left + viewport.scrollX + triggerRect.width / 2 - tooltipRect.width / 2;
         break;
       case 'bottom':
       case 'bottom-start':
       case 'bottom-end':
-        top = triggerRect.bottom + offset;
+        top = triggerRect.bottom + viewport.scrollY + offset;
         left = placement === 'bottom-start'
-          ? triggerRect.left
+          ? triggerRect.left + viewport.scrollX
           : placement === 'bottom-end'
-          ? triggerRect.right - tooltipRect.width
-          : triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2;
+          ? triggerRect.right + viewport.scrollX - tooltipRect.width
+          : triggerRect.left + viewport.scrollX + triggerRect.width / 2 - tooltipRect.width / 2;
         break;
       case 'left':
       case 'left-start':
       case 'left-end':
         top = placement === 'left-start'
-          ? triggerRect.top
+          ? triggerRect.top + viewport.scrollY
           : placement === 'left-end'
-          ? triggerRect.bottom - tooltipRect.height
-          : triggerRect.top + triggerRect.height / 2 - tooltipRect.height / 2;
-        left = triggerRect.left - tooltipRect.width - offset;
+          ? triggerRect.bottom + viewport.scrollY - tooltipRect.height
+          : triggerRect.top + viewport.scrollY + triggerRect.height / 2 - tooltipRect.height / 2;
+        left = triggerRect.left + viewport.scrollX - tooltipRect.width - offset;
         break;
       case 'right':
       case 'right-start':
       case 'right-end':
         top = placement === 'right-start'
-          ? triggerRect.top
+          ? triggerRect.top + viewport.scrollY
           : placement === 'right-end'
-          ? triggerRect.bottom - tooltipRect.height
-          : triggerRect.top + triggerRect.height / 2 - tooltipRect.height / 2;
-        left = triggerRect.right + offset;
+          ? triggerRect.bottom + viewport.scrollY - tooltipRect.height
+          : triggerRect.top + viewport.scrollY + triggerRect.height / 2 - tooltipRect.height / 2;
+        left = triggerRect.right + viewport.scrollX + offset;
         break;
     }
 
-    // Viewport collision detection and adjustment
-    if (top < 0) {
+    // Viewport collision detection (same as original)
+    const minMargin = 8;
+    if (top < viewport.scrollY + minMargin) {
       if (placement.includes('top')) {
-        top = triggerRect.bottom + offset;
+        top = triggerRect.bottom + viewport.scrollY + offset;
         finalPlacement = placement.replace('top', 'bottom') as typeof placement;
       } else {
-        top = 8;
+        top = viewport.scrollY + minMargin;
       }
-    } else if (top + tooltipRect.height > viewport.height) {
+    } else if (top + tooltipRect.height > viewport.scrollY + viewport.height - minMargin) {
       if (placement.includes('bottom')) {
-        top = triggerRect.top - tooltipRect.height - offset;
+        top = triggerRect.top + viewport.scrollY - tooltipRect.height - offset;
         finalPlacement = placement.replace('bottom', 'top') as typeof placement;
       } else {
-        top = viewport.height - tooltipRect.height - 8;
+        top = viewport.scrollY + viewport.height - tooltipRect.height - minMargin;
       }
     }
 
-    if (left < 0) {
+    if (left < viewport.scrollX + minMargin) {
       if (placement.includes('left')) {
-        left = triggerRect.right + offset;
+        left = triggerRect.right + viewport.scrollX + offset;
         finalPlacement = placement.replace('left', 'right') as typeof placement;
       } else {
-        left = 8;
+        left = viewport.scrollX + minMargin;
       }
-    } else if (left + tooltipRect.width > viewport.width) {
+    } else if (left + tooltipRect.width > viewport.scrollX + viewport.width - minMargin) {
       if (placement.includes('right')) {
-        left = triggerRect.left - tooltipRect.width - offset;
+        left = triggerRect.left + viewport.scrollX - tooltipRef.current.width - offset;
         finalPlacement = placement.replace('right', 'left') as typeof placement;
       } else {
-        left = viewport.width - tooltipRect.width - 8;
+        left = viewport.scrollX + viewport.width - tooltipRect.width - minMargin;
       }
     }
 
     setPosition({ top, left });
     setActualPlacement(finalPlacement);
-  }, [placement, offset]);
+  }, [placement, offset, mounted, useWrapper]);
 
-  // Show tooltip
+  // Show/hide functions (same as original)
   const showTooltip = useCallback(() => {
-    if (disabled || !content) return;
+    if (disabled || !content || !mounted) return;
 
-    if (hideTimeoutRef.current) {
+    if (hideTimeoutRef.current !== undefined) {
       clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = undefined;
     }
 
-    if (delay > 0) {
-      showTimeoutRef.current = window.setTimeout(() => {
-        if (!isControlled) {
-          setInternalVisible(true);
-        }
-        onVisibleChange?.(true);
-      }, delay);
-    } else {
+    const executeShow = () => {
       if (!isControlled) {
         setInternalVisible(true);
       }
       onVisibleChange?.(true);
-    }
-  }, [disabled, content, delay, isControlled, onVisibleChange]);
+    };
 
-  // Hide tooltip
-  const hideTooltip = useCallback(() => {
-    if (showTimeoutRef.current) {
-      clearTimeout(showTimeoutRef.current);
-    }
-
-    if (hideDelay > 0) {
-      hideTimeoutRef.current = window.setTimeout(() => {
-        if (!isControlled) {
-          setInternalVisible(false);
-        }
-        onVisibleChange?.(false);
-      }, hideDelay);
+    if (delay > 0) {
+      showTimeoutRef.current = window.setTimeout(executeShow, delay);
     } else {
+      executeShow();
+    }
+  }, [disabled, content, delay, isControlled, onVisibleChange, mounted]);
+
+  const hideTooltip = useCallback(() => {
+    if (showTimeoutRef.current !== undefined) {
+      clearTimeout(showTimeoutRef.current);
+      showTimeoutRef.current = undefined;
+    }
+
+    const executeHide = () => {
       if (!isControlled) {
         setInternalVisible(false);
       }
       onVisibleChange?.(false);
+    };
+
+    if (hideDelay > 0) {
+      hideTimeoutRef.current = window.setTimeout(executeHide, hideDelay);
+    } else {
+      executeHide();
     }
   }, [hideDelay, isControlled, onVisibleChange]);
 
-  // Event handlers
+  // Event handlers (same as original)
   const handleMouseEnter = useCallback(() => {
-    if (trigger === 'hover' || trigger === 'manual') {
+    if (trigger === 'hover') {
       showTooltip();
     }
   }, [trigger, showTooltip]);
 
   const handleMouseLeave = useCallback(() => {
-    if (trigger === 'hover' || trigger === 'manual') {
+    if (trigger === 'hover') {
       hideTooltip();
     }
   }, [trigger, hideTooltip]);
 
   const handleFocus = useCallback(() => {
-    if (trigger === 'focus' || trigger === 'manual') {
+    if (trigger === 'focus') {
       showTooltip();
     }
   }, [trigger, showTooltip]);
 
   const handleBlur = useCallback(() => {
-    if (trigger === 'focus' || trigger === 'manual') {
+    if (trigger === 'focus') {
       hideTooltip();
     }
   }, [trigger, hideTooltip]);
 
-  const handleClick = useCallback(() => {
+  const handleClick = useCallback((e: React.MouseEvent) => {
     if (trigger === 'click') {
+      e.preventDefault();
+      e.stopPropagation();
       if (currentVisible) {
         hideTooltip();
       } else {
@@ -238,35 +251,38 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
   const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
     if (event.key === 'Escape' && currentVisible) {
       hideTooltip();
-      triggerRef.current?.focus();
+      const targetRef = useWrapper ? wrapperRef.current : triggerRef.current;
+      targetRef?.focus();
     }
-  }, [currentVisible, hideTooltip]);
+  }, [currentVisible, hideTooltip, useWrapper]);
 
-  // Update position when visible
+  // Update position when visible (same as original)
   useEffect(() => {
-    if (currentVisible) {
+    if (currentVisible && mounted) {
       calculatePosition();
-      
+      const positionTimeout = setTimeout(calculatePosition, 10);
+
       const handleResize = () => calculatePosition();
       const handleScroll = () => calculatePosition();
-      
+
       window.addEventListener('resize', handleResize);
       window.addEventListener('scroll', handleScroll, true);
       
       return () => {
+        clearTimeout(positionTimeout);
         window.removeEventListener('resize', handleResize);
         window.removeEventListener('scroll', handleScroll, true);
       };
     }
-  }, [currentVisible, calculatePosition]);
+  }, [currentVisible, calculatePosition, mounted]);
 
-  // Cleanup timeouts
+  // Cleanup timeouts (same as original)
   useEffect(() => {
     return () => {
-      if (showTimeoutRef.current) {
+      if (showTimeoutRef.current !== undefined) {
         clearTimeout(showTimeoutRef.current);
       }
-      if (hideTimeoutRef.current) {
+      if (hideTimeoutRef.current !== undefined) {
         clearTimeout(hideTimeoutRef.current);
       }
     };
@@ -282,56 +298,8 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
     .filter(Boolean)
     .join(' ');
 
-  // Fix: Improved ref handling for triggerElement
-  const triggerElement = isValidElement(children) 
-    ? cloneElement(children, {
-        ref: (node: HTMLElement) => {
-          triggerRef.current = node;
-          // Handle both function and object refs from the original child
-          const originalRef = (children as any).ref;
-          if (typeof originalRef === 'function') {
-            originalRef(node);
-          } else if (originalRef && typeof originalRef === 'object' && 'current' in originalRef) {
-            (originalRef as React.MutableRefObject<HTMLElement>).current = node;
-          }
-        },
-        onMouseEnter: (e: React.MouseEvent) => {
-          // Call original handler first
-          const originalHandler = (children.props as any).onMouseEnter;
-          if (originalHandler) originalHandler(e);
-          handleMouseEnter();
-        },
-        onMouseLeave: (e: React.MouseEvent) => {
-          const originalHandler = (children.props as any).onMouseLeave;
-          if (originalHandler) originalHandler(e);
-          handleMouseLeave();
-        },
-        onFocus: (e: React.FocusEvent) => {
-          const originalHandler = (children.props as any).onFocus;
-          if (originalHandler) originalHandler(e);
-          handleFocus();
-        },
-        onBlur: (e: React.FocusEvent) => {
-          const originalHandler = (children.props as any).onBlur;
-          if (originalHandler) originalHandler(e);
-          handleBlur();
-        },
-        onClick: (e: React.MouseEvent) => {
-          const originalHandler = (children.props as any).onClick;
-          if (originalHandler) originalHandler(e);
-          handleClick();
-        },
-        onKeyDown: (e: React.KeyboardEvent) => {
-          const originalHandler = (children.props as any).onKeyDown;
-          if (originalHandler) originalHandler(e);
-          handleKeyDown(e);
-        },
-        'aria-describedby': currentVisible ? tooltipId : (children.props as any)['aria-describedby'] || ariaDescribedBy,
-      } as any)
-    : children;
-
-  // Tooltip content
-  const tooltipContent = (
+  // Tooltip content (same as original)
+  const tooltipContent = mounted && content ? (
     <div
       {...props}
       ref={(node) => {
@@ -345,13 +313,13 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
       id={tooltipId}
       className={classes}
       style={{
-        ...style,
         position: 'absolute',
         top: position.top,
         left: position.left,
         zIndex,
         maxWidth: typeof maxWidth === 'number' ? `${maxWidth}px` : maxWidth,
         pointerEvents: trigger === 'hover' ? 'none' : 'auto',
+        ...style,
       }}
       role="tooltip"
       aria-label={ariaLabel}
@@ -361,12 +329,84 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
       {content}
       {arrow && <div className="ui-tooltip-arrow" aria-hidden="true" />}
     </div>
-  );
+  ) : null;
+
+  // Determine if we should use wrapper approach
+  const shouldUseWrapper = useWrapper || children.type === 'button' || 
+    (typeof children.type === 'function' && children.type.displayName === 'Button');
+
+  if (shouldUseWrapper) {
+    // Use wrapper div approach
+    return (
+      <>
+        <div
+          ref={wrapperRef}
+          style={{ display: 'inline-flex', alignItems: 'center' }}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          onClick={handleClick}
+          onKeyDown={handleKeyDown}
+          aria-describedby={currentVisible ? tooltipId : ariaDescribedBy}
+        >
+          {children}
+        </div>
+        {tooltipContent && (
+          portal ? createPortal(tooltipContent, document.body) : tooltipContent
+        )}
+      </>
+    );
+  }
+
+  // Use original cloneElement approach
+  const triggerElement = React.cloneElement(children, {
+    ref: (node: HTMLElement) => {
+      triggerRef.current = node;
+      const originalRef = (children as any).ref;
+      if (typeof originalRef === 'function') {
+        originalRef(node);
+      } else if (originalRef && typeof originalRef === 'object' && 'current' in originalRef) {
+        (originalRef as React.MutableRefObject<HTMLElement>).current = node;
+      }
+    },
+    onMouseEnter: (e: React.MouseEvent) => {
+      const originalHandler = (children.props as any).onMouseEnter;
+      if (originalHandler) originalHandler(e);
+      handleMouseEnter();
+    },
+    onMouseLeave: (e: React.MouseEvent) => {
+      const originalHandler = (children.props as any).onMouseLeave;
+      if (originalHandler) originalHandler(e);
+      handleMouseLeave();
+    },
+    onFocus: (e: React.FocusEvent) => {
+      const originalHandler = (children.props as any).onFocus;
+      if (originalHandler) originalHandler(e);
+      handleFocus();
+    },
+    onBlur: (e: React.FocusEvent) => {
+      const originalHandler = (children.props as any).onBlur;
+      if (originalHandler) originalHandler(e);
+      handleBlur();
+    },
+    onClick: (e: React.MouseEvent) => {
+      const originalHandler = (children.props as any).onClick;
+      if (originalHandler) originalHandler(e);
+      handleClick(e);
+    },
+    onKeyDown: (e: React.KeyboardEvent) => {
+      const originalHandler = (children.props as any).onKeyDown;
+      if (originalHandler) originalHandler(e);
+      handleKeyDown(e);
+    },
+    'aria-describedby': currentVisible ? tooltipId : (children.props as any)['aria-describedby'] || ariaDescribedBy,
+  } as any);
 
   return (
     <>
       {triggerElement}
-      {currentVisible && content && (
+      {tooltipContent && (
         portal ? createPortal(tooltipContent, document.body) : tooltipContent
       )}
     </>
