@@ -1,396 +1,233 @@
-import React, { forwardRef, useState, useRef, useCallback, useEffect, useId, cloneElement, isValidElement } from 'react';
-import { createPortal } from 'react-dom';
-import './Tooltip.css';
+/* CSS Custom Properties for Theme Support */
+:root {
+  /* Light Theme Colors */
+  --primary-color: #1890ff;
+  --primary-hover: #40a9ff;
+  --primary-active: #096dd9;
+  --secondary-color: #d9d9d9;
+  --secondary-hover: #40a9ff;
+  --secondary-active: #096dd9;
+  --success-color: #52c41a;
+  --success-hover: #73d13d;
+  --success-active: #389e0d;
+  --warning-color: #faad14;
+  --warning-hover: #ffc53d;
+  --warning-active: #d48806;
+  --danger-color: #ff4d4f;
+  --danger-hover: #ff7875;
+  --danger-active: #d9363e;
+  --info-color: #1890ff;
+  --info-hover: #40a9ff;
+  --info-active: #096dd9;
+  --white-color: #ffffff;
 
-export interface TooltipProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'content'> {
-  content?: React.ReactNode;
-  placement?: 'top' | 'bottom' | 'left' | 'right' | 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end' | 'left-start' | 'left-end' | 'right-start' | 'right-end';
-  trigger?: 'hover' | 'focus' | 'click' | 'manual';
-  delay?: number;
-  hideDelay?: number;
-  disabled?: boolean;
-  visible?: boolean;
-  defaultVisible?: boolean;
-  arrow?: boolean;
-  offset?: number;
-  portal?: boolean;
-  zIndex?: number;
-  maxWidth?: string | number;
-  className?: string;
-  style?: React.CSSProperties;
-  children: React.ReactElement;
-  onVisibleChange?: (visible: boolean) => void;
-  'aria-label'?: string;
-  'aria-describedby'?: string;
+  /* Background Colors */
+  --bg-color: #ffffff;
+  --bg-secondary: #fafafa;
+  --bg-hover: #f5f5f5;
+  --bg-active: #f0f0f0;
+  --background-code: #f6f8fa;
+
+  /* Text Colors */
+  --text-color: rgba(0, 0, 0, 0.85);
+  --text-primary: rgba(0, 0, 0, 0.85);
+  --text-secondary: rgba(0, 0, 0, 0.65);
+  --text-tertiary: rgba(0, 0, 0, 0.45);
+  --text-disabled: rgba(0, 0, 0, 0.25);
+  --text-inverse: #ffffff;
+  --text-code: #24292f;
+
+  /* Border Colors */
+  --border-color: #d9d9d9;
+  --border-color-light: #f0f0f0;
+  --border-light: #f0f0f0;
+  --border-hover: #40a9ff;
+
+  /* Additional Color Variants */
+  --pink-color: #eb2f96;
+  --pink-hover: #f759ab;
+  --pink-active: #c41d7f;
+  --purple-color: #722ed1;
+  --purple-hover: #9254de;
+  --purple-active: #531dab;
+  --cyan-color: #13c2c2;
+  --cyan-hover: #36cfc9;
+  --cyan-active: #08979c;
+
+  /* Typography Variables */
+  
+  /* Font Families */
+  --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-family-mono: SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+
+  /* Font Sizes */
+  --font-size-xs: 0.75rem;    /* 12px */
+  --font-size-sm: 0.875rem;   /* 14px */
+  --font-size-base: 1rem;     /* 16px */
+  --font-size-lg: 1.125rem;   /* 18px */
+  --font-size-xl: 1.25rem;    /* 20px */
+  --font-size-2xl: 1.5rem;    /* 24px */
+  --font-size-3xl: 1.875rem;  /* 30px */
+  --font-size-4xl: 2.25rem;   /* 36px */
+  --font-size-5xl: 3rem;      /* 48px */
+  --font-size-6xl: 3.75rem;   /* 60px */
+
+  /* Heading Font Sizes */
+  --font-size-h1: 2.5rem;     /* 40px */
+  --font-size-h2: 2rem;       /* 32px */
+  --font-size-h3: 1.5rem;     /* 24px */
+  --font-size-h4: 1.25rem;    /* 20px */
+  --font-size-h5: 1.125rem;   /* 18px */
+  --font-size-h6: 1rem;       /* 16px */
+
+  /* Font Weights */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Line Heights */
+  --line-height-base: 1.5;
+  --line-height-relaxed: 1.625;
+  --line-height-heading: 1.2;
+
+  /* Letter Spacing */
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wider: 0.05em;
+
+  /* Spacing System */
+  --spacing-xs: 0.25rem;    /* 4px */
+  --spacing-sm: 0.5rem;     /* 8px */
+  --spacing-md: 1rem;       /* 16px */
+  --spacing-lg: 1.5rem;     /* 24px */
+  --spacing-xl: 2rem;       /* 32px */
+  --spacing-2xl: 2.5rem;    /* 40px */
+  --spacing-3xl: 3rem;      /* 48px */
+
+  /* Border Radius */
+  --border-radius-sm: 0.25rem;   /* 4px */
+  --border-radius-md: 0.375rem;  /* 6px */
+  --border-radius-lg: 0.5rem;    /* 8px */
+  --border-radius-xl: 0.75rem;   /* 12px */
+
+  /* Modern Shadow System */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* Avatar Colors */
+  --avatar-bg-1: #fef3c7;
+  --avatar-color-1: #d97706;
+  --avatar-bg-2: #dcfce7;
+  --avatar-color-2: #16a34a;
+  --avatar-bg-3: #dbeafe;
+  --avatar-color-3: #2563eb;
+  --avatar-bg-4: #fce7f3;
+  --avatar-color-4: #db2777;
+  --avatar-bg-5: #f3e8ff;
+  --avatar-color-5: #9333ea;
+  --avatar-default-bg: #f3f4f6;
+  --avatar-default-color: #6b7280;
+
+  /* Sidebar specific colors */
+  --sidebar-bg: #ffffff;
+  --sidebar-header-bg: #fafafa;
+  --nav-item-hover-bg: rgba(24, 144, 255, 0.06);
+  --nav-item-active-bg: rgba(24, 144, 255, 0.12);
+  --nav-item-border-radius: 8px;
+
+  /* Opacity */
+  --checkbox-hover-opacity: 0.08;
 }
 
-export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
-  content,
-  placement = 'top',
-  trigger = 'hover',
-  delay = 100,
-  hideDelay = 100,
-  disabled = false,
-  visible,
-  defaultVisible = false,
-  arrow = true,
-  offset = 8,
-  portal = true,
-  zIndex = 9999,
-  maxWidth = 250,
-  className = '',
-  style,
-  children,
-  onVisibleChange,
-  'aria-label': ariaLabel,
-  'aria-describedby': ariaDescribedBy,
-  ...props
-}, ref) => {
-  const [internalVisible, setInternalVisible] = useState(defaultVisible);
-  const [position, setPosition] = useState({ top: 0, left: 0 });
-  const [actualPlacement, setActualPlacement] = useState(placement);
-  const [mounted, setMounted] = useState(false);
+/* Dark Theme Colors */
+[data-theme="dark"] {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
   
-  const triggerRef = useRef<HTMLElement>(null);
-  const tooltipRef = useRef<HTMLDivElement>(null);
-  const showTimeoutRef = useRef<number | undefined>(undefined);
-  const hideTimeoutRef = useRef<number | undefined>(undefined);
-  const tooltipId = useId();
+  /* Primary colors remain similar but adjusted for dark mode */
+  --primary-color: #1890ff;
+  --primary-hover: #40a9ff;
+  --primary-active: #096dd9;
+  --secondary-color: #434343;
+  --secondary-hover: #40a9ff;
+  --secondary-active: #096dd9;
+  --success-color: #52c41a;
+  --success-hover: #73d13d;
+  --success-active: #389e0d;
+  --warning-color: #faad14;
+  --warning-hover: #ffc53d;
+  --warning-active: #d48806;
+  --danger-color: #ff4d4f;
+  --danger-hover: #ff7875;
+  --danger-active: #d9363e;
+  --info-color: #1890ff;
+  --info-hover: #40a9ff;
+  --info-active: #096dd9;
+  --white-color: #ffffff;
 
-  const isControlled = visible !== undefined;
-  const currentVisible = isControlled ? visible : internalVisible;
+  /* Additional Color Variants for Dark Mode */
+  --pink-color: #eb2f96;
+  --pink-hover: #f759ab;
+  --pink-active: #c41d7f;
+  --purple-color: #722ed1;
+  --purple-hover: #9254de;
+  --purple-active: #531dab;
+  --cyan-color: #13c2c2;
+  --cyan-hover: #36cfc9;
+  --cyan-active: #08979c;
 
-  // Ensure component is mounted before showing tooltip
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  /* Background Colors */
+  --bg-color: #141414;
+  --bg-secondary: #1f1f1f;
+  --bg-hover: #262626;
+  --bg-active: #434343;
+  --background-code: #161b22;
 
-  // Calculate tooltip position
-  const calculatePosition = useCallback(() => {
-    if (!triggerRef.current || !tooltipRef.current || !mounted) return;
+  /* Text Colors */
+  --text-color: rgba(255, 255, 255, 0.85);
+  --text-primary: rgba(255, 255, 255, 0.85);
+  --text-secondary: rgba(255, 255, 255, 0.65);
+  --text-tertiary: rgba(255, 255, 255, 0.45);
+  --text-disabled: rgba(255, 255, 255, 0.25);
+  --text-inverse: rgba(0, 0, 0, 0.85);
+  --text-code: #e6edf3;
 
-    const triggerRect = triggerRef.current.getBoundingClientRect();
-    const tooltipRect = tooltipRef.current.getBoundingClientRect();
-    const viewport = {
-      width: window.innerWidth,
-      height: window.innerHeight,
-      scrollX: window.scrollX,
-      scrollY: window.scrollY,
-    };
+  /* Border Colors */
+  --border-color: #434343;
+  --border-color-light: #303030;
+  --border-light: #303030;
+  --border-hover: #40a9ff;
 
-    let top = 0;
-    let left = 0;
-    let finalPlacement = placement;
+  /* Modern Shadow System for Dark Mode */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.5);
 
-    // Calculate base position without scroll offset for fixed positioning
-    switch (placement) {
-      case 'top':
-      case 'top-start':
-      case 'top-end':
-        top = triggerRect.top - tooltipRect.height - offset;
-        left = placement === 'top-start' 
-          ? triggerRect.left
-          : placement === 'top-end'
-          ? triggerRect.right - tooltipRect.width
-          : triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2;
-        break;
-      case 'bottom':
-      case 'bottom-start':
-      case 'bottom-end':
-        top = triggerRect.bottom + offset;
-        left = placement === 'bottom-start'
-          ? triggerRect.left
-          : placement === 'bottom-end'
-          ? triggerRect.right - tooltipRect.width
-          : triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2;
-        break;
-      case 'left':
-      case 'left-start':
-      case 'left-end':
-        top = placement === 'left-start'
-          ? triggerRect.top
-          : placement === 'left-end'
-          ? triggerRect.bottom - tooltipRect.height
-          : triggerRect.top + triggerRect.height / 2 - tooltipRect.height / 2;
-        left = triggerRect.left - tooltipRect.width - offset;
-        break;
-      case 'right':
-      case 'right-start':
-      case 'right-end':
-        top = placement === 'right-start'
-          ? triggerRect.top
-          : placement === 'right-end'
-          ? triggerRect.bottom - tooltipRect.height
-          : triggerRect.top + triggerRect.height / 2 - tooltipRect.height / 2;
-        left = triggerRect.right + offset;
-        break;
-    }
+  /* Avatar Colors - Darker variants */
+  --avatar-bg-1: #7c2d12;
+  --avatar-color-1: #fed7aa;
+  --avatar-bg-2: #14532d;
+  --avatar-color-2: #bbf7d0;
+  --avatar-bg-3: #1e3a8a;
+  --avatar-color-3: #bfdbfe;
+  --avatar-bg-4: #831843;
+  --avatar-color-4: #fbcfe8;
+  --avatar-bg-5: #581c87;
+  --avatar-color-5: #e9d5ff;
+  --avatar-default-bg: #374151;
+  --avatar-default-color: #d1d5db;
 
-    // Viewport collision detection for fixed positioning
-    const minMargin = 8;
-    if (top < minMargin) {
-      if (placement.includes('top')) {
-        top = triggerRect.bottom + offset;
-        finalPlacement = placement.replace('top', 'bottom') as typeof placement;
-      } else {
-        top = minMargin;
-      }
-    } else if (top + tooltipRect.height > viewport.height - minMargin) {
-      if (placement.includes('bottom')) {
-        top = triggerRect.top - tooltipRect.height - offset;
-        finalPlacement = placement.replace('bottom', 'top') as typeof placement;
-      } else {
-        top = viewport.height - tooltipRect.height - minMargin;
-      }
-    }
+  /* Sidebar specific colors for dark mode */
+  --sidebar-bg: #1a1a1a;
+  --sidebar-header-bg: #202020;
+  --nav-item-hover-bg: rgba(24, 144, 255, 0.12);
+  --nav-item-active-bg: rgba(24, 144, 255, 0.18);
 
-    if (left < minMargin) {
-      if (placement.includes('left')) {
-        left = triggerRect.right + offset;
-        finalPlacement = placement.replace('left', 'right') as typeof placement;
-      } else {
-        left = minMargin;
-      }
-    } else if (left + tooltipRect.width > viewport.width - minMargin) {
-      if (placement.includes('right')) {
-        left = triggerRect.left - tooltipRect.width - offset;
-        finalPlacement = placement.replace('right', 'left') as typeof placement;
-      } else {
-        left = viewport.width - tooltipRect.width - minMargin;
-      }
-    }
-
-    setPosition({ top, left });
-    setActualPlacement(finalPlacement);
-  }, [placement, offset, mounted]);
-
-  // Show tooltip
-  const showTooltip = useCallback(() => {
-    if (disabled || !content || !mounted) return;
-
-    if (hideTimeoutRef.current !== undefined) {
-      clearTimeout(hideTimeoutRef.current);
-      hideTimeoutRef.current = undefined;
-    }
-
-    const executeShow = () => {
-      if (!isControlled) {
-        setInternalVisible(true);
-      }
-      onVisibleChange?.(true);
-    };
-
-    if (delay > 0) {
-      showTimeoutRef.current = window.setTimeout(executeShow, delay);
-    } else {
-      executeShow();
-    }
-  }, [disabled, content, delay, isControlled, onVisibleChange, mounted]);
-
-  // Hide tooltip
-  const hideTooltip = useCallback(() => {
-    if (showTimeoutRef.current !== undefined) {
-      clearTimeout(showTimeoutRef.current);
-      showTimeoutRef.current = undefined;
-    }
-
-    const executeHide = () => {
-      if (!isControlled) {
-        setInternalVisible(false);
-      }
-      onVisibleChange?.(false);
-    };
-
-    if (hideDelay > 0) {
-      hideTimeoutRef.current = window.setTimeout(executeHide, hideDelay);
-    } else {
-      executeHide();
-    }
-  }, [hideDelay, isControlled, onVisibleChange]);
-
-  // Event handlers
-  const handleMouseEnter = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    if (trigger === 'hover') {
-      showTooltip();
-    }
-  }, [trigger, showTooltip]);
-
-  const handleMouseLeave = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    if (trigger === 'hover') {
-      hideTooltip();
-    }
-  }, [trigger, hideTooltip]);
-
-  const handleFocus = useCallback((e: React.FocusEvent) => {
-    if (trigger === 'focus') {
-      showTooltip();
-    }
-  }, [trigger, showTooltip]);
-
-  const handleBlur = useCallback((e: React.FocusEvent) => {
-    if (trigger === 'focus') {
-      hideTooltip();
-    }
-  }, [trigger, hideTooltip]);
-
-  const handleClick = useCallback((e: React.MouseEvent) => {
-    if (trigger === 'click') {
-      e.preventDefault();
-      e.stopPropagation();
-      if (currentVisible) {
-        hideTooltip();
-      } else {
-        showTooltip();
-      }
-    }
-  }, [trigger, currentVisible, showTooltip, hideTooltip]);
-
-  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
-    if (event.key === 'Escape' && currentVisible) {
-      hideTooltip();
-      triggerRef.current?.focus();
-    }
-  }, [currentVisible, hideTooltip]);
-
-  // Update position when visible
-  useEffect(() => {
-    if (currentVisible && mounted) {
-      // Calculate position immediately
-      calculatePosition();
-      
-      // Recalculate after a small delay to ensure DOM is updated
-      const positionTimeout = setTimeout(calculatePosition, 10);
-      
-      const handleResize = () => calculatePosition();
-      const handleScroll = () => calculatePosition();
-      
-      window.addEventListener('resize', handleResize);
-      window.addEventListener('scroll', handleScroll, true);
-      
-      return () => {
-        clearTimeout(positionTimeout);
-        window.removeEventListener('resize', handleResize);
-        window.removeEventListener('scroll', handleScroll, true);
-      };
-    }
-  }, [currentVisible, calculatePosition, mounted]);
-
-  // Cleanup timeouts
-  useEffect(() => {
-    return () => {
-      if (showTimeoutRef.current !== undefined) {
-        clearTimeout(showTimeoutRef.current);
-      }
-      if (hideTimeoutRef.current !== undefined) {
-        clearTimeout(hideTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  // Build class names
-  const baseClass = 'ui-tooltip';
-  const placementClass = `ui-tooltip--${actualPlacement}`;
-  const visibleClass = currentVisible ? 'ui-tooltip--visible' : '';
-  const arrowClass = arrow ? 'ui-tooltip--arrow' : '';
-
-  const classes = [baseClass, placementClass, visibleClass, arrowClass, className]
-    .filter(Boolean)
-    .join(' ');
-
-  // Create trigger element with event handlers
-  const triggerElement = isValidElement(children) 
-    ? cloneElement(children, {
-        ref: (node: HTMLElement) => {
-          triggerRef.current = node;
-          // Handle original ref
-          const originalRef = (children as any).ref;
-          if (typeof originalRef === 'function') {
-            originalRef(node);
-          } else if (originalRef && typeof originalRef === 'object' && 'current' in originalRef) {
-            (originalRef as React.MutableRefObject<HTMLElement>).current = node;
-          }
-        },
-        onMouseEnter: (e: React.MouseEvent) => {
-          const originalHandler = (children.props as any).onMouseEnter;
-          if (originalHandler) originalHandler(e);
-          handleMouseEnter(e);
-        },
-        onMouseLeave: (e: React.MouseEvent) => {
-          const originalHandler = (children.props as any).onMouseLeave;
-          if (originalHandler) originalHandler(e);
-          handleMouseLeave(e);
-        },
-        onFocus: (e: React.FocusEvent) => {
-          const originalHandler = (children.props as any).onFocus;
-          if (originalHandler) originalHandler(e);
-          handleFocus(e);
-        },
-        onBlur: (e: React.FocusEvent) => {
-          const originalHandler = (children.props as any).onBlur;
-          if (originalHandler) originalHandler(e);
-          handleBlur(e);
-        },
-        onClick: (e: React.MouseEvent) => {
-          const originalHandler = (children.props as any).onClick;
-          if (originalHandler) originalHandler(e);
-          handleClick(e);
-        },
-        onKeyDown: (e: React.KeyboardEvent) => {
-          const originalHandler = (children.props as any).onKeyDown;
-          if (originalHandler) originalHandler(e);
-          handleKeyDown(e);
-        },
-        'aria-describedby': currentVisible ? tooltipId : (children.props as any)['aria-describedby'] || ariaDescribedBy,
-      } as any)
-    : children;
-
-  // Tooltip content - always render but control visibility with CSS
-  const tooltipContent = mounted && content ? (
-    <div
-      {...props}
-      ref={(node) => {
-        tooltipRef.current = node;
-        if (typeof ref === 'function') {
-          ref(node);
-        } else if (ref && typeof ref === 'object' && 'current' in ref) {
-          (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
-        }
-      }}
-      id={tooltipId}
-      className={classes}
-      style={{
-        position: 'fixed', // Use fixed instead of absolute to avoid positioning issues
-        top: position.top,
-        left: position.left,
-        zIndex: 2147483647, // Maximum z-index to ensure it's above everything
-        maxWidth: typeof maxWidth === 'number' ? `${maxWidth}px` : maxWidth,
-        pointerEvents: trigger === 'hover' ? 'none' : 'auto',
-        // Force visibility properties to ensure it shows
-        display: 'block',
-        visibility: currentVisible ? 'visible' : 'hidden',
-        opacity: currentVisible ? 1 : 0,
-        ...style,
-      }}
-      role="tooltip"
-      aria-label={ariaLabel}
-      data-tooltip-visible={currentVisible} // Debug attribute
-      onMouseEnter={trigger === 'hover' ? handleMouseEnter : undefined}
-      onMouseLeave={trigger === 'hover' ? handleMouseLeave : undefined}
-    >
-      {content}
-      {arrow && <div className="ui-tooltip-arrow" aria-hidden="true" />}
-    </div>
-  ) : null;
-
-  return (
-    <>
-      {triggerElement}
-      {/* Always render tooltip content, don't use conditional rendering that might be blocked */}
-      {tooltipContent}
-    </>
-  );
-});
-
-Tooltip.displayName = 'Tooltip';
+  /* Opacity */
+  --checkbox-hover-opacity: 0.12;
+}
