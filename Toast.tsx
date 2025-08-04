@@ -304,8 +304,7 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
   // Check if child can handle refs and events properly
   const canCloneChild = isValidElement(children) && 
     (typeof children.type === 'string' || 
-     React.forwardRef.displayName === (children.type as any).displayName ||
-     (children.type as any).$$typeof === Symbol.for('react.forward_ref'));
+     (children.type as any).$typeof === Symbol.for('react.forward_ref'));
 
   // Create trigger element - either clone the child or wrap it
   let triggerElement: React.ReactElement;
