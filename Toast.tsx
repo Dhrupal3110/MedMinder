@@ -1,186 +1,145 @@
-import React, { useEffect, useState, useCallback, forwardRef } from 'react';
-import './Toast.css';
+import React, { forwardRef } from 'react';
+import './Label.css';
 
-export type ToastType = 'success' | 'error' | 'info' | 'warning';
-
-export interface ToastProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onClose'> {
-  /** Toast content - can be string or ReactNode */
-  message: string | React.ReactNode;
-  /** Toast type determines icon and color scheme */
-  type: ToastType;
-  /** Auto-dismiss duration in milliseconds. Set to 0 to disable auto-dismiss */
-  duration?: number;
-  /** Whether toast is visible (for external animation control) */
-  isVisible?: boolean;
-  /** Accessible label for the toast */
-  'aria-label'?: string;
-  /** ID of element that describes the toast */
-  'aria-describedby'?: string;
-}
-
-const defaultIcons: Record<ToastType, React.ReactNode> = {
-  success: (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M16.25 5.625L8.125 13.75L3.75 9.375"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  ),
-  error: (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M15 5L5 15M5 5l10 10"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  ),
-  info: (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="2" />
-      <path d="M10 6v4M10 14h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  ),
-  warning: (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M8.485 2.495a1.5 1.5 0 0 1 2.53 0l7.5 12A1.5 1.5 0 0 1 17.25 17H2.75a1.5 1.5 0 0 1-1.265-2.505l7.5-12Z"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
-      <path d="M10 6v4M10 14h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  ),
-};
-
-const CloseIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path
-      d="M12 4L4 12M4 4l8 8"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-export const Toast = forwardRef<HTMLDivElement, ToastProps>(({
-  message,
-  type,
-  duration = 5000,
-  dismissible = true,
-  onClose,
-  icon,
-  className = '',
-  style,
-  isVisible: externalIsVisible,
-  'aria-label': ariaLabel,
-  'aria-describedby': ariaDescribedBy,
-  ...props
-}, ref) => {
-  const [internalIsVisible, setInternalIsVisible] = useState(true);
-  const [isExiting, setIsExiting] = useState(false);
-
-  // Use external visibility control if provided, otherwise use internal state
-  const isVisible = externalIsVisible !== undefined ? externalIsVisible : internalIsVisible;
-
-  const handleClose = useCallback(() => {
-    setIsExiting(true);
-    // Wait for exit animation to complete
-    setTimeout(() => {
-      setInternalIsVisible(false);
-      onClose?.();
-    }, 200);
-  }, [onClose]);
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
-    if ((event.key === 'Enter' || event.key === ' ') && dismissible) {
-      event.preventDefault();
-      handleClose();
-    }
-  };
-
-  useEffect(() => {
-    if (duration > 0 && isVisible && !isExiting) {
-      const timer = setTimeout(handleClose, duration);
-      return () => clearTimeout(timer);
-    }
-  }, [duration, isVisible, isExiting, handleClose]);
-
-  if (!isVisible && externalIsVisible === undefined) {
-    return null;
-  }
-
-  // Build class names
-  const baseClass = 'ui-toast';
-  const typeClass = `ui-toast--${type}`;
-  const exitingClass = isExiting ? 'ui-toast--exiting' : '';
-  const dismissibleClass = dismissible ? 'ui-toast--dismissible' : '';
-
-  const classes = [baseClass, typeClass, exitingClass, dismissibleClass, className]
-    .filter(Boolean)
-    .join(' ');
-
-  const toastIcon = icon || defaultIcons[type];
-  const roleAttr = type === 'error' ? 'alert' : 'status';
-
-  // Determine aria-label for accessibility
-  const getAriaLabel = (): string => {
-    if (ariaLabel) return ariaLabel;
-    if (typeof message === 'string') return `${type} notification: ${message}`;
-    return `${type} notification`;
-  };
-
-  return (
-    <div
-      {...props}
-      ref={ref}
-      className={classes}
-      style={style}
-      role={roleAttr}
-      aria-live={type === 'error' ? 'assertive' : 'polite'}
-      aria-label={getAriaLabel()}
-      aria-describedby={ariaDescribedBy}
-    >
-      <div className="ui-toast-icon" aria-hidden="true">
-        {toastIcon}
-      </div>
-      
-      <div className="ui-toast-content">
-        {typeof message === 'string' ? <span>{message}</span> : message}
-      </div>
-
-      {dismissible && (
-        <button
-          type="button"
-          className="ui-toast-close"
-          onClick={handleClose}
-          onKeyDown={handleKeyDown}
-          aria-label="Close notification"
-          tabIndex={0}
-        >
-          <CloseIcon />
-        </button>
-      )}
-    </div>
-  );
-});
-
-Toast.displayName = 'Toast'; to show close button */
-  dismissible?: boolean;
-  /** Callback when toast is closed (manually or auto) */
-  onClose?: () => void;
-  /** Custom icon to override default type icon */
-  icon?: React.ReactNode;
+export interface LabelProps extends Omit<React.LabelHTMLAttributes<HTMLLabelElement>, 'htmlFor'> {
+  /** ID of the associated form input element */
+  htmlFor?: string;
+  /** Label content - can be string or ReactNode */
+  children: React.ReactNode;
+  /** Whether the associated input is required - adds visual indicator */
+  required?: boolean;
+  /** Whether the label is disabled - applies muted styling */
+  disabled?: boolean;
+  /** Text alignment */
+  align?: 'left' | 'center' | 'right';
+  /** Size variant */
+  size?: 'sm' | 'md' | 'lg';
   /** Additional CSS class */
   className?: string;
   /** Inline styles */
   style?: React.CSSProperties;
-  /** Whether
+  /** Custom element type to render as */
+  as?: 'label' | 'legend' | 'span' | 'div';
+  /** Accessible label for the label itself (when needed) */
+  'aria-label'?: string;
+  /** ID of element that describes the label */
+  'aria-describedby'?: string;
+}
+
+export const Label = forwardRef<HTMLLabelElement, LabelProps>(({
+  htmlFor,
+  children,
+  required = false,
+  disabled = false,
+  align = 'left',
+  size = 'md',
+  className = '',
+  style,
+  as = 'label',
+  'aria-label': ariaLabel,
+  'aria-describedby': ariaDescribedBy,
+  ...props
+}, ref) => {
+  
+  // Build class names
+  const baseClass = 'ui-label';
+  const sizeClass = `ui-label--${size}`;
+  const alignClass = align !== 'left' ? `ui-label--${align}` : '';
+  const requiredClass = required ? 'ui-label--required' : '';
+  const disabledClass = disabled ? 'ui-label--disabled' : '';
+
+  const classes = [baseClass, sizeClass, alignClass, requiredClass, disabledClass, className]
+    .filter(Boolean)
+    .join(' ');
+
+  // Determine ARIA attributes
+  const ariaAttributes = {
+    'aria-label': ariaLabel,
+    'aria-describedby': ariaDescribedBy,
+    'aria-required': required ? 'true' : undefined,
+    'aria-disabled': disabled ? 'true' : undefined,
+  };
+
+  // Filter out undefined ARIA attributes
+  const filteredAriaAttributes = Object.fromEntries(
+    Object.entries(ariaAttributes).filter(([, value]) => value !== undefined)
+  );
+
+  // Common props for all element types
+  const commonProps = {
+    ...props,
+    ...filteredAriaAttributes,
+    className: classes,
+    style,
+  };
+
+  // Render based on 'as' prop
+  if (as === 'label') {
+    return (
+      <label
+        {...commonProps}
+        ref={ref}
+        htmlFor={htmlFor}
+      >
+        <span className="ui-label-content">
+          {children}
+        </span>
+        {required && (
+          <span 
+            className="ui-label-required-indicator" 
+            aria-hidden="true"
+            title="Required field"
+          >
+            *
+          </span>
+        )}
+      </label>
+    );
+  }
+
+  if (as === 'legend') {
+    return (
+      <legend
+        {...commonProps}
+        ref={ref as React.Ref<HTMLLegendElement>}
+      >
+        <span className="ui-label-content">
+          {children}
+        </span>
+        {required && (
+          <span 
+            className="ui-label-required-indicator" 
+            aria-hidden="true"
+            title="Required field"
+          >
+            *
+          </span>
+        )}
+      </legend>
+    );
+  }
+
+  // For span or div
+  const Element = as as keyof JSX.IntrinsicElements;
+  return (
+    <Element
+      {...commonProps}
+      ref={ref as any}
+    >
+      <span className="ui-label-content">
+        {children}
+      </span>
+      {required && (
+        <span 
+          className="ui-label-required-indicator" 
+          aria-hidden="true"
+          title="Required field"
+        >
+          *
+        </span>
+      )}
+    </Element>
+  );
+});
+
+Label.displayName = 'Label';
