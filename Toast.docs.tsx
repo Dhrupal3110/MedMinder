@@ -1,571 +1,760 @@
-import React, { useState } from "react";
-import { ExampleContainer } from "../Shared/ExampleContainer";
-import { Typography } from "./Typography";
-import { Button } from "../Button/Button";
-import { APITable, type APITableRow } from "../Shared/APITable";
+import React, { useState } from 'react';
+import { ExampleContainer } from '../Shared/ExampleContainer';
+import { Label } from './Label';
+import { APITable, type APITableRow } from '../Shared/APITable';
+import { Button } from '../Button/Button';
 
-const typographyProps: APITableRow[] = [
+// Mock Input component for demonstration
+const Input: React.FC<{
+  id?: string;
+  disabled?: boolean;
+  placeholder?: string;
+  type?: string;
+  required?: boolean;
+  className?: string;
+}> = ({ id, disabled, placeholder, type = 'text', required, className = '' }) => (
+  <input
+    id={id}
+    type={type}
+    disabled={disabled}
+    placeholder={placeholder}
+    required={required}
+    className={`ui-input ${className}`}
+    style={{
+      padding: '8px 12px',
+      border: '1px solid #d1d5db',
+      borderRadius: '6px',
+      fontSize: '14px',
+      width: '200px',
+      fontFamily: 'inherit',
+      outline: 'none',
+      transition: 'border-color 0.2s ease',
+    }}
+  />
+);
+
+// Mock Textarea component for demonstration
+const Textarea: React.FC<{
+  id?: string;
+  disabled?: boolean;
+  placeholder?: string;
+  required?: boolean;
+  rows?: number;
+}> = ({ id, disabled, placeholder, required, rows = 3 }) => (
+  <textarea
+    id={id}
+    disabled={disabled}
+    placeholder={placeholder}
+    required={required}
+    rows={rows}
+    className="ui-textarea"
+    style={{
+      padding: '8px 12px',
+      border: '1px solid #d1d5db',
+      borderRadius: '6px',
+      fontSize: '14px',
+      width: '200px',
+      fontFamily: 'inherit',
+      outline: 'none',
+      transition: 'border-color 0.2s ease',
+      resize: 'vertical',
+    }}
+  />
+);
+
+// Mock Select component for demonstration
+const Select: React.FC<{
+  id?: string;
+  disabled?: boolean;
+  required?: boolean;
+  children: React.ReactNode;
+}> = ({ id, disabled, required, children }) => (
+  <select
+    id={id}
+    disabled={disabled}
+    required={required}
+    className="ui-select"
+    style={{
+      padding: '8px 12px',
+      border: '1px solid #d1d5db',
+      borderRadius: '6px',
+      fontSize: '14px',
+      width: '224px',
+      fontFamily: 'inherit',
+      outline: 'none',
+      transition: 'border-color 0.2s ease',
+      background: 'white',
+    }}
+  >
+    {children}
+  </select>
+);
+
+// API Documentation
+const labelProps: APITableRow[] = [
   {
-    property: "variant",
-    description: "The typographic variant to apply. Determines font size, weight, and spacing.",
-    type: "'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'subtitle1' | 'subtitle2' | 'body1' | 'body2' | 'caption' | 'overline' | 'code'",
-    default: "'body1'",
-  },
-  {
-    property: "as",
-    description: "The HTML element to render. Overrides the default element for the variant.",
-    type: "keyof JSX.IntrinsicElements",
-    default: "Auto-determined by variant",
-  },
-  {
-    property: "component",
-    description: "Alias for 'as' prop for backward compatibility.",
-    type: "keyof JSX.IntrinsicElements",
-    default: "Auto-determined by variant",
-  },
-  {
-    property: "color",
-    description: "Color variant to apply to the text.",
-    type: "'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info' | 'inherit'",
-    default: "'inherit'",
-  },
-  {
-    property: "align",
-    description: "Text alignment.",
-    type: "'left' | 'center' | 'right' | 'justify'",
+    property: "htmlFor",
+    description: "ID of the associated form input element. Creates semantic binding between label and input.",
+    type: "string",
     default: "-",
   },
   {
-    property: "weight",
-    description: "Font weight to apply.",
-    type: "'light' | 'normal' | 'medium' | 'semibold' | 'bold'",
-    default: "Determined by variant",
+    property: "children",
+    description: "Label content - can be string or ReactNode.",
+    type: "ReactNode",
+    default: "-",
   },
   {
-    property: "italic",
-    description: "Whether to apply italic styling.",
+    property: "required",
+    description: "Whether the associated input is required. Adds visual indicator (*) and aria-required.",
     type: "boolean",
     default: "false",
   },
   {
-    property: "truncate",
-    description: "Truncate text with ellipsis. Use number for line clamping.",
-    type: "boolean | number",
-    default: "false",
-  },
-  {
-    property: "noWrap",
-    description: "Prevent text from wrapping to new lines.",
+    property: "disabled",
+    description: "Whether the label is disabled. Applies muted styling and aria-disabled.",
     type: "boolean",
     default: "false",
   },
   {
-    property: "gutterBottom",
-    description: "Add bottom margin for spacing.",
-    type: "boolean",
-    default: "false",
+    property: "align",
+    description: "Text alignment of the label content.",
+    type: "'left' | 'center' | 'right'",
+    default: "'left'",
+  },
+  {
+    property: "size",
+    description: "Size variant of the label that affects font size and spacing.",
+    type: "'sm' | 'md' | 'lg'",
+    default: "'md'",
+  },
+  {
+    property: "as",
+    description: "Element type to render as. Use 'legend' for fieldsets, 'span' or 'div' for non-form contexts.",
+    type: "'label' | 'legend' | 'span' | 'div'",
+    default: "'label'",
   },
   {
     property: "className",
-    description: "Additional class name for the typography element.",
+    description: "Additional CSS class name for the label.",
     type: "string",
     default: "-",
   },
   {
     property: "style",
-    description: "Inline style for the typography element.",
+    description: "Inline styles for the label.",
     type: "React.CSSProperties",
     default: "-",
   },
   {
-    property: "children",
-    description: "The content to display.",
-    type: "ReactNode",
-    default: "-",
-  },
-  {
     property: "aria-label",
-    description: "Accessible label for the typography element.",
+    description: "Accessible label for the label itself (when additional context is needed).",
     type: "string",
     default: "-",
   },
   {
     property: "aria-describedby",
-    description: "ID of element that describes the typography.",
+    description: "ID of element that describes the label.",
     type: "string",
     default: "-",
   },
 ];
 
-const typographyMethods: APITableRow[] = [
-  {
-    property: "focus",
-    description: "Focus the typography element.",
-    type: "() => void",
-    default: "-",
-  },
-  {
-    property: "blur",
-    description: "Blur the typography element.",
-    type: "() => void",
-    default: "-",
-  },
-];
-
-export const TypographyDocs: React.FC = () => {
-  const [truncateLines, setTruncateLines] = useState(2);
-  const [selectedAlign, setSelectedAlign] = useState<'left' | 'center' | 'right' | 'justify'>('left');
-  const [selectedWeight, setSelectedWeight] = useState<'light' | 'normal' | 'medium' | 'semibold' | 'bold'>('normal');
-
-  const longText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.";
+export const LabelDocs: React.FC = () => {
+  const [isRequired, setIsRequired] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(false);
+  const [labelSize, setLabelSize] = useState<'sm' | 'md' | 'lg'>('md');
+  const [alignment, setAlignment] = useState<'left' | 'center' | 'right'>('left');
 
   return (
     <div className="component-docs">
       <div className="docs-header">
-        <h1>Typography</h1>
-        <p>Typography component for consistent text styling across your application. Provides semantic HTML elements with design system typography scales.</p>
+        <h1>Label</h1>
+        <p>
+          Accessible label component for form inputs. Provides semantic association with form elements 
+          and supports required/disabled states with proper ARIA attributes.
+        </p>
       </div>
 
       <div className="docs-section">
         <h2>When To Use</h2>
         <ul>
-          <li>Use Typography to create consistent text hierarchy and maintain design system compliance.</li>
-          <li>Apply different typographic variants to establish visual hierarchy (headings, body text, captions).</li>
-          <li>Ensure semantic HTML structure while maintaining visual consistency.</li>
-          <li>Handle text truncation, alignment, and responsive typography needs.</li>
-          <li>Provide accessible text with proper semantic roles and ARIA attributes.</li>
+          <li>Associate descriptive text with form inputs, selects, and textareas.</li>
+          <li>Indicate required fields with visual and semantic indicators.</li>
+          <li>Provide accessible labels that screen readers can announce.</li>
+          <li>Create semantic form structures with proper label-input relationships.</li>
+          <li>Group related form controls with fieldset legends.</li>
         </ul>
       </div>
 
       <div className="docs-section">
         <h2>Examples</h2>
 
-        {/* Headings */}
+        {/* Basic Usage */}
         <ExampleContainer
-          title="Headings"
-          description="Typography variants for headings with proper semantic hierarchy."
-          style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
-          code={`<Typography variant="h1">Heading 1</Typography>
-<Typography variant="h2">Heading 2</Typography>
-<Typography variant="h3">Heading 3</Typography>
-<Typography variant="h4">Heading 4</Typography>
-<Typography variant="h5">Heading 5</Typography>
-<Typography variant="h6">Heading 6</Typography>`}
+          title="Basic Usage"
+          description="Simple label associated with form inputs using htmlFor prop."
+          style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'flex-start' }}
+          code={`<div>
+  <Label htmlFor="username">Username</Label>
+  <Input id="username" placeholder="Enter your username" />
+</div>
+
+<div>
+  <Label htmlFor="email">Email Address</Label>
+  <Input id="email" type="email" placeholder="Enter your email" />
+</div>`}
         >
           <>
-            <Typography variant="h1">Heading 1</Typography>
-            <Typography variant="h2">Heading 2</Typography>
-            <Typography variant="h3">Heading 3</Typography>
-            <Typography variant="h4">Heading 4</Typography>
-            <Typography variant="h5">Heading 5</Typography>
-            <Typography variant="h6">Heading 6</Typography>
+            <div>
+              <Label htmlFor="username">Username</Label>
+              <br />
+              <Input id="username" placeholder="Enter your username" />
+            </div>
+            <div>
+              <Label htmlFor="email">Email Address</Label>
+              <br />
+              <Input id="email" type="email" placeholder="Enter your email" />
+            </div>
           </>
         </ExampleContainer>
 
-        {/* Subtitles */}
+        {/* Required Fields */}
         <ExampleContainer
-          title="Subtitles"
-          description="Subtitle variants for secondary headings and section descriptions."
-          style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
-          code={`<Typography variant="subtitle1">Subtitle 1 - Larger secondary text</Typography>
-<Typography variant="subtitle2">Subtitle 2 - Smaller secondary text</Typography>`}
+          title="Required Fields"
+          description="Labels for required fields show a red asterisk and set proper ARIA attributes."
+          style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'flex-start' }}
+          code={`<div>
+  <Label htmlFor="required-name" required>
+    Full Name
+  </Label>
+  <Input id="required-name" required placeholder="Enter your full name" />
+</div>
+
+<div>
+  <Label htmlFor="required-email" required>
+    Email Address
+  </Label>
+  <Input id="required-email" type="email" required placeholder="Enter your email" />
+</div>`}
         >
           <>
-            <Typography variant="subtitle1">Subtitle 1 - Larger secondary text</Typography>
-            <Typography variant="subtitle2">Subtitle 2 - Smaller secondary text</Typography>
+            <div>
+              <Label htmlFor="required-name" required>
+                Full Name
+              </Label>
+              <br />
+              <Input id="required-name" required placeholder="Enter your full name" />
+            </div>
+            <div>
+              <Label htmlFor="required-email" required>
+                Email Address
+              </Label>
+              <br />
+              <Input id="required-email" type="email" required placeholder="Enter your email" />
+            </div>
           </>
         </ExampleContainer>
 
-        {/* Body Text */}
+        {/* Disabled State */}
         <ExampleContainer
-          title="Body Text"
-          description="Standard body text variants for paragraphs and general content."
-          style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
-          code={`<Typography variant="body1">
-  Body 1 - This is the default body text variant used for most paragraph content.
-</Typography>
-<Typography variant="body2">
-  Body 2 - Smaller body text variant for secondary content and descriptions.
-</Typography>`}
+          title="Disabled State"
+          description="Labels can be disabled to match the state of their associated inputs."
+          style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'flex-start' }}
+          code={`<div>
+  <Label htmlFor="disabled-input" disabled>
+    Disabled Field
+  </Label>
+  <Input id="disabled-input" disabled placeholder="This field is disabled" />
+</div>
+
+<div>
+  <Label htmlFor="disabled-required" disabled required>
+    Disabled Required Field
+  </Label>
+  <Input id="disabled-required" disabled required placeholder="Disabled and required" />
+</div>`}
         >
           <>
-            <Typography variant="body1">
-              Body 1 - This is the default body text variant used for most paragraph content. It provides excellent readability and is suitable for longer text blocks.
-            </Typography>
-            <Typography variant="body2">
-              Body 2 - Smaller body text variant for secondary content and descriptions. Perfect for supporting information and metadata.
-            </Typography>
+            <div>
+              <Label htmlFor="disabled-input" disabled>
+                Disabled Field
+              </Label>
+              <br />
+              <Input id="disabled-input" disabled placeholder="This field is disabled" />
+            </div>
+            <div>
+              <Label htmlFor="disabled-required" disabled required>
+                Disabled Required Field
+              </Label>
+              <br />
+              <Input id="disabled-required" disabled required placeholder="Disabled and required" />
+            </div>
           </>
         </ExampleContainer>
 
-        {/* Small Text Variants */}
+        {/* Size Variants */}
         <ExampleContainer
-          title="Small Text Variants"
-          description="Caption and overline text for labels, metadata, and fine print."
-          style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
-          code={`<Typography variant="caption">Caption text - Used for image captions, help text, and metadata</Typography>
-<Typography variant="overline">Overline text - All caps label style</Typography>
-<Typography variant="code">inline code snippet</Typography>`}
-        >
-          <>
-            <Typography variant="caption">Caption text - Used for image captions, help text, and metadata</Typography>
-            <Typography variant="overline">Overline text - All caps label style</Typography>
-            <Typography variant="code">inline code snippet</Typography>
-          </>
-        </ExampleContainer>
+          title="Size Variants"
+          description="Labels support three sizes to match your typography hierarchy."
+          style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'flex-start' }}
+          code={`<div>
+  <Label htmlFor="small-input" size="sm">
+    Small Label
+  </Label>
+  <Input id="small-input" placeholder="Small input" />
+</div>
 
-        {/* Color Variants */}
-        <ExampleContainer
-          title="Color Variants"
-          description="Different color variants for various contexts and states."
-          style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
-          code={`<Typography color="primary">Primary color text</Typography>
-<Typography color="secondary">Secondary color text</Typography>
-<Typography color="success">Success color text</Typography>
-<Typography color="warning">Warning color text</Typography>
-<Typography color="danger">Danger color text</Typography>
-<Typography color="info">Info color text</Typography>`}
+<div>
+  <Label htmlFor="medium-input" size="md">
+    Medium Label (Default)
+  </Label>
+  <Input id="medium-input" placeholder="Medium input" />
+</div>
+
+<div>
+  <Label htmlFor="large-input" size="lg">
+    Large Label
+  </Label>
+  <Input id="large-input" placeholder="Large input" />
+</div>`}
         >
           <>
-            <Typography color="primary">Primary color text</Typography>
-            <Typography color="secondary">Secondary color text</Typography>
-            <Typography color="success">Success color text</Typography>
-            <Typography color="warning">Warning color text</Typography>
-            <Typography color="danger">Danger color text</Typography>
-            <Typography color="info">Info color text</Typography>
+            <div>
+              <Label htmlFor="small-input" size="sm">
+                Small Label
+              </Label>
+              <br />
+              <Input id="small-input" placeholder="Small input" />
+            </div>
+            <div>
+              <Label htmlFor="medium-input" size="md">
+                Medium Label (Default)
+              </Label>
+              <br />
+              <Input id="medium-input" placeholder="Medium input" />
+            </div>
+            <div>
+              <Label htmlFor="large-input" size="lg">
+                Large Label
+              </Label>
+              <br />
+              <Input id="large-input" placeholder="Large input" />
+            </div>
           </>
         </ExampleContainer>
 
         {/* Alignment */}
         <ExampleContainer
           title="Text Alignment"
-          description="Control text alignment with the align prop."
-          style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
-          code={`<Typography align="left">Left aligned text</Typography>
-<Typography align="center">Center aligned text</Typography>
-<Typography align="right">Right aligned text</Typography>
-<Typography align="justify">Justified text that spreads across the full width...</Typography>`}
+          description="Labels can be aligned left, center, or right."
+          style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'flex-start', width: '100%' }}
+          code={`<div style={{ width: '100%' }}>
+  <Label htmlFor="left-align" align="left">
+    Left Aligned (Default)
+  </Label>
+  <Input id="left-align" placeholder="Left aligned" />
+</div>
+
+<div style={{ width: '100%' }}>
+  <Label htmlFor="center-align" align="center">
+    Center Aligned
+  </Label>
+  <Input id="center-align" placeholder="Center aligned" />
+</div>
+
+<div style={{ width: '100%' }}>
+  <Label htmlFor="right-align" align="right">
+    Right Aligned
+  </Label>
+  <Input id="right-align" placeholder="Right aligned" />
+</div>`}
         >
           <>
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-              {(['left', 'center', 'right', 'justify'] as const).map((align) => (
-                <Button
-                  key={align}
-                  size="sm"
-                  variant={selectedAlign === align ? 'primary' : 'secondary'}
-                  onClick={() => setSelectedAlign(align)}
-                >
-                  {align}
-                </Button>
-              ))}
+            <div style={{ width: '100%' }}>
+              <Label htmlFor="left-align" align="left">
+                Left Aligned (Default)
+              </Label>
+              <br />
+              <Input id="left-align" placeholder="Left aligned" />
             </div>
-            <Typography align={selectedAlign}>
-              This text alignment can be controlled dynamically. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </Typography>
+            <div style={{ width: '100%' }}>
+              <Label htmlFor="center-align" align="center">
+                Center Aligned
+              </Label>
+              <br />
+              <Input id="center-align" placeholder="Center aligned" />
+            </div>
+            <div style={{ width: '100%' }}>
+              <Label htmlFor="right-align" align="right">
+                Right Aligned
+              </Label>
+              <br />
+              <Input id="right-align" placeholder="Right aligned" />
+            </div>
           </>
         </ExampleContainer>
 
-        {/* Font Weights */}
+        {/* Different Input Types */}
         <ExampleContainer
-          title="Font Weights"
-          description="Different font weights for emphasis and hierarchy."
-          style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
-          code={`<Typography weight="light">Light weight text</Typography>
-<Typography weight="normal">Normal weight text</Typography>
-<Typography weight="medium">Medium weight text</Typography>
-<Typography weight="semibold">Semibold weight text</Typography>
-<Typography weight="bold">Bold weight text</Typography>`}
+          title="Different Form Controls"
+          description="Labels work with various types of form controls."
+          style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'flex-start' }}
+          code={`<div>
+  <Label htmlFor="textarea-field" required>
+    Description
+  </Label>
+  <Textarea id="textarea-field" required placeholder="Enter description" />
+</div>
+
+<div>
+  <Label htmlFor="select-field">
+    Country
+  </Label>
+  <Select id="select-field">
+    <option value="">Select a country</option>
+    <option value="us">United States</option>
+    <option value="ca">Canada</option>
+    <option value="uk">United Kingdom</option>
+  </Select>
+</div>`}
         >
           <>
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-              {(['light', 'normal', 'medium', 'semibold', 'bold'] as const).map((weight) => (
-                <Button
-                  key={weight}
-                  size="sm"
-                  variant={selectedWeight === weight ? 'primary' : 'secondary'}
-                  onClick={() => setSelectedWeight(weight)}
-                >
-                  {weight}
-                </Button>
-              ))}
+            <div>
+              <Label htmlFor="textarea-field" required>
+                Description
+              </Label>
+              <br />
+              <Textarea id="textarea-field" required placeholder="Enter description" />
             </div>
-            <Typography weight={selectedWeight}>
-              This text uses {selectedWeight} font weight. You can see how different weights affect the visual hierarchy and emphasis of the text.
-            </Typography>
+            <div>
+              <Label htmlFor="select-field">
+                Country
+              </Label>
+              <br />
+              <Select id="select-field">
+                <option value="">Select a country</option>
+                <option value="us">United States</option>
+                <option value="ca">Canada</option>
+                <option value="uk">United Kingdom</option>
+              </Select>
+            </div>
           </>
         </ExampleContainer>
 
-        {/* Text Styling */}
+        {/* Custom Element Types */}
         <ExampleContainer
-          title="Text Styling"
-          description="Additional text styling options like italic and combinations."
-          style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
-          code={`<Typography italic>Italic text for emphasis</Typography>
-<Typography weight="bold" italic>Bold italic combination</Typography>
-<Typography variant="h4" color="primary" italic>Styled heading with color and italic</Typography>`}
+          title="Custom Element Types"
+          description="Use the 'as' prop to render different HTML elements while maintaining label styling."
+          style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'flex-start' }}
+          code={`<fieldset style={{ border: '1px solid #d1d5db', padding: '16px', borderRadius: '6px' }}>
+  <Label as="legend" size="lg">
+    Personal Information
+  </Label>
+  <div style={{ marginTop: '12px' }}>
+    <Label htmlFor="first-name" size="sm">First Name</Label>
+    <br />
+    <Input id="first-name" placeholder="Enter first name" />
+  </div>
+</fieldset>
+
+<div>
+  <Label as="span" size="sm">
+    Status Indicator (Non-form label)
+  </Label>
+</div>`}
         >
           <>
-            <Typography italic>Italic text for emphasis</Typography>
-            <Typography weight="bold" italic>Bold italic combination</Typography>
-            <Typography variant="h4" color="primary" italic>Styled heading with color and italic</Typography>
-          </>
-        </ExampleContainer>
-
-        {/* Text Truncation */}
-        <ExampleContainer
-          title="Text Truncation"
-          description="Control text overflow with truncate options."
-          style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
-          code={`// Single line truncation
-<Typography truncate style={{ width: '200px' }}>
-  {longText}
-</Typography>
-
-// Multi-line truncation (line clamping)
-<Typography truncate={2} style={{ width: '300px' }}>
-  {longText}
-</Typography>`}
-        >
-          <>
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-              <Button size="sm" onClick={() => setTruncateLines(1)}>1 Line</Button>
-              <Button size="sm" onClick={() => setTruncateLines(2)}>2 Lines</Button>
-              <Button size="sm" onClick={() => setTruncateLines(3)}>3 Lines</Button>
-            </div>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div>
-                <Typography variant="caption" gutterBottom>Single line truncation:</Typography>
-                <Typography truncate style={{ width: '250px', border: '1px dashed #ccc', padding: '8px' }}>
-                  {longText}
-                </Typography>
+            <fieldset style={{ border: '1px solid #d1d5db', padding: '16px', borderRadius: '6px', width: '300px' }}>
+              <Label as="legend" size="lg">
+                Personal Information
+              </Label>
+              <div style={{ marginTop: '12px' }}>
+                <Label htmlFor="first-name" size="sm">First Name</Label>
+                <br />
+                <Input id="first-name" placeholder="Enter first name" />
               </div>
-              
-              <div>
-                <Typography variant="caption" gutterBottom>Multi-line truncation ({truncateLines} lines):</Typography>
-                <Typography truncate={truncateLines} style={{ width: '300px', border: '1px dashed #ccc', padding: '8px' }}>
-                  {longText}
-                </Typography>
-              </div>
+            </fieldset>
+            <div>
+              <Label as="span" size="sm">
+                Status Indicator (Non-form label)
+              </Label>
             </div>
           </>
         </ExampleContainer>
 
-        {/* No Wrap */}
+        {/* Rich Content */}
         <ExampleContainer
-          title="No Wrap"
-          description="Prevent text from wrapping to new lines."
-          style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
-          code={`<Typography noWrap style={{ width: '200px' }}>
-  This text will not wrap to new lines even in a narrow container
-</Typography>`}
+          title="Rich Content"
+          description="Labels can contain complex ReactNode content with formatting and icons."
+          style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'flex-start' }}
+          code={`<div>
+  <Label htmlFor="password-field" required>
+    <strong>Password</strong>
+    <br />
+    <small style={{ fontWeight: 'normal', color: '#6b7280' }}>
+      Must be at least 8 characters long
+    </small>
+  </Label>
+  <Input id="password-field" type="password" required placeholder="Enter password" />
+</div>
+
+<div>
+  <Label htmlFor="terms-checkbox">
+    I agree to the{' '}
+    <a href="#" style={{ color: '#3b82f6', textDecoration: 'underline' }}>
+      Terms of Service
+    </a>{' '}
+    and{' '}
+    <a href="#" style={{ color: '#3b82f6', textDecoration: 'underline' }}>
+      Privacy Policy
+    </a>
+  </Label>
+  <br />
+  <input 
+    id="terms-checkbox" 
+    type="checkbox" 
+    style={{ marginTop: '8px' }}
+  />
+</div>`}
         >
           <>
-            <Typography variant="caption" gutterBottom>Normal text (wraps):</Typography>
-            <Typography style={{ width: '200px', border: '1px dashed #ccc', padding: '8px', marginBottom: '12px' }}>
-              This text will wrap to new lines when it reaches the container width
-            </Typography>
-            
-            <Typography variant="caption" gutterBottom>No wrap text (overflows):</Typography>
-            <Typography noWrap style={{ width: '200px', border: '1px dashed #ccc', padding: '8px' }}>
-              This text will not wrap to new lines even in a narrow container
-            </Typography>
+            <div>
+              <Label htmlFor="password-field" required>
+                <strong>Password</strong>
+                <br />
+                <small style={{ fontWeight: 'normal', color: '#6b7280' }}>
+                  Must be at least 8 characters long
+                </small>
+              </Label>
+              <br />
+              <Input id="password-field" type="password" required placeholder="Enter password" />
+            </div>
+            <div style={{ width: '300px' }}>
+              <Label htmlFor="terms-checkbox">
+                I agree to the{' '}
+                <a href="#" style={{ color: '#3b82f6', textDecoration: 'underline' }}>
+                  Terms of Service
+                </a>{' '}
+                and{' '}
+                <a href="#" style={{ color: '#3b82f6', textDecoration: 'underline' }}>
+                  Privacy Policy
+                </a>
+              </Label>
+              <br />
+              <input 
+                id="terms-checkbox" 
+                type="checkbox" 
+                style={{ marginTop: '8px' }}
+              />
+            </div>
           </>
         </ExampleContainer>
 
-        {/* Semantic Elements */}
+        {/* Interactive Example */}
         <ExampleContainer
-          title="Semantic Elements"
-          description="Use different HTML elements while maintaining visual consistency."
-          style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
-          code={`<Typography variant="h3" as="h1">Visual h3, semantic h1</Typography>
-<Typography variant="body1" as="label">Body text as label</Typography>
-<Typography variant="caption" as="span">Caption as span</Typography>
-<Typography variant="body2" as="strong">Body text as strong</Typography>`}
-        >
-          <>
-            <Typography variant="h3" as="h1">Visual h3, semantic h1</Typography>
-            <Typography variant="body1" as="label">Body text as label element</Typography>
-            <Typography variant="caption" as="span">Caption as span element</Typography>
-            <Typography variant="body2" as="strong">Body text as strong element</Typography>
-          </>
-        </ExampleContainer>
+          title="Interactive Demo"
+          description="Try different combinations of label states and properties."
+          style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+          code={`const [isRequired, setIsRequired] = useState(false);
+const [isDisabled, setIsDisabled] = useState(false);
+const [labelSize, setLabelSize] = useState<'sm' | 'md' | 'lg'>('md');
+const [alignment, setAlignment] = useState<'left' | 'center' | 'right'>('left');
 
-        {/* Gutter Bottom */}
-        <ExampleContainer
-          title="Gutter Bottom"
-          description="Add consistent bottom spacing with gutterBottom prop."
-          style={{ display: 'flex', flexDirection: 'column' }}
-          code={`<Typography variant="h4" gutterBottom>Heading with gutter</Typography>
-<Typography variant="body1" gutterBottom>
-  First paragraph with bottom spacing.
-</Typography>
-<Typography variant="body1">
-  Second paragraph without additional spacing follows naturally.
-</Typography>`}
-        >
-          <>
-            <Typography variant="h4" gutterBottom>Heading with gutter</Typography>
-            <Typography variant="body1" gutterBottom>
-              First paragraph with bottom spacing. This creates consistent vertical rhythm in your layout.
-            </Typography>
-            <Typography variant="body1">
-              Second paragraph without additional spacing follows naturally with the component's default margins.
-            </Typography>
-          </>
-        </ExampleContainer>
-
-        {/* Interactive Typography */}
-        <ExampleContainer
-          title="Interactive Typography"
-          description="Typography with interactive behaviors and focus states."
-          style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
-          code={`<Typography 
-  color="primary" 
-  role="button" 
-  tabIndex={0}
-  onClick={() => alert('Typography clicked!')}
+<Label 
+  htmlFor="interactive-input"
+  required={isRequired}
+  disabled={isDisabled}
+  size={labelSize}
+  align={alignment}
 >
-  Clickable typography
-</Typography>`}
+  Interactive Label
+</Label>
+<Input 
+  id="interactive-input" 
+  disabled={isDisabled}
+  required={isRequired}
+  placeholder="Interactive input"
+/>`}
         >
           <>
-            <Typography 
-              color="primary" 
-              role="button" 
-              tabIndex={0}
-              onClick={() => alert('Typography clicked!')}
-              style={{ cursor: 'pointer' }}
-            >
-              Clickable typography (try clicking)
-            </Typography>
-            <Typography 
-              color="info" 
-              tabIndex={0}
-              style={{ cursor: 'pointer' }}
-            >
-              Focusable typography (try tabbing to it)
-            </Typography>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
+              <Button 
+                size="sm" 
+                onClick={() => setIsRequired(!isRequired)}
+                style={{ backgroundColor: isRequired ? '#dc2626' : '#6b7280' }}
+              >
+                {isRequired ? 'Remove Required' : 'Make Required'}
+              </Button>
+              <Button 
+                size="sm" 
+                onClick={() => setIsDisabled(!isDisabled)}
+                style={{ backgroundColor: isDisabled ? '#6b7280' : '#3b82f6' }}
+              >
+                {isDisabled ? 'Enable' : 'Disable'}
+              </Button>
+              <select 
+                value={labelSize} 
+                onChange={(e) => setLabelSize(e.target.value as 'sm' | 'md' | 'lg')}
+                style={{ padding: '4px 8px', borderRadius: '4px', border: '1px solid #d1d5db' }}
+              >
+                <option value="sm">Small</option>
+                <option value="md">Medium</option>
+                <option value="lg">Large</option>
+              </select>
+              <select 
+                value={alignment} 
+                onChange={(e) => setAlignment(e.target.value as 'left' | 'center' | 'right')}
+                style={{ padding: '4px 8px', borderRadius: '4px', border: '1px solid #d1d5db' }}
+              >
+                <option value="left">Left</option>
+                <option value="center">Center</option>
+                <option value="right">Right</option>
+              </select>
+            </div>
+            <div style={{ width: '250px' }}>
+              <Label 
+                htmlFor="interactive-input"
+                required={isRequired}
+                disabled={isDisabled}
+                size={labelSize}
+                align={alignment}
+              >
+                Interactive Label
+              </Label>
+              <br />
+              <Input 
+                id="interactive-input" 
+                disabled={isDisabled}
+                required={isRequired}
+                placeholder="Interactive input"
+              />
+            </div>
+            <div style={{ fontSize: '12px', color: '#6b7280' }}>
+              Current state: {isRequired ? 'Required' : 'Optional'}, {isDisabled ? 'Disabled' : 'Enabled'}, Size: {labelSize}, Align: {alignment}
+            </div>
           </>
         </ExampleContainer>
 
-        {/* Real-world Example */}
+        {/* Form Layout Example */}
         <ExampleContainer
-          title="Real-world Example"
-          description="A complete article layout using various typography variants."
-          style={{ maxWidth: '600px' }}
-          code={`<article>
-  <Typography variant="overline" color="primary">Technology</Typography>
-  <Typography variant="h2" gutterBottom>
-    The Future of Web Development
-  </Typography>
-  <Typography variant="subtitle1" color="secondary" gutterBottom>
-    Exploring modern frameworks and development practices
-  </Typography>
-  <Typography variant="body1" gutterBottom>
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit...
-  </Typography>
-  <Typography variant="caption" color="secondary">
-    Published on March 15, 2024
-  </Typography>
-</article>`}
+          title="Complete Form Example"
+          description="A realistic form demonstrating proper label usage with various input types."
+          style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'flex-start' }}
+          code={`<form style={{ width: '300px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+  <div>
+    <Label htmlFor="form-name" required size="sm">Full Name</Label>
+    <Input id="form-name" required placeholder="Enter your full name" />
+  </div>
+  
+  <div>
+    <Label htmlFor="form-email" required size="sm">Email</Label>
+    <Input id="form-email" type="email" required placeholder="your@email.com" />
+  </div>
+  
+  <div>
+    <Label htmlFor="form-phone" size="sm">Phone Number</Label>
+    <Input id="form-phone" type="tel" placeholder="(555) 123-4567" />
+  </div>
+  
+  <div>
+    <Label htmlFor="form-company" size="sm">Company</Label>
+    <Input id="form-company" placeholder="Your company name" />
+  </div>
+  
+  <div>
+    <Label htmlFor="form-message" size="sm">Message</Label>
+    <Textarea id="form-message" placeholder="Your message..." rows={4} />
+  </div>
+</form>`}
         >
-          <article>
-            <Typography variant="overline" color="primary">Technology</Typography>
-            <Typography variant="h2" gutterBottom>
-              The Future of Web Development
-            </Typography>
-            <Typography variant="subtitle1" color="secondary" gutterBottom>
-              Exploring modern frameworks and development practices that are shaping the industry
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-              Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-            </Typography>
-            <Typography variant="caption" color="secondary">
-              Published on March 15, 2024 • 5 min read
-            </Typography>
-          </article>
-        </ExampleContainer>
-
-        {/* Code Blocks */}
-        <ExampleContainer
-          title="Code Typography"
-          description="Typography variant for inline code and code snippets."
-          style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
-          code={`<Typography variant="body1">
-  Use the <Typography variant="code" as="code">useState</Typography> hook for state management.
-</Typography>
-
-<Typography variant="code" as="pre" style={{ padding: '16px', display: 'block' }}>
-  const [count, setCount] = useState(0);
-</Typography>`}
-        >
-          <>
-            <Typography variant="body1">
-              Use the <Typography variant="code" as="code">useState</Typography> hook for state management in React components.
-            </Typography>
+          <form style={{ width: '300px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div>
+              <Label htmlFor="form-name" required size="sm">Full Name</Label>
+              <Input id="form-name" required placeholder="Enter your full name" />
+            </div>
             
-            <Typography variant="code" as="pre" style={{ 
-              padding: '16px', 
-              display: 'block',
-              backgroundColor: 'var(--background-code)',
-              borderRadius: '4px',
-              overflow: 'auto'
-            }}>
-              {`const [count, setCount] = useState(0);
-              
-const increment = () => {
-  setCount(prev => prev + 1);
-};`}
-            </Typography>
-          </>
+            <div>
+              <Label htmlFor="form-email" required size="sm">Email</Label>
+              <Input id="form-email" type="email" required placeholder="your@email.com" />
+            </div>
+            
+            <div>
+              <Label htmlFor="form-phone" size="sm">Phone Number</Label>
+              <Input id="form-phone" type="tel" placeholder="(555) 123-4567" />
+            </div>
+            
+            <div>
+              <Label htmlFor="form-company" size="sm">Company</Label>
+              <Input id="form-company" placeholder="Your company name" />
+            </div>
+            
+            <div>
+              <Label htmlFor="form-message" size="sm">Message</Label>
+              <Textarea id="form-message" placeholder="Your message..." rows={4} />
+            </div>
+          </form>
         </ExampleContainer>
       </div>
 
       <div className="docs-section">
         <h2>API</h2>
-        <p>This section describes all the available props for the <strong>Typography</strong> component. 
-          You can use these properties to control appearance, behavior, and semantic structure.</p>
-        <APITable props={typographyProps} />
+        <p>
+          This section describes all the available props for the <strong>Label</strong> component. 
+          You can use these properties to control behavior, appearance, and accessibility.
+        </p>
+        <APITable props={labelProps} />
       </div>
 
       <div className="docs-section">
-        <h2>Methods</h2>
-        <p>These methods are available on the <strong>Typography</strong> component via ref. 
-          They allow you to programmatically control the typography element's behavior.</p>
-        <APITable props={typographyMethods} />
+        <h2>Accessibility</h2>
+        <ul>
+          <li><strong>Semantic HTML:</strong> Uses proper <code>&lt;label&gt;</code> elements for form association</li>
+          <li><strong>ARIA Support:</strong> Automatically sets <code>aria-required</code> and <code>aria-disabled</code> attributes</li>
+          <li><strong>Screen Reader Friendly:</strong> Properly announces required fields and disabled states</li>
+          <li><strong>Keyboard Navigation:</strong> Labels are focusable and maintain proper tab order</li>
+          <li><strong>High Contrast:</strong> Enhanced styling for high contrast display modes</li>
+          <li><strong>Form Association:</strong> <code>htmlFor</code> creates semantic binding with form controls</li>
+        </ul>
       </div>
 
       <div className="docs-section">
-        <h2>Design Guidelines</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div>
-            <Typography variant="h5" gutterBottom>Typography Hierarchy</Typography>
-            <Typography variant="body1">
-              Use consistent typography hierarchy to establish clear information architecture. 
-              Headings should decrease in size and importance from h1 to h6, with proper semantic nesting.
-            </Typography>
-          </div>
-          
-          <div>
-            <Typography variant="h5" gutterBottom>Color Usage</Typography>
-            <Typography variant="body1">
-              Use color variants purposefully - primary for key actions, success for positive states, 
-              warning for cautions, and danger for errors. Avoid overusing colored text.
-            </Typography>
-          </div>
-          
-          <div>
-            <Typography variant="h5" gutterBottom>Accessibility</Typography>
-            <Typography variant="body1">
-              Always consider semantic HTML structure. Use proper heading hierarchy, 
-              ensure sufficient color contrast, and provide meaningful text for screen readers.
-            </Typography>
-          </div>
-        </div>
+        <h2>Styling & Theming</h2>
+        <p>
+          The Label component uses CSS variables for complete customization. 
+          It integrates with your Typography system and supports light/dark themes automatically.
+        </p>
+        
+        <h3>Key CSS Variables</h3>
+        <ul>
+          <li><code>--label-font-family</code> - Font family (inherits from Typography)</li>
+          <li><code>--label-font-size</code> - Font size for each size variant</li>
+          <li><code>--label-font-weight</code> - Font weight (bolder for required)</li>
+          <li><code>--label-text-color</code> - Text color</li>
+          <li><code>--label-required-color</code> - Color of the required asterisk</li>
+          <li><code>--label-disabled-color</code> - Color when disabled</li>
+          <li><code>--label-gap</code> - Space between content and required indicator</li>
+        </ul>
+
+        <h3>Integration with Typography</h3>
+        <p>
+          The Label component is designed to work seamlessly with your Typography system. 
+          It respects your global font settings and can be styled to match your design tokens.
+        </p>
+      </div>
+
+      <div className="docs-section">
+        <h2>Best Practices</h2>
+        <ul>
+          <li>Always use <code>htmlFor</code> to associate labels with their corresponding inputs</li>
+          <li>Keep label text concise but descriptive</li>
+          <li>Use the <code>required</code> prop instead of manually adding asterisks</li>
+          <li>Match the <code>disabled</code> state of labels with their associated inputs</li>
+          <li>Use appropriate size variants to maintain visual hierarchy</li>
+          <li>Provide additional context for complex fields using rich content</li>
+          <li>Use <code>as="legend"</code> for fieldset groupings</li>
+          <li>Test with screen readers to ensure proper announcements</li>
+        </ul>
       </div>
     </div>
   );
