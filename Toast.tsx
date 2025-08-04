@@ -26,7 +26,7 @@ export interface LabelProps extends Omit<React.LabelHTMLAttributes<HTMLLabelElem
   'aria-describedby'?: string;
 }
 
-export const Label = forwardRef<HTMLLabelElement, LabelProps>(({
+export const Label = forwardRef<HTMLElement, LabelProps>(({
   htmlFor,
   children,
   required = false,
@@ -47,7 +47,6 @@ export const Label = forwardRef<HTMLLabelElement, LabelProps>(({
   const alignClass = align !== 'left' ? `ui-label--${align}` : '';
   const requiredClass = required ? 'ui-label--required' : '';
   const disabledClass = disabled ? 'ui-label--disabled' : '';
-
   const classes = [baseClass, sizeClass, alignClass, requiredClass, disabledClass, className]
     .filter(Boolean)
     .join(' ');
@@ -73,59 +72,9 @@ export const Label = forwardRef<HTMLLabelElement, LabelProps>(({
     style,
   };
 
-  // Render based on 'as' prop
-  if (as === 'label') {
-    return (
-      <label
-        {...commonProps}
-        ref={ref}
-        htmlFor={htmlFor}
-      >
-        <span className="ui-label-content">
-          {children}
-        </span>
-        {required && (
-          <span 
-            className="ui-label-required-indicator" 
-            aria-hidden="true"
-            title="Required field"
-          >
-            *
-          </span>
-        )}
-      </label>
-    );
-  }
-
-  if (as === 'legend') {
-    return (
-      <legend
-        {...commonProps}
-        ref={ref as React.Ref<HTMLLegendElement>}
-      >
-        <span className="ui-label-content">
-          {children}
-        </span>
-        {required && (
-          <span 
-            className="ui-label-required-indicator" 
-            aria-hidden="true"
-            title="Required field"
-          >
-            *
-          </span>
-        )}
-      </legend>
-    );
-  }
-
-  // For span or div
-  const Element = as as keyof JSX.IntrinsicElements;
-  return (
-    <Element
-      {...commonProps}
-      ref={ref as any}
-    >
+  // Render the content with required indicator
+  const content = (
+    <>
       <span className="ui-label-content">
         {children}
       </span>
@@ -138,7 +87,52 @@ export const Label = forwardRef<HTMLLabelElement, LabelProps>(({
           *
         </span>
       )}
-    </Element>
+    </>
+  );
+
+  // Render based on 'as' prop
+  if (as === 'label') {
+    return (
+      <label
+        {...commonProps}
+        ref={ref as React.Ref<HTMLLabelElement>}
+        htmlFor={htmlFor}
+      >
+        {content}
+      </label>
+    );
+  }
+
+  if (as === 'legend') {
+    return (
+      <legend
+        {...commonProps}
+        ref={ref as React.Ref<HTMLLegendElement>}
+      >
+        {content}
+      </legend>
+    );
+  }
+
+  if (as === 'span') {
+    return (
+      <span
+        {...commonProps}
+        ref={ref as React.Ref<HTMLSpanElement>}
+      >
+        {content}
+      </span>
+    );
+  }
+
+  // For div
+  return (
+    <div
+      {...commonProps}
+      ref={ref as React.Ref<HTMLDivElement>}
+    >
+      {content}
+    </div>
   );
 });
 
