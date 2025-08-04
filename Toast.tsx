@@ -324,8 +324,7 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
       },
       'aria-label': (children.props as any)['aria-label'] ||
         (typeof content === 'string' ? content : ariaLabel),
-      'title': (children.props as any).title ||
-        (typeof content === 'string' ? content : undefined),
+      'title': undefined, // Remove title to prevent native tooltip
       'aria-describedby': currentVisible ? tooltipId : (children.props as any)['aria-describedby'] || ariaDescribedBy,
       onMouseEnter: (e: React.MouseEvent) => {
         const originalHandler = (children.props as any).onMouseEnter;
@@ -365,7 +364,7 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
         ref={wrapperRef}
         style={{ display: 'inline-block' }}
         aria-label={typeof content === 'string' ? content : ariaLabel}
-        title={typeof content === 'string' ? content : undefined}
+        title={undefined} // Remove title to prevent native tooltip
         aria-describedby={currentVisible ? tooltipId : ariaDescribedBy}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
