@@ -1,10 +1,7 @@
-import React, { forwardRef } from 'react';
+import React from 'react';
 import './Label.css';
 
-export interface LabelProps
-  extends Omit<React.LabelHTMLAttributes<HTMLLabelElement>, 'htmlFor'> {
-  /** ID of the associated form input element */
-  htmlFor?: string;
+type CommonLabelProps = {
   /** Label content - can be string or ReactNode */
   children: React.ReactNode;
   /** Whether the associated input is required - adds visual indicator */
@@ -19,28 +16,51 @@ export interface LabelProps
   className?: string;
   /** Inline styles */
   style?: React.CSSProperties;
-  /** Custom element type to render as */
-  as?: 'label' | 'legend' | 'span' | 'div';
   /** Accessible label for the label itself (when needed) */
   'aria-label'?: string;
   /** ID of element that describes the label */
   'aria-describedby'?: string;
-}
+};
 
-export const Label = forwardRef<HTMLElement, LabelProps>(({
-  htmlFor,
-  children,
-  required = false,
-  disabled = false,
-  align = 'left',
-  size = 'md',
-  className = '',
-  style,
-  as = 'label',
-  'aria-label': ariaLabel,
-  'aria-describedby': ariaDescribedBy,
-  ...props
-}, ref) => {
+// Individual variants per "as" type
+type LabelAsLabel = {
+  as?: 'label';
+  htmlFor?: string;
+} & Omit<React.LabelHTMLAttributes<HTMLLabelElement>, 'htmlFor'>;
+
+type LabelAsLegend = {
+  as: 'legend';
+} & React.HTMLAttributes<HTMLLegendElement>;
+
+type LabelAsDiv = {
+  as: 'div';
+} & React.HTMLAttributes<HTMLDivElement>;
+
+type LabelAsSpan = {
+  as: 'span';
+} & React.HTMLAttributes<HTMLSpanElement>;
+
+type LabelProps =
+  | (LabelAsLabel & CommonLabelProps)
+  | (LabelAsLegend & CommonLabelProps)
+  | (LabelAsDiv & CommonLabelProps)
+  | (LabelAsSpan & CommonLabelProps);
+
+export const Label = React.forwardRef<HTMLElement, LabelProps>((props, ref) => {
+  const {
+    children,
+    required = false,
+    disabled = false,
+    align = 'left',
+    size = 'md',
+    className = '',
+    style,
+    as = 'label',
+    'aria-label': ariaLabel,
+    'aria-describedby': ariaDescribedBy,
+    ...rest
+  } = props;
+
   const baseClass = 'ui-label';
   const sizeClass = `ui-label--${size}`;
   const alignClass = align !== 'left' ? `ui-label--${align}` : '';
@@ -55,17 +75,6 @@ export const Label = forwardRef<HTMLElement, LabelProps>(({
     'aria-describedby': ariaDescribedBy,
     'aria-required': required ? 'true' : undefined,
     'aria-disabled': disabled ? 'true' : undefined,
-  };
-
-  const filteredAriaAttributes = Object.fromEntries(
-    Object.entries(ariaAttributes).filter(([, value]) => value !== undefined)
-  );
-
-  const commonProps = {
-    ...props,
-    ...filteredAriaAttributes,
-    className: classes,
-    style,
   };
 
   const content = (
@@ -83,12 +92,20 @@ export const Label = forwardRef<HTMLElement, LabelProps>(({
     </>
   );
 
+  const filteredAria = Object.fromEntries(
+    Object.entries(ariaAttributes).filter(([, v]) => v !== undefined)
+  );
+
   if (as === 'label') {
+    const { htmlFor, ...labelRest } = rest as LabelAsLabel;
     return (
       <label
-        {...commonProps}
-        ref={ref as React.Ref<HTMLLabelElement>}
+        {...labelRest}
+        {...filteredAria}
         htmlFor={htmlFor}
+        className={classes}
+        style={style}
+        ref={ref as React.Ref<HTMLLabelElement>}
       >
         {content}
       </label>
@@ -96,10 +113,12 @@ export const Label = forwardRef<HTMLElement, LabelProps>(({
   }
 
   if (as === 'legend') {
-    const { htmlFor: _, ...legendProps } = commonProps;
     return (
       <legend
-        {...legendProps}
+        {...(rest as LabelAsLegend)}
+        {...filteredAria}
+        className={classes}
+        style={style}
         ref={ref as React.Ref<HTMLLegendElement>}
       >
         {content}
@@ -108,10 +127,12 @@ export const Label = forwardRef<HTMLElement, LabelProps>(({
   }
 
   if (as === 'span') {
-    const { htmlFor: _, ...spanProps } = commonProps;
     return (
       <span
-        {...spanProps}
+        {...(rest as LabelAsSpan)}
+        {...filteredAria}
+        className={classes}
+        style={style}
         ref={ref as React.Ref<HTMLSpanElement>}
       >
         {content}
@@ -119,11 +140,12 @@ export const Label = forwardRef<HTMLElement, LabelProps>(({
     );
   }
 
-  // Fallback to <div>
-  const { htmlFor: _, ...divProps } = commonProps;
   return (
     <div
-      {...divProps}
+      {...(rest as LabelAsDiv)}
+      {...filteredAria}
+      className={classes}
+      style={style}
       ref={ref as React.Ref<HTMLDivElement>}
     >
       {content}
