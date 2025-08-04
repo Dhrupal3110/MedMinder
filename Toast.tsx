@@ -1,428 +1,186 @@
-import React, { forwardRef, useState, useRef, useCallback, useEffect, useId, cloneElement, isValidElement } from 'react';
-import './Tooltip.css';
+import React, { useEffect, useState, useCallback, forwardRef } from 'react';
+import './Toast.css';
 
-export interface TooltipProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'content'> {
-  content?: React.ReactNode;
-  placement?: 'top' | 'bottom' | 'left' | 'right' | 'top-start' | 'top-end' | 'bottom-start' | 'bottom-end' | 'left-start' | 'left-end' | 'right-start' | 'right-end';
-  trigger?: 'hover' | 'focus' | 'click' | 'manual';
-  delay?: number;
-  hideDelay?: number;
-  disabled?: boolean;
-  visible?: boolean;
-  defaultVisible?: boolean;
-  arrow?: boolean;
-  offset?: number;
-  portal?: boolean;
-  zIndex?: number;
-  maxWidth?: string | number;
-  className?: string;
-  style?: React.CSSProperties;
-  children: React.ReactElement;
-  onVisibleChange?: (visible: boolean) => void;
+export type ToastType = 'success' | 'error' | 'info' | 'warning';
+
+export interface ToastProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onClose'> {
+  /** Toast content - can be string or ReactNode */
+  message: string | React.ReactNode;
+  /** Toast type determines icon and color scheme */
+  type: ToastType;
+  /** Auto-dismiss duration in milliseconds. Set to 0 to disable auto-dismiss */
+  duration?: number;
+  /** Whether toast is visible (for external animation control) */
+  isVisible?: boolean;
+  /** Accessible label for the toast */
   'aria-label'?: string;
+  /** ID of element that describes the toast */
   'aria-describedby'?: string;
 }
 
-export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({
-  content,
-  placement = 'top',
-  trigger = 'hover',
-  delay = 100,
-  hideDelay = 100,
-  disabled = false,
-  visible,
-  defaultVisible = false,
-  arrow = true,
-  offset = 8,
-  portal = true,
-  zIndex = 9999,
-  maxWidth = 250,
+const defaultIcons: Record<ToastType, React.ReactNode> = {
+  success: (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M16.25 5.625L8.125 13.75L3.75 9.375"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  ),
+  error: (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M15 5L5 15M5 5l10 10"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  ),
+  info: (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="2" />
+      <path d="M10 6v4M10 14h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  ),
+  warning: (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M8.485 2.495a1.5 1.5 0 0 1 2.53 0l7.5 12A1.5 1.5 0 0 1 17.25 17H2.75a1.5 1.5 0 0 1-1.265-2.505l7.5-12Z"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <path d="M10 6v4M10 14h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  ),
+};
+
+const CloseIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M12 4L4 12M4 4l8 8"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+export const Toast = forwardRef<HTMLDivElement, ToastProps>(({
+  message,
+  type,
+  duration = 5000,
+  dismissible = true,
+  onClose,
+  icon,
   className = '',
   style,
-  children,
-  onVisibleChange,
+  isVisible: externalIsVisible,
   'aria-label': ariaLabel,
   'aria-describedby': ariaDescribedBy,
   ...props
 }, ref) => {
-  const [internalVisible, setInternalVisible] = useState(defaultVisible);
-  const [position, setPosition] = useState({ top: 0, left: 0 });
-  const [actualPlacement, setActualPlacement] = useState(placement);
-  const [mounted, setMounted] = useState(false);
+  const [internalIsVisible, setInternalIsVisible] = useState(true);
+  const [isExiting, setIsExiting] = useState(false);
 
-  const triggerRef = useRef<HTMLElement>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const tooltipRef = useRef<HTMLDivElement>(null);
-  const showTimeoutRef = useRef<number | undefined>(undefined);
-  const hideTimeoutRef = useRef<number | undefined>(undefined);
-  const tooltipId = useId();
+  // Use external visibility control if provided, otherwise use internal state
+  const isVisible = externalIsVisible !== undefined ? externalIsVisible : internalIsVisible;
 
-  const isControlled = visible !== undefined;
-  const currentVisible = isControlled ? visible : internalVisible;
+  const handleClose = useCallback(() => {
+    setIsExiting(true);
+    // Wait for exit animation to complete
+    setTimeout(() => {
+      setInternalIsVisible(false);
+      onClose?.();
+    }, 200);
+  }, [onClose]);
 
-  // Ensure component is mounted before showing tooltip
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if ((event.key === 'Enter' || event.key === ' ') && dismissible) {
+      event.preventDefault();
+      handleClose();
+    }
+  };
+
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Calculate tooltip position
-  const calculatePosition = useCallback(() => {
-    const targetElement = triggerRef.current || wrapperRef.current;
-    if (!targetElement || !tooltipRef.current || !mounted) return;
-
-    const triggerRect = targetElement.getBoundingClientRect();
-    const tooltipRect = tooltipRef.current.getBoundingClientRect();
-    const viewport = {
-      width: window.innerWidth,
-      height: window.innerHeight,
-      scrollX: window.scrollX,
-      scrollY: window.scrollY,
-    };
-
-    let top = 0;
-    let left = 0;
-    let finalPlacement = placement;
-
-    // Calculate base position without scroll offset for fixed positioning
-    switch (placement) {
-      case 'top':
-      case 'top-start':
-      case 'top-end':
-        top = triggerRect.top - tooltipRect.height - offset;
-        left = placement === 'top-start'
-          ? triggerRect.left
-          : placement === 'top-end'
-            ? triggerRect.right - tooltipRect.width
-            : triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2;
-        break;
-      case 'bottom':
-      case 'bottom-start':
-      case 'bottom-end':
-        top = triggerRect.bottom + offset;
-        left = placement === 'bottom-start'
-          ? triggerRect.left
-          : placement === 'bottom-end'
-            ? triggerRect.right - tooltipRect.width
-            : triggerRect.left + triggerRect.width / 2 - tooltipRect.width / 2;
-        break;
-      case 'left':
-      case 'left-start':
-      case 'left-end':
-        top = placement === 'left-start'
-          ? triggerRect.top
-          : placement === 'left-end'
-            ? triggerRect.bottom - tooltipRect.height
-            : triggerRect.top + triggerRect.height / 2 - tooltipRect.height / 2;
-        left = triggerRect.left - tooltipRect.width - offset;
-        break;
-      case 'right':
-      case 'right-start':
-      case 'right-end':
-        top = placement === 'right-start'
-          ? triggerRect.top
-          : placement === 'right-end'
-            ? triggerRect.bottom - tooltipRect.height
-            : triggerRect.top + triggerRect.height / 2 - tooltipRect.height / 2;
-        left = triggerRect.right + offset;
-        break;
+    if (duration > 0 && isVisible && !isExiting) {
+      const timer = setTimeout(handleClose, duration);
+      return () => clearTimeout(timer);
     }
+  }, [duration, isVisible, isExiting, handleClose]);
 
-    // Viewport collision detection for fixed positioning
-    const minMargin = 8;
-    if (top < minMargin) {
-      if (placement.includes('top')) {
-        top = triggerRect.bottom + offset;
-        finalPlacement = placement.replace('top', 'bottom') as typeof placement;
-      } else {
-        top = minMargin;
-      }
-    } else if (top + tooltipRect.height > viewport.height - minMargin) {
-      if (placement.includes('bottom')) {
-        top = triggerRect.top - tooltipRect.height - offset;
-        finalPlacement = placement.replace('bottom', 'top') as typeof placement;
-      } else {
-        top = viewport.height - tooltipRect.height - minMargin;
-      }
-    }
-
-    if (left < minMargin) {
-      if (placement.includes('left')) {
-        left = triggerRect.right + offset;
-        finalPlacement = placement.replace('left', 'right') as typeof placement;
-      } else {
-        left = minMargin;
-      }
-    } else if (left + tooltipRect.width > viewport.width - minMargin) {
-      if (placement.includes('right')) {
-        left = triggerRect.left - tooltipRect.width - offset;
-        finalPlacement = placement.replace('right', 'left') as typeof placement;
-      } else {
-        left = viewport.width - tooltipRect.width - minMargin;
-      }
-    }
-
-    setPosition({ top, left });
-    setActualPlacement(finalPlacement);
-  }, [placement, offset, mounted]);
-
-  // Show tooltip
-  const showTooltip = useCallback(() => {
-    if (disabled || !content || !mounted) return;
-
-    if (hideTimeoutRef.current !== undefined) {
-      clearTimeout(hideTimeoutRef.current);
-      hideTimeoutRef.current = undefined;
-    }
-
-    const executeShow = () => {
-      if (!isControlled) {
-        setInternalVisible(true);
-      }
-      onVisibleChange?.(true);
-    };
-
-    if (delay > 0) {
-      showTimeoutRef.current = window.setTimeout(executeShow, delay);
-    } else {
-      executeShow();
-    }
-  }, [disabled, content, delay, isControlled, onVisibleChange, mounted]);
-
-  // Hide tooltip
-  const hideTooltip = useCallback(() => {
-    if (showTimeoutRef.current !== undefined) {
-      clearTimeout(showTimeoutRef.current);
-      showTimeoutRef.current = undefined;
-    }
-
-    const executeHide = () => {
-      if (!isControlled) {
-        setInternalVisible(false);
-      }
-      onVisibleChange?.(false);
-    };
-
-    if (hideDelay > 0) {
-      hideTimeoutRef.current = window.setTimeout(executeHide, hideDelay);
-    } else {
-      executeHide();
-    }
-  }, [hideDelay, isControlled, onVisibleChange]);
-
-  // Event handlers
-  const handleMouseEnter = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    if (trigger === 'hover') {
-      showTooltip();
-    }
-  }, [trigger, showTooltip]);
-
-  const handleMouseLeave = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    if (trigger === 'hover') {
-      hideTooltip();
-    }
-  }, [trigger, hideTooltip]);
-
-  const handleFocus = useCallback(() => {
-    if (trigger === 'focus') {
-      showTooltip();
-    }
-  }, [trigger, showTooltip]);
-
-  const handleBlur = useCallback(() => {
-    if (trigger === 'focus') {
-      hideTooltip();
-    }
-  }, [trigger, hideTooltip]);
-
-  const handleClick = useCallback((e: React.MouseEvent) => {
-    if (trigger === 'click') {
-      e.preventDefault();
-      e.stopPropagation();
-      if (currentVisible) {
-        hideTooltip();
-      } else {
-        showTooltip();
-      }
-    }
-  }, [trigger, currentVisible, showTooltip, hideTooltip]);
-
-  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
-    if (event.key === 'Escape' && currentVisible) {
-      hideTooltip();
-      const targetElement = triggerRef.current || wrapperRef.current;
-      targetElement?.focus();
-    }
-  }, [currentVisible, hideTooltip]);
-
-  // Update position when visible
-  useEffect(() => {
-    if (currentVisible && mounted) {
-      // Calculate position immediately
-      calculatePosition();
-
-      // Recalculate after a small delay to ensure DOM is updated
-      const positionTimeout = setTimeout(calculatePosition, 10);
-
-      const handleResize = () => calculatePosition();
-      const handleScroll = () => calculatePosition();
-
-      window.addEventListener('resize', handleResize);
-      window.addEventListener('scroll', handleScroll, true);
-
-      return () => {
-        clearTimeout(positionTimeout);
-        window.removeEventListener('resize', handleResize);
-        window.removeEventListener('scroll', handleScroll, true);
-      };
-    }
-  }, [currentVisible, calculatePosition, mounted]);
-
-  // Cleanup timeouts
-  useEffect(() => {
-    return () => {
-      if (showTimeoutRef.current !== undefined) {
-        clearTimeout(showTimeoutRef.current);
-      }
-      if (hideTimeoutRef.current !== undefined) {
-        clearTimeout(hideTimeoutRef.current);
-      }
-    };
-  }, []);
+  if (!isVisible && externalIsVisible === undefined) {
+    return null;
+  }
 
   // Build class names
-  const baseClass = 'ui-tooltip';
-  const placementClass = `ui-tooltip--${actualPlacement}`;
-  const visibleClass = currentVisible ? 'ui-tooltip--visible' : '';
-  const arrowClass = arrow ? 'ui-tooltip--arrow' : '';
+  const baseClass = 'ui-toast';
+  const typeClass = `ui-toast--${type}`;
+  const exitingClass = isExiting ? 'ui-toast--exiting' : '';
+  const dismissibleClass = dismissible ? 'ui-toast--dismissible' : '';
 
-  const classes = [baseClass, placementClass, visibleClass, arrowClass, className]
+  const classes = [baseClass, typeClass, exitingClass, dismissibleClass, className]
     .filter(Boolean)
     .join(' ');
 
-  // Check if child can handle refs and events properly
-  const canCloneChild = isValidElement(children) && 
-    (typeof children.type === 'string' || 
-     (children.type as any).$typeof === Symbol.for('react.forward_ref'));
+  const toastIcon = icon || defaultIcons[type];
+  const roleAttr = type === 'error' ? 'alert' : 'status';
 
-  // Create trigger element - either clone the child or wrap it
-  let triggerElement: React.ReactElement;
-
-  if (canCloneChild) {
-    // Try to clone the child if it can handle refs properly
-    triggerElement = cloneElement(children, {
-      ref: (node: HTMLElement) => {
-        triggerRef.current = node;
-        // Handle original ref
-        const originalRef = (children as any).ref;
-        if (typeof originalRef === 'function') {
-          originalRef(node);
-        } else if (originalRef && typeof originalRef === 'object' && 'current' in originalRef) {
-          (originalRef as React.MutableRefObject<HTMLElement>).current = node;
-        }
-      },
-      'aria-label': (children.props as any)['aria-label'] ||
-        (typeof content === 'string' ? content : ariaLabel),
-      'title': undefined, // Remove title to prevent native tooltip
-      'aria-describedby': currentVisible ? tooltipId : (children.props as any)['aria-describedby'] || ariaDescribedBy,
-      onMouseEnter: (e: React.MouseEvent) => {
-        const originalHandler = (children.props as any).onMouseEnter;
-        if (originalHandler) originalHandler(e);
-        handleMouseEnter(e);
-      },
-      onMouseLeave: (e: React.MouseEvent) => {
-        const originalHandler = (children.props as any).onMouseLeave;
-        if (originalHandler) originalHandler(e);
-        handleMouseLeave(e);
-      },
-      onFocus: (e: React.FocusEvent) => {
-        const originalHandler = (children.props as any).onFocus;
-        if (originalHandler) originalHandler(e);
-        handleFocus();
-      },
-      onBlur: (e: React.FocusEvent) => {
-        const originalHandler = (children.props as any).onBlur;
-        if (originalHandler) originalHandler(e);
-        handleBlur();
-      },
-      onClick: (e: React.MouseEvent) => {
-        const originalHandler = (children.props as any).onClick;
-        if (originalHandler) originalHandler(e);
-        handleClick(e);
-      },
-      onKeyDown: (e: React.KeyboardEvent) => {
-        const originalHandler = (children.props as any).onKeyDown;
-        if (originalHandler) originalHandler(e);
-        handleKeyDown(e);
-      },
-    } as any);
-  } else {
-    // Wrap the child in a span if it can't handle refs or events
-    triggerElement = (
-      <span
-        ref={wrapperRef}
-        style={{ display: 'inline-block' }}
-        aria-label={typeof content === 'string' ? content : ariaLabel}
-        title={undefined} // Remove title to prevent native tooltip
-        aria-describedby={currentVisible ? tooltipId : ariaDescribedBy}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        onClick={handleClick}
-        onKeyDown={handleKeyDown}
-        tabIndex={trigger === 'focus' ? 0 : undefined}
-      >
-        {children}
-      </span>
-    );
-  }
-
-  // Tooltip content - always render but control visibility with CSS
-  const tooltipContent = mounted && content ? (
-    <div
-      {...props}
-      ref={(node) => {
-        tooltipRef.current = node;
-        if (typeof ref === 'function') {
-          ref(node);
-        } else if (ref && typeof ref === 'object' && 'current' in ref) {
-          (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
-        }
-      }}
-      id={tooltipId}
-      className={classes}
-      style={{
-        position: 'fixed',
-        top: position.top,
-        left: position.left,
-        zIndex: 2147483647,
-        maxWidth: typeof maxWidth === 'number' ? `${maxWidth}px` : maxWidth,
-        pointerEvents: trigger === 'hover' ? 'none' : 'auto',
-        display: 'block',
-        visibility: currentVisible ? 'visible' : 'hidden',
-        opacity: currentVisible ? 1 : 0,
-        transition: 'opacity 0.15s ease-in-out, visibility 0.15s ease-in-out',
-        ...style,
-      }}
-      role="tooltip"
-      aria-label={ariaLabel}
-      data-tooltip-visible={currentVisible}
-      onMouseEnter={trigger === 'hover' ? handleMouseEnter : undefined}
-      onMouseLeave={trigger === 'hover' ? handleMouseLeave : undefined}
-    >
-      {content}
-      {arrow && <div className="ui-tooltip-arrow" aria-hidden="true" />}
-    </div>
-  ) : null;
+  // Determine aria-label for accessibility
+  const getAriaLabel = (): string => {
+    if (ariaLabel) return ariaLabel;
+    if (typeof message === 'string') return `${type} notification: ${message}`;
+    return `${type} notification`;
+  };
 
   return (
-    <>
-      {triggerElement}
-      {tooltipContent}
-    </>
+    <div
+      {...props}
+      ref={ref}
+      className={classes}
+      style={style}
+      role={roleAttr}
+      aria-live={type === 'error' ? 'assertive' : 'polite'}
+      aria-label={getAriaLabel()}
+      aria-describedby={ariaDescribedBy}
+    >
+      <div className="ui-toast-icon" aria-hidden="true">
+        {toastIcon}
+      </div>
+      
+      <div className="ui-toast-content">
+        {typeof message === 'string' ? <span>{message}</span> : message}
+      </div>
+
+      {dismissible && (
+        <button
+          type="button"
+          className="ui-toast-close"
+          onClick={handleClose}
+          onKeyDown={handleKeyDown}
+          aria-label="Close notification"
+          tabIndex={0}
+        >
+          <CloseIcon />
+        </button>
+      )}
+    </div>
   );
 });
 
-Tooltip.displayName = 'Tooltip';
+Toast.displayName = 'Toast'; to show close button */
+  dismissible?: boolean;
+  /** Callback when toast is closed (manually or auto) */
+  onClose?: () => void;
+  /** Custom icon to override default type icon */
+  icon?: React.ReactNode;
+  /** Additional CSS class */
+  className?: string;
+  /** Inline styles */
+  style?: React.CSSProperties;
+  /** Whether
