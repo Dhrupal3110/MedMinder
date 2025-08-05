@@ -41,6 +41,8 @@ export interface FormFieldProps {
   layout?: 'stacked' | 'inline';
   /** Size variant for label and typography */
   size?: 'sm' | 'md' | 'lg';
+  /** Gap between form field elements */
+  gap?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   /** Form control element(s) */
   children: React.ReactNode;
   /** Additional CSS class */
@@ -63,6 +65,7 @@ export const FormField = React.forwardRef<HTMLDivElement, FormFieldProps>((props
     disabled = false,
     layout = 'stacked',
     size = 'md',
+    gap = 'sm',
     children,
     className = '',
     style,
@@ -82,6 +85,7 @@ export const FormField = React.forwardRef<HTMLDivElement, FormFieldProps>((props
   const baseClass = 'ui-formfield';
   const layoutClass = `ui-formfield--${layout}`;
   const sizeClass = `ui-formfield--${size}`;
+  const gapClass = `ui-formfield--gap-${gap}`;
   const errorClass = hasError ? 'ui-formfield--error' : '';
   const disabledClass = disabled ? 'ui-formfield--disabled' : '';
   const requiredClass = required ? 'ui-formfield--required' : '';
@@ -90,6 +94,7 @@ export const FormField = React.forwardRef<HTMLDivElement, FormFieldProps>((props
     baseClass,
     layoutClass,
     sizeClass,
+    gapClass,
     errorClass,
     disabledClass,
     requiredClass,
@@ -112,13 +117,24 @@ export const FormField = React.forwardRef<HTMLDivElement, FormFieldProps>((props
     if (React.isValidElement(child)) {
       const describedBy = [descriptionId, errorId].filter(Boolean).join(' ');
       
-      return React.cloneElement(child as React.ReactElement<any>, {
-        id: child.props.id || fieldId,
+      // Type assertion to fix the unknown props issue
+      const childElement = child as React.ReactElement<{
+        id?: string;
+        'aria-describedby'?: string;
+        'aria-invalid'?: string;
+        'aria-required'?: string;
+        disabled?: boolean;
+        required?: boolean;
+        [key: string]: any;
+      }>;
+      
+      return React.cloneElement(childElement, {
+        id: childElement.props.id || fieldId,
         'aria-describedby': describedBy || undefined,
         'aria-invalid': hasError ? 'true' : undefined,
         'aria-required': required ? 'true' : undefined,
-        disabled: disabled || child.props.disabled,
-        required: required || child.props.required,
+        disabled: disabled || childElement.props.disabled,
+        required: required || childElement.props.required,
       });
     }
     return child;
