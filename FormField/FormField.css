@@ -1,0 +1,301 @@
+/* FormField Component Styles */
+.ui-formfield {
+  /* Layout */
+  display: flex;
+  flex-direction: column;
+  gap: var(--formfield-gap, 6px);
+  width: 100%;
+  box-sizing: border-box;
+
+  /* Spacing */
+  margin: var(--formfield-margin, 0);
+  padding: var(--formfield-padding, 0);
+
+  /* Transitions */
+  transition: var(--formfield-transition, opacity 0.2s ease);
+}
+
+/* Layout Variants */
+.ui-formfield--stacked {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.ui-formfield--inline {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: var(--formfield-inline-gap, 12px);
+}
+
+.ui-formfield--inline .ui-formfield__label-wrapper {
+  flex-shrink: 0;
+  min-width: var(--formfield-inline-label-width, 120px);
+  padding-top: var(--formfield-inline-label-offset, 8px);
+}
+
+.ui-formfield--inline .ui-formfield__control-wrapper {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Size Variants */
+.ui-formfield--sm {
+  --formfield-gap: var(--formfield-sm-gap, 4px);
+  --formfield-inline-gap: var(--formfield-sm-inline-gap, 10px);
+  --formfield-inline-label-width: var(--formfield-sm-inline-label-width, 100px);
+  --formfield-inline-label-offset: var(--formfield-sm-inline-label-offset, 6px);
+}
+
+.ui-formfield--md {
+  --formfield-gap: var(--formfield-md-gap, 6px);
+  --formfield-inline-gap: var(--formfield-md-inline-gap, 12px);
+  --formfield-inline-label-width: var(--formfield-md-inline-label-width, 120px);
+  --formfield-inline-label-offset: var(--formfield-md-inline-label-offset, 8px);
+}
+
+.ui-formfield--lg {
+  --formfield-gap: var(--formfield-lg-gap, 8px);
+  --formfield-inline-gap: var(--formfield-lg-inline-gap, 16px);
+  --formfield-inline-label-width: var(--formfield-lg-inline-label-width, 140px);
+  --formfield-inline-label-offset: var(--formfield-lg-inline-label-offset, 10px);
+}
+
+/* Label Wrapper */
+.ui-formfield__label-wrapper {
+  display: flex;
+  align-items: flex-start;
+}
+
+.ui-formfield__label {
+  display: flex;
+  align-items: center;
+  gap: var(--formfield-label-gap, 4px);
+}
+
+/* Control Wrapper */
+.ui-formfield__control-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--formfield-control-gap, 4px);
+  flex: 1;
+  min-width: 0;
+}
+
+.ui-formfield__control {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Description */
+.ui-formfield__description {
+  margin-top: var(--formfield-description-spacing, 4px);
+}
+
+.ui-formfield__description-text {
+  color: var(--formfield-description-color, var(--text-muted, #6b7280));
+  font-size: var(--formfield-description-font-size, 13px);
+  line-height: var(--formfield-description-line-height, 1.4);
+}
+
+/* Error State */
+.ui-formfield__error {
+  margin-top: var(--formfield-error-spacing, 4px);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--formfield-error-gap, 4px);
+}
+
+.ui-formfield__error-text {
+  color: var(--formfield-error-color, var(--danger-color, #dc2626));
+  font-size: var(--formfield-error-font-size, 13px);
+  line-height: var(--formfield-error-line-height, 1.4);
+  font-weight: var(--formfield-error-font-weight, 500);
+}
+
+/* State Modifiers */
+.ui-formfield--error .ui-formfield__label {
+  color: var(--formfield-error-label-color, var(--danger-color, #dc2626));
+}
+
+.ui-formfield--disabled {
+  opacity: var(--formfield-disabled-opacity, 0.6);
+  pointer-events: none;
+}
+
+.ui-formfield--disabled .ui-formfield__label,
+.ui-formfield--disabled .ui-formfield__description-text {
+  color: var(--formfield-disabled-color, var(--text-disabled, #9ca3af));
+}
+
+.ui-formfield--required .ui-formfield__label {
+  font-weight: var(--formfield-required-label-weight, 600);
+}
+
+/* Focus Within */
+.ui-formfield:focus-within .ui-formfield__label {
+  color: var(--formfield-focus-label-color, var(--primary-color, #3b82f6));
+}
+
+.ui-formfield--error:focus-within .ui-formfield__label {
+  color: var(--formfield-error-focus-label-color, var(--danger-color, #dc2626));
+}
+
+/* Dark Theme Support */
+[data-theme="dark"] .ui-formfield {
+  --formfield-description-color: var(--formfield-description-color-dark, var(--text-muted-dark, #9ca3af));
+  --formfield-error-color: var(--formfield-error-color-dark, var(--danger-color-dark, #f87171));
+  --formfield-disabled-color: var(--formfield-disabled-color-dark, var(--text-disabled-dark, #6b7280));
+  --formfield-focus-label-color: var(--formfield-focus-label-color-dark, var(--primary-color-dark, #60a5fa));
+  --formfield-error-focus-label-color: var(--formfield-error-focus-label-color-dark, var(--danger-color-dark, #f87171));
+  --formfield-error-label-color: var(--formfield-error-label-color-dark, var(--danger-color-dark, #f87171));
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .ui-formfield__error-text {
+    font-weight: var(--formfield-error-high-contrast-weight, 600);
+  }
+
+  .ui-formfield--error .ui-formfield__label {
+    font-weight: var(--formfield-error-label-high-contrast-weight, 700);
+  }
+
+  .ui-formfield__description-text {
+    font-weight: var(--formfield-description-high-contrast-weight, 500);
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .ui-formfield {
+    transition: none;
+  }
+
+  .ui-formfield__error {
+    animation: none;
+  }
+}
+
+/* RTL Support */
+[dir="rtl"] .ui-formfield--inline {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .ui-formfield--inline .ui-formfield__label-wrapper {
+  text-align: right;
+}
+
+[dir="rtl"] .ui-formfield__error {
+  flex-direction: row-reverse;
+}
+
+/* Print Styles */
+@media print {
+  .ui-formfield {
+    break-inside: avoid;
+  }
+
+  .ui-formfield__description-text,
+  .ui-formfield__error-text {
+    color: var(--formfield-print-text-color, #000) !important;
+  }
+}
+
+/* Responsive Behavior */
+@media (max-width: 768px) {
+  .ui-formfield--inline {
+    flex-direction: column;
+    gap: var(--formfield-mobile-gap, 6px);
+  }
+
+  .ui-formfield--inline .ui-formfield__label-wrapper {
+    min-width: auto;
+    padding-top: 0;
+  }
+
+  .ui-formfield--sm {
+    --formfield-gap: var(--formfield-sm-mobile-gap, 4px);
+  }
+
+  .ui-formfield--md {
+    --formfield-gap: var(--formfield-md-mobile-gap, 5px);
+  }
+
+  .ui-formfield--lg {
+    --formfield-gap: var(--formfield-lg-mobile-gap, 6px);
+  }
+}
+
+/* Form Grid Integration */
+.ui-form-grid .ui-formfield {
+  margin-bottom: var(--formfield-grid-spacing, 16px);
+}
+
+.ui-form-grid .ui-formfield:last-child {
+  margin-bottom: 0;
+}
+
+/* Animation for Error Messages */
+@keyframes ui-formfield-error-appear {
+  0% {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ui-formfield__error {
+  animation: var(--formfield-error-animation, ui-formfield-error-appear 0.2s ease-out);
+}
+
+/* Nested FormField Support */
+.ui-formfield .ui-formfield {
+  margin-top: var(--formfield-nested-spacing, 12px);
+  padding-left: var(--formfield-nested-indent, 16px);
+  border-left: var(--formfield-nested-border, 2px solid var(--border-color, #e5e7eb));
+}
+
+[data-theme="dark"] .ui-formfield .ui-formfield {
+  border-left-color: var(--formfield-nested-border-color-dark, var(--border-color-dark, #374151));
+}
+
+/* Focus Ring for FormField Container */
+.ui-formfield:focus-within {
+  outline: var(--formfield-focus-outline, none);
+  outline-offset: var(--formfield-focus-outline-offset, 2px);
+}
+
+/* Fieldset Integration */
+fieldset .ui-formfield {
+  margin-bottom: var(--formfield-fieldset-spacing, 12px);
+}
+
+fieldset .ui-formfield:last-child {
+  margin-bottom: 0;
+}
+
+/* Custom Input Styling Integration */
+.ui-formfield__control input,
+.ui-formfield__control textarea,
+.ui-formfield__control select {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Error State for Controls */
+.ui-formfield--error .ui-formfield__control input,
+.ui-formfield--error .ui-formfield__control textarea,
+.ui-formfield--error .ui-formfield__control select {
+  border-color: var(--formfield-error-border-color, var(--danger-color, #dc2626));
+}
+
+.ui-formfield--error .ui-formfield__control input:focus,
+.ui-formfield--error .ui-formfield__control textarea:focus,
+.ui-formfield--error .ui-formfield__control select:focus {
+  outline-color: var(--formfield-error-focus-color, var(--danger-color, #dc2626));
+  box-shadow: var(--formfield-error-focus-shadow, 0 0 0 2px rgba(220, 38, 38, 0.1));
+}
