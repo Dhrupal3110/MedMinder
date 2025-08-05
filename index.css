@@ -1,0 +1,377 @@
+/* CSS Custom Properties for Theme Support */
+:root {
+  /* Light Theme Colors */
+  --primary-color: #1890ff;
+  --primary-hover: #40a9ff;
+  --primary-active: #096dd9;
+  --secondary-color: #d9d9d9;
+  --secondary-hover: #40a9ff;
+  --secondary-active: #096dd9;
+  --success-color: #52c41a;
+  --success-hover: #73d13d;
+  --success-active: #389e0d;
+  --warning-color: #faad14;
+  --warning-hover: #ffc53d;
+  --warning-active: #d48806;
+  --danger-color: #ff4d4f;
+  --danger-hover: #ff7875;
+  --danger-active: #d9363e;
+  --info-color: #1890ff;
+  --info-hover: #40a9ff;
+  --info-active: #096dd9;
+  --white-color: #ffffff;
+
+  /* Background Colors */
+  --bg-color: #ffffff;
+  --bg-secondary: #fafafa;
+  --bg-hover: #f5f5f5;
+  --bg-active: #f0f0f0;
+  --background-code: #f6f8fa;
+
+  /* Text Colors */
+  --text-color: rgba(0, 0, 0, 0.85);
+  --text-primary: rgba(0, 0, 0, 0.85);
+  --text-secondary: rgba(0, 0, 0, 0.65);
+  --text-tertiary: rgba(0, 0, 0, 0.45);
+  --text-disabled: rgba(0, 0, 0, 0.25);
+  --text-inverse: #ffffff;
+  --text-code: #24292f;
+  --text-muted: #6b7280;
+
+  /* Border Colors */
+  --border-color: #d9d9d9;
+  --border-color-light: #f0f0f0;
+  --border-light: #f0f0f0;
+  --border-hover: #40a9ff;
+
+  /* Additional Color Variants */
+  --pink-color: #eb2f96;
+  --pink-hover: #f759ab;
+  --pink-active: #c41d7f;
+  --purple-color: #722ed1;
+  --purple-hover: #9254de;
+  --purple-active: #531dab;
+  --cyan-color: #13c2c2;
+  --cyan-hover: #36cfc9;
+  --cyan-active: #08979c;
+
+  /* Typography Variables */
+
+  /* Font Families */
+  --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-family-mono: SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+  /* Font Sizes */
+  --font-size-xs: 0.75rem; /* 12px */
+  --font-size-sm: 0.875rem; /* 14px */
+  --font-size-base: 1rem; /* 16px */
+  --font-size-lg: 1.125rem; /* 18px */
+  --font-size-xl: 1.25rem; /* 20px */
+  --font-size-2xl: 1.5rem; /* 24px */
+  --font-size-3xl: 1.875rem; /* 30px */
+  --font-size-4xl: 2.25rem; /* 36px */
+  --font-size-5xl: 3rem; /* 48px */
+  --font-size-6xl: 3.75rem; /* 60px */
+
+  /* Heading Font Sizes */
+  --font-size-h1: 2.5rem; /* 40px */
+  --font-size-h2: 2rem; /* 32px */
+  --font-size-h3: 1.5rem; /* 24px */
+  --font-size-h4: 1.25rem; /* 20px */
+  --font-size-h5: 1.125rem; /* 18px */
+  --font-size-h6: 1rem; /* 16px */
+
+  /* Font Weights */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Line Heights */
+  --line-height-base: 1.5;
+  --line-height-relaxed: 1.625;
+  --line-height-heading: 1.2;
+
+  /* Letter Spacing */
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wider: 0.05em;
+
+  /* Spacing System */
+  --spacing-xs: 0.25rem; /* 4px */
+  --spacing-sm: 0.5rem; /* 8px */
+  --spacing-md: 1rem; /* 16px */
+  --spacing-lg: 1.5rem; /* 24px */
+  --spacing-xl: 2rem; /* 32px */
+  --spacing-2xl: 2.5rem; /* 40px */
+  --spacing-3xl: 3rem; /* 48px */
+
+  /* Border Radius */
+  --border-radius-sm: 0.25rem; /* 4px */
+  --border-radius-md: 0.375rem; /* 6px */
+  --border-radius-lg: 0.5rem; /* 8px */
+  --border-radius-xl: 0.75rem; /* 12px */
+
+  /* Modern Shadow System */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  /* Avatar Colors */
+  --avatar-bg-1: #fef3c7;
+  --avatar-color-1: #d97706;
+  --avatar-bg-2: #dcfce7;
+  --avatar-color-2: #16a34a;
+  --avatar-bg-3: #dbeafe;
+  --avatar-color-3: #2563eb;
+  --avatar-bg-4: #fce7f3;
+  --avatar-color-4: #db2777;
+  --avatar-bg-5: #f3e8ff;
+  --avatar-color-5: #9333ea;
+  --avatar-default-bg: #f3f4f6;
+  --avatar-default-color: #6b7280;
+
+  /* Sidebar specific colors */
+  --sidebar-bg: #ffffff;
+  --sidebar-header-bg: #fafafa;
+  --nav-item-hover-bg: rgba(24, 144, 255, 0.06);
+  --nav-item-active-bg: rgba(24, 144, 255, 0.12);
+  --nav-item-border-radius: 8px;
+
+  /* Opacity */
+  --checkbox-hover-opacity: 0.08;
+
+  /* FormField Variables */
+  --formfield-gap: 6px;
+  --formfield-margin: 0;
+  --formfield-padding: 0;
+  --formfield-transition: opacity 0.2s ease;
+  --formfield-inline-gap: 12px;
+  --formfield-inline-label-width: 120px;
+  --formfield-inline-label-offset: 8px;
+  --formfield-sm-gap: 4px;
+  --formfield-sm-inline-gap: 10px;
+  --formfield-sm-inline-label-width: 100px;
+  --formfield-sm-inline-label-offset: 6px;
+  --formfield-md-gap: 6px;
+  --formfield-md-inline-gap: 12px;
+  --formfield-md-inline-label-width: 120px;
+  --formfield-md-inline-label-offset: 8px;
+  --formfield-lg-gap: 8px;
+  --formfield-lg-inline-gap: 16px;
+  --formfield-lg-inline-label-width: 140px;
+  --formfield-lg-inline-label-offset: 10px;
+  --formfield-label-gap: 4px;
+  --formfield-control-gap: 4px;
+  --formfield-description-spacing: 4px;
+  --formfield-description-color: #6b7280;
+  --formfield-description-font-size: 13px;
+  --formfield-description-line-height: 1.4;
+  --formfield-error-spacing: 4px;
+  --formfield-error-gap: 4px;
+  --formfield-error-color: #dc2626;
+  --formfield-error-font-size: 13px;
+  --formfield-error-line-height: 1.4;
+  --formfield-error-font-weight: 500;
+  --formfield-error-label-color: #dc2626;
+  --formfield-disabled-opacity: 0.6;
+  --formfield-disabled-color: #9ca3af;
+  --formfield-required-label-weight: 600;
+  --formfield-focus-label-color: #3b82f6;
+  --formfield-error-focus-label-color: #dc2626;
+  --formfield-error-high-contrast-weight: 600;
+  --formfield-error-label-high-contrast-weight: 700;
+  --formfield-description-high-contrast-weight: 500;
+  --formfield-mobile-gap: 6px;
+  --formfield-sm-mobile-gap: 4px;
+  --formfield-md-mobile-gap: 5px;
+  --formfield-lg-mobile-gap: 6px;
+  --formfield-grid-spacing: 16px;
+  --formfield-error-animation: ui-formfield-error-appear 0.2s ease-out;
+  --formfield-nested-spacing: 12px;
+  --formfield-nested-indent: 16px;
+  --formfield-nested-border: 2px solid #e5e7eb;
+  --formfield-focus-outline: none;
+  --formfield-focus-outline-offset: 2px;
+  --formfield-fieldset-spacing: 12px;
+  --formfield-error-border-color: #dc2626;
+  --formfield-error-focus-color: #dc2626;
+  --formfield-error-focus-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1);
+  --formfield-print-text-color: #000;
+
+  /* Label Variables */
+  --label-gap: 4px;
+  --label-font-family: inherit;
+  --label-font-size: 14px;
+  --label-font-weight: 500;
+  --label-line-height: 1.4;
+  --label-letter-spacing: 0;
+  --label-text-color: #1f2937;
+  --label-transition: color 0.2s ease, opacity 0.2s ease;
+  --label-required-color: #dc2626;
+  --label-required-size: 1em;
+  --label-required-weight: 600;
+  --label-required-spacing: 2px;
+  --label-sm-font-size: 12px;
+  --label-sm-font-weight: 500;
+  --label-sm-line-height: 1.3;
+  --label-sm-gap: 3px;
+  --label-sm-required-size: 0.9em;
+  --label-md-font-size: 14px;
+  --label-md-font-weight: 500;
+  --label-md-line-height: 1.4;
+  --label-md-gap: 4px;
+  --label-lg-font-size: 16px;
+  --label-lg-font-weight: 600;
+  --label-lg-line-height: 1.5;
+  --label-lg-gap: 5px;
+  --label-lg-required-size: 1.1em;
+  --label-required-font-weight: 600;
+  --label-required-text-color: #1f2937;
+  --label-disabled-color: #9ca3af;
+  --label-disabled-opacity: 0.6;
+  --label-disabled-required-color: #9ca3af;
+  --label-focus-outline: 2px solid #3b82f6;
+  --label-focus-outline-offset: 2px;
+  --label-focus-border-radius: 2px;
+  --label-hover-color: #3b82f6;
+  --label-hover-text-color: #3b82f6;
+  --label-active-color: #2563eb;
+  --label-legend-padding: 0 8px;
+  --label-legend-margin: 0;
+  --label-high-contrast-weight: 600;
+  --label-required-high-contrast-weight: 700;
+  --label-focus-outline-width-high-contrast: 3px;
+  --label-print-color: #000;
+  --label-required-print-color: #000;
+  --label-lg-mobile-font-size: 15px;
+  --label-md-mobile-font-size: 13px;
+  --label-sm-mobile-font-size: 11px;
+  --label-input-spacing: 4px;
+  --label-fieldset-spacing: 8px;
+  --label-aria-required-weight: 600;
+  --label-focus-within-outline: 2px solid #3b82f6;
+  --label-focus-within-outline-offset: 2px;
+  --label-focus-within-border-radius: 2px;
+  --label-required-animation: ui-label-required-appear 0.2s ease-out;
+  --label-hyphens: auto;
+  --label-word-break: break-word;
+  --label-inline-spacing: 12px;
+}
+
+/* Dark Theme Colors */
+[data-theme="dark"] {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+
+  /* Primary colors remain similar but adjusted for dark mode */
+  --primary-color: #1890ff;
+  --primary-hover: #40a9ff;
+  --primary-active: #096dd9;
+  --secondary-color: #434343;
+  --secondary-hover: #40a9ff;
+  --secondary-active: #096dd9;
+  --success-color: #52c41a;
+  --success-hover: #73d13d;
+  --success-active: #389e0d;
+  --warning-color: #faad14;
+  --warning-hover: #ffc53d;
+  --warning-active: #d48806;
+  --danger-color: #ff4d4f;
+  --danger-hover: #ff7875;
+  --danger-active: #d9363e;
+  --info-color: #1890ff;
+  --info-hover: #40a9ff;
+  --info-active: #096dd9;
+  --white-color: #ffffff;
+
+  /* Additional Color Variants for Dark Mode */
+  --pink-color: #eb2f96;
+  --pink-hover: #f759ab;
+  --pink-active: #c41d7f;
+  --purple-color: #722ed1;
+  --purple-hover: #9254de;
+  --purple-active: #531dab;
+  --cyan-color: #13c2c2;
+  --cyan-hover: #36cfc9;
+  --cyan-active: #08979c;
+
+  /* Background Colors */
+  --bg-color: #141414;
+  --bg-secondary: #1f1f1f;
+  --bg-hover: #262626;
+  --bg-active: #434343;
+  --background-code: #161b22;
+
+  /* Text Colors */
+  --text-color: rgba(255, 255, 255, 0.85);
+  --text-primary: rgba(255, 255, 255, 0.85);
+  --text-secondary: rgba(255, 255, 255, 0.65);
+  --text-tertiary: rgba(255, 255, 255, 0.45);
+  --text-disabled: rgba(255, 255, 255, 0.25);
+  --text-inverse: rgba(0, 0, 0, 0.85);
+  --text-code: #e6edf3;
+  --text-muted-dark: #9ca3af;
+  --text-primary-dark: #f9fafb;
+  --text-disabled-dark: #6b7280;
+
+  /* Border Colors */
+  --border-color: #434343;
+  --border-color-light: #303030;
+  --border-light: #303030;
+  --border-hover: #40a9ff;
+  --border-color-dark: #374151;
+
+  /* Modern Shadow System for Dark Mode */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.5);
+
+  /* Avatar Colors - Darker variants */
+  --avatar-bg-1: #7c2d12;
+  --avatar-color-1: #fed7aa;
+  --avatar-bg-2: #14532d;
+  --avatar-color-2: #bbf7d0;
+  --avatar-bg-3: #1e3a8a;
+  --avatar-color-3: #bfdbfe;
+  --avatar-bg-4: #831843;
+  --avatar-color-4: #fbcfe8;
+  --avatar-bg-5: #581c87;
+  --avatar-color-5: #e9d5ff;
+  --avatar-default-bg: #374151;
+  --avatar-default-color: #d1d5db;
+
+  /* Sidebar specific colors for dark mode */
+  --sidebar-bg: #1a1a1a;
+  --sidebar-header-bg: #202020;
+  --nav-item-hover-bg: rgba(24, 144, 255, 0.12);
+  --nav-item-active-bg: rgba(24, 144, 255, 0.18);
+
+  /* Opacity */
+  --checkbox-hover-opacity: 0.12;
+
+  /* FormField Dark Theme Variables */
+  --formfield-description-color-dark: #9ca3af;
+  --formfield-error-color-dark: #f87171;
+  --formfield-disabled-color-dark: #6b7280;
+  --formfield-focus-label-color-dark: #60a5fa;
+  --formfield-error-focus-label-color-dark: #f87171;
+  --formfield-error-label-color-dark: #f87171;
+  --formfield-nested-border-color-dark: #374151;
+  --danger-color-dark: #f87171;
+  --primary-color-dark: #60a5fa;
+  --primary-hover-dark: #3b82f6;
+
+  /* Label Dark Theme Variables */
+  --label-text-color-dark: #f9fafb;
+  --label-required-color-dark: #f87171;
+  --label-disabled-color-dark: #6b7280;
+  --label-hover-color-dark: #60a5fa;
+  --label-hover-text-color-dark: #60a5fa;
+  --label-active-color-dark: #3b82f6;
+  --label-required-text-color-dark: #f9fafb;
+}
