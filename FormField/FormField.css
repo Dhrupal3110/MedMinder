@@ -299,3 +299,15 @@ fieldset .ui-formfield:last-child {
   outline-color: var(--formfield-error-focus-color, var(--danger-color, #dc2626));
   box-shadow: var(--formfield-error-focus-shadow, 0 0 0 2px rgba(220, 38, 38, 0.1));
 }
+
+
+
+
+
+
+
+.ui-formfield--gap-xs { gap: 0.25rem; }
+.ui-formfield--gap-sm { gap: 0.5rem; }
+.ui-formfield--gap-md { gap: 0.75rem; }
+.ui-formfield--gap-lg { gap: 1rem; }
+.ui-formfield--gap-xl { gap: 1.5rem; }
