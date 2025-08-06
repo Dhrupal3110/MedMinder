@@ -191,187 +191,7 @@ export const FlexDocs: React.FC = () => {
               { justify: 'space-evenly', label: 'space-evenly' },
             ].map(({ justify, label }) => (
               <div key={justify}>
-                <h3 style={{ margin: 0, fontSize: '14px' }}>Sidebar</h3>
-                <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>Sidebar content...</p>
-              </Flex>
-            </Flex>
-          </div>
-        </ExampleContainer>
-
-        {/* Common Patterns */}
-        <ExampleContainer
-          title="Common Patterns"
-          description="Frequently used layout patterns with Flex."
-          style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}
-          code={`// Card with header and actions
-<Flex direction="column" gap={12}>
-  <Flex justify="space-between" align="center">
-    <h3>Card Title</h3>
-    <Button>Action</Button>
-  </Flex>
-  <div>Card content...</div>
-</Flex>
-
-// Center everything
-<Flex justify="center" align="center" style={{ minHeight: '200px' }}>
-  <div>Perfectly Centered</div>
-</Flex>
-
-// Form layout
-<Flex direction="column" gap={16} fullWidth>
-  <Flex gap={16}>
-    <input placeholder="First Name" style={{ flex: 1 }} />
-    <input placeholder="Last Name" style={{ flex: 1 }} />
-  </Flex>
-  <Flex justify="flex-end" gap={8}>
-    <Button>Cancel</Button>
-    <Button>Submit</Button>
-  </Flex>
-</Flex>`}
-        >
-          <>
-            <div>
-              <h4 style={{ marginBottom: '8px', fontSize: '14px', color: '#666' }}>Card with header and actions</h4>
-              <div style={{ border: '1px solid #d9d9d9', borderRadius: '8px', padding: '16px' }}>
-                <Flex direction="column" gap={12}>
-                  <Flex justify="space-between" align="center">
-                    <h3 style={{ margin: 0, fontSize: '16px' }}>Card Title</h3>
-                    <Button size="sm">Action</Button>
-                  </Flex>
-                  <div style={{ fontSize: '14px', color: '#666' }}>Card content goes here with some sample text...</div>
-                </Flex>
-              </div>
-            </div>
-
-            <div>
-              <h4 style={{ marginBottom: '8px', fontSize: '14px', color: '#666' }}>Center everything</h4>
-              <div style={{ border: '1px solid #d9d9d9', borderRadius: '8px' }}>
-                <Flex justify="center" align="center" style={{ minHeight: '120px' }}>
-                  <DemoBox>Perfectly Centered</DemoBox>
-                </Flex>
-              </div>
-            </div>
-
-            <div>
-              <h4 style={{ marginBottom: '8px', fontSize: '14px', color: '#666' }}>Form layout</h4>
-              <div style={{ border: '1px solid #d9d9d9', borderRadius: '8px', padding: '16px' }}>
-                <Flex direction="column" gap={16} fullWidth>
-                  <Flex gap={16}>
-                    <input 
-                      placeholder="First Name" 
-                      style={{ 
-                        flex: 1, 
-                        padding: '8px 12px', 
-                        border: '1px solid #d9d9d9', 
-                        borderRadius: '4px',
-                        fontSize: '14px'
-                      }} 
-                    />
-                    <input 
-                      placeholder="Last Name" 
-                      style={{ 
-                        flex: 1, 
-                        padding: '8px 12px', 
-                        border: '1px solid #d9d9d9', 
-                        borderRadius: '4px',
-                        fontSize: '14px'
-                      }} 
-                    />
-                  </Flex>
-                  <Flex justify="flex-end" gap={8}>
-                    <Button size="sm" variant="outline">Cancel</Button>
-                    <Button size="sm">Submit</Button>
-                  </Flex>
-                </Flex>
-              </div>
-            </div>
-          </>
-        </ExampleContainer>
-      </div>
-
-      <div className="docs-section">
-        <h2>API</h2>
-        <p>This section describes all the available props for the <strong>Flex</strong> component. 
-          You can use these properties to control layout behavior, alignment, and spacing.</p>
-        <APITable props={flexProps} />
-      </div>
-
-      <div className="docs-section">
-        <h2>CSS Classes</h2>
-        <p>The Flex component includes utility classes that can be applied to flex items for additional control:</p>
-        
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginTop: '16px' }}>
-          <div>
-            <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>Flex Item Growth</h4>
-            <ul style={{ fontSize: '12px', lineHeight: '1.6', margin: 0, paddingLeft: '16px' }}>
-              <li><code>.ui-flex-item--grow</code> - flex-grow: 1</li>
-              <li><code>.ui-flex-item--shrink</code> - flex-shrink: 1</li>
-              <li><code>.ui-flex-item--no-shrink</code> - flex-shrink: 0</li>
-            </ul>
-          </div>
-          
-          <div>
-            <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>Flex Item Alignment</h4>
-            <ul style={{ fontSize: '12px', lineHeight: '1.6', margin: 0, paddingLeft: '16px' }}>
-              <li><code>.ui-flex-item--align-self-start</code></li>
-              <li><code>.ui-flex-item--align-self-center</code></li>
-              <li><code>.ui-flex-item--align-self-end</code></li>
-              <li><code>.ui-flex-item--align-self-stretch</code></li>
-            </ul>
-          </div>
-          
-          <div>
-            <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>Utility Classes</h4>
-            <ul style={{ fontSize: '12px', lineHeight: '1.6', margin: 0, paddingLeft: '16px' }}>
-              <li><code>.ui-flex--center-all</code> - Center both axes</li>
-              <li><code>.ui-flex--space-between-center</code> - Space between + center align</li>
-              <li><code>.ui-flex--column-center</code> - Column direction, center aligned</li>
-              <li><code>.ui-flex--debug</code> - Visual debugging outlines</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div className="docs-section">
-        <h2>Best Practices</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-          <div>
-            <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '8px', color: '#52c41a' }}>✅ Do</h4>
-            <ul style={{ fontSize: '12px', lineHeight: '1.6', margin: 0, paddingLeft: '16px' }}>
-              <li>Use semantic HTML elements with the <code>as</code> prop when appropriate</li>
-              <li>Prefer numeric gap values for consistency (maps to design tokens)</li>
-              <li>Use <code>fullWidth</code> for containers that should fill their parent</li>
-              <li>Combine with CSS Grid for complex layouts</li>
-              <li>Test with different content lengths to ensure flexibility</li>
-            </ul>
-          </div>
-          
-          <div>
-            <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '8px', color: '#f5222d' }}>❌ Don't</h4>
-            <ul style={{ fontSize: '12px', lineHeight: '1.6', margin: 0, paddingLeft: '16px' }}>
-              <li>Overuse nested flex containers when CSS Grid would be simpler</li>
-              <li>Hardcode pixel values when CSS variables are available</li>
-              <li>Use flex for simple single-item centering (use CSS Grid instead)</li>
-              <li>Forget to test responsive behavior on different screen sizes</li>
-              <li>Mix direction changes with complex alignment requirements</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div className="docs-section">
-        <h2>Accessibility</h2>
-        <p>The Flex component is primarily a layout tool and doesn't introduce accessibility concerns by itself. However, consider these points:</p>
-        <ul>
-          <li>Use semantic HTML elements via the <code>as</code> prop when the flex container represents a meaningful document structure</li>
-          <li>Be aware that visual order (via <code>flex-direction: row-reverse</code>) may not match DOM order for screen readers</li>
-          <li>Ensure adequate color contrast and focus indicators for interactive children</li>
-          <li>Test keyboard navigation flows, especially with complex nested layouts</li>
-        </ul>
-      </div>
-    </div>
-  );
-};4 style={{ marginBottom: '8px', fontSize: '12px', color: '#666' }}>{label}</h4>
+                <h4 style={{ marginBottom: '8px', fontSize: '12px', color: '#666' }}>{label}</h4>
                 <div style={{ border: '1px dashed #ccc', borderRadius: '4px', padding: '8px' }}>
                   <Flex justify={justify as any}>
                     <DemoBox size="sm">A</DemoBox>
@@ -662,4 +482,183 @@ const [wrap, setWrap] = useState(false);
                 <p style={{ margin: 0, fontSize: '14px', color: '#666' }}>Content goes here...</p>
               </Flex>
               <Flex as="aside" direction="column" gap={16} style={{ flex: 1, padding: '16px', backgroundColor: '#f9f9f9', borderRadius: '4px' }}>
-                <h
+                <h3 style={{ margin: 0, fontSize: '14px' }}>Sidebar</h3>
+                <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>Sidebar content...</p>
+              </Flex>
+            </Flex>
+          </div>
+        </ExampleContainer>
+
+        {/* Common Patterns */}
+        <ExampleContainer
+          title="Common Patterns"
+          description="Frequently used layout patterns with Flex."
+          style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}
+          code={`// Card with header and actions
+<Flex direction="column" gap={12}>
+  <Flex justify="space-between" align="center">
+    <h3>Card Title</h3>
+    <Button>Action</Button>
+  </Flex>
+  <div>Card content...</div>
+</Flex>
+
+// Center everything
+<Flex justify="center" align="center" style={{ minHeight: '200px' }}>
+  <div>Perfectly Centered</div>
+</Flex>
+
+// Form layout
+<Flex direction="column" gap={16} fullWidth>
+  <Flex gap={16}>
+    <input placeholder="First Name" style={{ flex: 1 }} />
+    <input placeholder="Last Name" style={{ flex: 1 }} />
+  </Flex>
+  <Flex justify="flex-end" gap={8}>
+    <Button>Cancel</Button>
+    <Button>Submit</Button>
+  </Flex>
+</Flex>`}
+        >
+          <>
+            <div>
+              <h4 style={{ marginBottom: '8px', fontSize: '14px', color: '#666' }}>Card with header and actions</h4>
+              <div style={{ border: '1px solid #d9d9d9', borderRadius: '8px', padding: '16px' }}>
+                <Flex direction="column" gap={12}>
+                  <Flex justify="space-between" align="center">
+                    <h3 style={{ margin: 0, fontSize: '16px' }}>Card Title</h3>
+                    <Button size="sm">Action</Button>
+                  </Flex>
+                  <div style={{ fontSize: '14px', color: '#666' }}>Card content goes here with some sample text...</div>
+                </Flex>
+              </div>
+            </div>
+
+            <div>
+              <h4 style={{ marginBottom: '8px', fontSize: '14px', color: '#666' }}>Center everything</h4>
+              <div style={{ border: '1px solid #d9d9d9', borderRadius: '8px' }}>
+                <Flex justify="center" align="center" style={{ minHeight: '120px' }}>
+                  <DemoBox>Perfectly Centered</DemoBox>
+                </Flex>
+              </div>
+            </div>
+
+            <div>
+              <h4 style={{ marginBottom: '8px', fontSize: '14px', color: '#666' }}>Form layout</h4>
+              <div style={{ border: '1px solid #d9d9d9', borderRadius: '8px', padding: '16px' }}>
+                <Flex direction="column" gap={16} fullWidth>
+                  <Flex gap={16}>
+                    <input 
+                      placeholder="First Name" 
+                      style={{ 
+                        flex: 1, 
+                        padding: '8px 12px', 
+                        border: '1px solid #d9d9d9', 
+                        borderRadius: '4px',
+                        fontSize: '14px'
+                      }} 
+                    />
+                    <input 
+                      placeholder="Last Name" 
+                      style={{ 
+                        flex: 1, 
+                        padding: '8px 12px', 
+                        border: '1px solid #d9d9d9', 
+                        borderRadius: '4px',
+                        fontSize: '14px'
+                      }} 
+                    />
+                  </Flex>
+                  <Flex justify="flex-end" gap={8}>
+                    <Button size="sm" variant="outline">Cancel</Button>
+                    <Button size="sm">Submit</Button>
+                  </Flex>
+                </Flex>
+              </div>
+            </div>
+          </>
+        </ExampleContainer>
+      </div>
+
+      <div className="docs-section">
+        <h2>API</h2>
+        <p>This section describes all the available props for the <strong>Flex</strong> component. 
+          You can use these properties to control layout behavior, alignment, and spacing.</p>
+        <APITable props={flexProps} />
+      </div>
+
+      <div className="docs-section">
+        <h2>CSS Classes</h2>
+        <p>The Flex component includes utility classes that can be applied to flex items for additional control:</p>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginTop: '16px' }}>
+          <div>
+            <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>Flex Item Growth</h4>
+            <ul style={{ fontSize: '12px', lineHeight: '1.6', margin: 0, paddingLeft: '16px' }}>
+              <li><code>.ui-flex-item--grow</code> - flex-grow: 1</li>
+              <li><code>.ui-flex-item--shrink</code> - flex-shrink: 1</li>
+              <li><code>.ui-flex-item--no-shrink</code> - flex-shrink: 0</li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>Flex Item Alignment</h4>
+            <ul style={{ fontSize: '12px', lineHeight: '1.6', margin: 0, paddingLeft: '16px' }}>
+              <li><code>.ui-flex-item--align-self-start</code></li>
+              <li><code>.ui-flex-item--align-self-center</code></li>
+              <li><code>.ui-flex-item--align-self-end</code></li>
+              <li><code>.ui-flex-item--align-self-stretch</code></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>Utility Classes</h4>
+            <ul style={{ fontSize: '12px', lineHeight: '1.6', margin: 0, paddingLeft: '16px' }}>
+              <li><code>.ui-flex--center-all</code> - Center both axes</li>
+              <li><code>.ui-flex--space-between-center</code> - Space between + center align</li>
+              <li><code>.ui-flex--column-center</code> - Column direction, center aligned</li>
+              <li><code>.ui-flex--debug</code> - Visual debugging outlines</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div className="docs-section">
+        <h2>Best Practices</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+          <div>
+            <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '8px', color: '#52c41a' }}>✅ Do</h4>
+            <ul style={{ fontSize: '12px', lineHeight: '1.6', margin: 0, paddingLeft: '16px' }}>
+              <li>Use semantic HTML elements with the <code>as</code> prop when appropriate</li>
+              <li>Prefer numeric gap values for consistency (maps to design tokens)</li>
+              <li>Use <code>fullWidth</code> for containers that should fill their parent</li>
+              <li>Combine with CSS Grid for complex layouts</li>
+              <li>Test with different content lengths to ensure flexibility</li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '8px', color: '#f5222d' }}>❌ Don't</h4>
+            <ul style={{ fontSize: '12px', lineHeight: '1.6', margin: 0, paddingLeft: '16px' }}>
+              <li>Overuse nested flex containers when CSS Grid would be simpler</li>
+              <li>Hardcode pixel values when CSS variables are available</li>
+              <li>Use flex for simple single-item centering (use CSS Grid instead)</li>
+              <li>Forget to test responsive behavior on different screen sizes</li>
+              <li>Mix direction changes with complex alignment requirements</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div className="docs-section">
+        <h2>Accessibility</h2>
+        <p>The Flex component is primarily a layout tool and doesn't introduce accessibility concerns by itself. However, consider these points:</p>
+        <ul>
+          <li>Use semantic HTML elements via the <code>as</code> prop when the flex container represents a meaningful document structure</li>
+          <li>Be aware that visual order (via <code>flex-direction: row-reverse</code>) may not match DOM order for screen readers</li>
+          <li>Ensure adequate color contrast and focus indicators for interactive children</li>
+          <li>Test keyboard navigation flows, especially with complex nested layouts</li>
+        </ul>
+      </div>
+    </div>
+  );
