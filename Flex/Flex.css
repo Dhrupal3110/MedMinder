@@ -1,0 +1,218 @@
+/* Flex Component - Layout Utilities */
+.ui-flex {
+  display: flex;
+  box-sizing: border-box;
+}
+
+/* Direction Variants */
+.ui-flex--column {
+  flex-direction: column;
+}
+
+.ui-flex--row-reverse {
+  flex-direction: row-reverse;
+}
+
+.ui-flex--column-reverse {
+  flex-direction: column-reverse;
+}
+
+/* Alignment Variants */
+.ui-flex--align-flex-start {
+  align-items: flex-start;
+}
+
+.ui-flex--align-center {
+  align-items: center;
+}
+
+.ui-flex--align-flex-end {
+  align-items: flex-end;
+}
+
+.ui-flex--align-baseline {
+  align-items: baseline;
+}
+
+/* Justify Variants */
+.ui-flex--justify-center {
+  justify-content: center;
+}
+
+.ui-flex--justify-flex-end {
+  justify-content: flex-end;
+}
+
+.ui-flex--justify-space-between {
+  justify-content: space-between;
+}
+
+.ui-flex--justify-space-around {
+  justify-content: space-around;
+}
+
+.ui-flex--justify-space-evenly {
+  justify-content: space-evenly;
+}
+
+/* Wrap Variants */
+.ui-flex--wrap-wrap {
+  flex-wrap: wrap;
+}
+
+.ui-flex--wrap-wrap-reverse {
+  flex-wrap: wrap-reverse;
+}
+
+/* Full Width */
+.ui-flex--full-width {
+  width: 100%;
+}
+
+/* Common Gap Presets (for performance when using CSS classes) */
+.ui-flex--gap-xs {
+  gap: var(--spacing-xs, 4px);
+}
+
+.ui-flex--gap-sm {
+  gap: var(--spacing-sm, 8px);
+}
+
+.ui-flex--gap-md {
+  gap: var(--spacing-md, 16px);
+}
+
+.ui-flex--gap-lg {
+  gap: var(--spacing-lg, 24px);
+}
+
+.ui-flex--gap-xl {
+  gap: var(--spacing-xl, 32px);
+}
+
+/* Responsive Behavior */
+@media (max-width: 768px) {
+  /* On mobile, allow column direction to override for better UX */
+  .ui-flex--mobile-column {
+    flex-direction: column;
+  }
+  
+  .ui-flex--mobile-wrap {
+    flex-wrap: wrap;
+  }
+}
+
+/* Accessibility - Focus Management */
+.ui-flex:focus-within {
+  /* Optional: Add subtle indication when flex container has focused children */
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .ui-flex {
+    /* Ensure proper contrast for any border/background that might be added */
+    border-color: var(--border-color-high-contrast, currentColor);
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .ui-flex * {
+    /* Ensure any animations within flex items respect user preferences */
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .ui-flex {
+    /* Ensure flex layouts work well in print */
+    display: flex !important;
+    break-inside: avoid;
+  }
+  
+  /* On print, prefer column layouts for better readability */
+  .ui-flex--print-column {
+    flex-direction: column !important;
+  }
+}
+
+/* RTL Support */
+[dir="rtl"] .ui-flex--row-reverse {
+  flex-direction: row;
+}
+
+[dir="rtl"] .ui-flex:not(.ui-flex--row-reverse):not(.ui-flex--column):not(.ui-flex--column-reverse) {
+  flex-direction: row-reverse;
+}
+
+/* Utility Classes for Common Patterns */
+.ui-flex--center-all {
+  align-items: center;
+  justify-content: center;
+}
+
+.ui-flex--space-between-center {
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ui-flex--column-center {
+  flex-direction: column;
+  align-items: center;
+}
+
+.ui-flex--column-stretch {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* Flex Item Utilities (can be applied to children) */
+.ui-flex-item--grow {
+  flex-grow: 1;
+}
+
+.ui-flex-item--shrink {
+  flex-shrink: 1;
+}
+
+.ui-flex-item--no-shrink {
+  flex-shrink: 0;
+}
+
+.ui-flex-item--align-self-start {
+  align-self: flex-start;
+}
+
+.ui-flex-item--align-self-center {
+  align-self: center;
+}
+
+.ui-flex-item--align-self-end {
+  align-self: flex-end;
+}
+
+.ui-flex-item--align-self-stretch {
+  align-self: stretch;
+}
+
+/* Debug Mode (can be enabled via class for development) */
+.ui-flex--debug {
+  outline: 1px dashed var(--debug-color, #ff0000);
+  background-color: var(--debug-bg, rgba(255, 0, 0, 0.1));
+}
+
+.ui-flex--debug > * {
+  outline: 1px dashed var(--debug-item-color, #0000ff);
+  background-color: var(--debug-item-bg, rgba(0, 0, 255, 0.1));
+}
+
+/* Theme Support */
+[data-theme="dark"] .ui-flex {
+  /* Add any dark theme specific styles if needed */
+}
+
+[data-theme="light"] .ui-flex {
+  /* Add any light theme specific styles if needed */
+}
