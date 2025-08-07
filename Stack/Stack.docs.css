@@ -1,0 +1,803 @@
+import React, { useState } from "react";
+import { ExampleContainer } from "../Shared/ExampleContainer";
+import { Stack } from "./Stack";
+import { Flex } from "../Flex/Flex";
+import { Badge } from "../Badge/Badge";
+import { Button } from "../Button/Button";
+import { APITable, type APITableRow } from "../Shared/APITable";
+
+const stackProps: APITableRow[] = [
+  {
+    property: "direction",
+    description: "The direction of the stack. 'vertical' creates a column layout, 'horizontal' creates a row layout.",
+    type: "'vertical' | 'horizontal'",
+    default: "'vertical'",
+  },
+  {
+    property: "gap",
+    description: "Space between stack items. Can be a number (px) or string (any CSS unit).",
+    type: "number | string",
+    default: "-",
+  },
+  {
+    property: "align",
+    description: "How stack items are aligned along the cross axis.",
+    type: "'flex-start' | 'center' | 'flex-end' | 'stretch' | 'baseline'",
+    default: "-",
+  },
+  {
+    property: "justify",
+    description: "How stack items are distributed along the main axis.",
+    type: "'flex-start' | 'center' | 'flex-end' | 'space-between' | 'space-around' | 'space-evenly'",
+    default: "-",
+  },
+  {
+    property: "wrap",
+    description: "Whether stack items should wrap to new lines when they overflow.",
+    type: "boolean",
+    default: "false",
+  },
+  {
+    property: "fullWidth",
+    description: "Whether the stack should take full width of its parent.",
+    type: "boolean",
+    default: "false",
+  },
+  {
+    property: "as",
+    description: "The HTML element to render. Useful for semantic markup.",
+    type: "keyof JSX.IntrinsicElements",
+    default: "'div'",
+  },
+  {
+    property: "className",
+    description: "Additional class name for the stack container.",
+    type: "string",
+    default: "-",
+  },
+  {
+    property: "style",
+    description: "Inline style for the stack container.",
+    type: "React.CSSProperties",
+    default: "-",
+  },
+  {
+    property: "children",
+    description: "The elements to be arranged in the stack.",
+    type: "ReactNode",
+    default: "-",
+  },
+];
+
+// Demo component for examples
+const DemoCard: React.FC<{ 
+  children: React.ReactNode; 
+  variant?: 'default' | 'primary' | 'success' | 'warning';
+  size?: 'sm' | 'md' | 'lg';
+}> = ({ 
+  children, 
+  variant = 'default',
+  size = 'md'
+}) => {
+  const variants = {
+    default: { backgroundColor: '#f8f9fa', border: '1px solid #dee2e6', color: '#495057' },
+    primary: { backgroundColor: '#e3f2fd', border: '1px solid #2196f3', color: '#1976d2' },
+    success: { backgroundColor: '#e8f5e8', border: '1px solid #4caf50', color: '#2e7d32' },
+    warning: { backgroundColor: '#fff3e0', border: '1px solid #ff9800', color: '#f57c00' }
+  };
+  
+  const sizes = {
+    sm: { padding: '8px 12px', fontSize: '12px', minHeight: '32px' },
+    md: { padding: '12px 16px', fontSize: '14px', minHeight: '40px' },
+    lg: { padding: '16px 20px', fontSize: '16px', minHeight: '48px' }
+  };
+
+  return (
+    <div 
+      style={{
+        borderRadius: '6px',
+        display: 'flex',
+        alignItems: 'center',
+        fontWeight: 500,
+        ...variants[variant],
+        ...sizes[size]
+      }}
+    >
+      {children}
+    </div>
+  );
+};
+
+export const StackDocs: React.FC = () => {
+  const [dynamicGap, setDynamicGap] = useState(16);
+  const [direction, setDirection] = useState<'vertical' | 'horizontal'>('vertical');
+  const [items, setItems] = useState(['Item 1', 'Item 2', 'Item 3']);
+
+  const addItem = () => {
+    setItems(prev => [...prev, `Item ${prev.length + 1}`]);
+  };
+
+  const removeItem = () => {
+    setItems(prev => prev.slice(0, -1));
+  };
+
+  return (
+    <div className="component-docs">
+      <div className="docs-header">
+        <h1>Stack</h1>
+        <p>A layout component for arranging elements in a single direction with consistent spacing. Stack provides a semantic way to create vertical or horizontal layouts with proper spacing between items.</p>
+      </div>
+
+      <div className="docs-section">
+        <h2>When To Use</h2>
+        <ul>
+          <li>Creating consistent vertical spacing in forms, cards, or content areas.</li>
+          <li>Arranging buttons or actions in horizontal groups with uniform spacing.</li>
+          <li>Building simple one-dimensional layouts where you need predictable spacing.</li>
+          <li>When you need semantic spacing that adapts to design system tokens.</li>
+          <li>Replacing margin-based spacing patterns with gap-based layouts for better consistency.</li>
+        </ul>
+      </div>
+
+      <div className="docs-section">
+        <h2>Examples</h2>
+
+        {/* Basic */}
+        <ExampleContainer
+          title="Basic"
+          description="Simple vertical and horizontal stacks with default spacing."
+          style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}
+          code={`// Vertical stack (default)
+<Stack gap={12}>
+  <DemoCard>First item</DemoCard>
+  <DemoCard>Second item</DemoCard>
+  <DemoCard>Third item</DemoCard>
+</Stack>
+
+// Horizontal stack
+<Stack direction="horizontal" gap={12}>
+  <DemoCard>First</DemoCard>
+  <DemoCard>Second</DemoCard>
+  <DemoCard>Third</DemoCard>
+</Stack>`}
+        >
+          <>
+            <div>
+              <h4 style={{ marginBottom: '12px', fontSize: '14px', color: '#666' }}>Vertical Stack (default)</h4>
+              <Stack gap={12}>
+                <DemoCard>First item</DemoCard>
+                <DemoCard>Second item</DemoCard>
+                <DemoCard>Third item</DemoCard>
+              </Stack>
+            </div>
+            
+            <div>
+              <h4 style={{ marginBottom: '12px', fontSize: '14px', color: '#666' }}>Horizontal Stack</h4>
+              <Stack direction="horizontal" gap={12}>
+                <DemoCard>First</DemoCard>
+                <DemoCard>Second</DemoCard>
+                <DemoCard>Third</DemoCard>
+              </Stack>
+            </div>
+          </>
+        </ExampleContainer>
+
+        {/* Form Layout */}
+        <ExampleContainer
+          title="Form Layout"
+          description="Using Stack for consistent form field spacing."
+          style={{ maxWidth: '400px' }}
+          code={`<Stack gap={16} fullWidth>
+  <div>
+    <label>First Name</label>
+    <input type="text" style={{ width: '100%' }} />
+  </div>
+  <div>
+    <label>Email</label>
+    <input type="email" style={{ width: '100%' }} />
+  </div>
+  <Stack direction="horizontal" gap={8} justify="flex-end">
+    <Button variant="outline">Cancel</Button>
+    <Button>Submit</Button>
+  </Stack>
+</Stack>`}
+        >
+          <div style={{ border: '1px solid #e1e5e9', borderRadius: '8px', padding: '24px' }}>
+            <Stack gap={16} fullWidth>
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: 500 }}>
+                  First Name
+                </label>
+                <input 
+                  type="text" 
+                  style={{ 
+                    width: '100%', 
+                    padding: '8px 12px', 
+                    border: '1px solid #d9d9d9', 
+                    borderRadius: '4px',
+                    fontSize: '14px',
+                    boxSizing: 'border-box'
+                  }} 
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: 500 }}>
+                  Email
+                </label>
+                <input 
+                  type="email" 
+                  style={{ 
+                    width: '100%', 
+                    padding: '8px 12px', 
+                    border: '1px solid #d9d9d9', 
+                    borderRadius: '4px',
+                    fontSize: '14px',
+                    boxSizing: 'border-box'
+                  }} 
+                />
+              </div>
+              <Stack direction="horizontal" gap={8} justify="flex-end">
+                <Button size="sm" variant="outline">Cancel</Button>
+                <Button size="sm">Submit</Button>
+              </Stack>
+            </Stack>
+          </div>
+        </ExampleContainer>
+
+        {/* Button Groups */}
+        <ExampleContainer
+          title="Button Groups"
+          description="Horizontal stacks for button groups and actions."
+          style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}
+          code={`// Primary actions
+<Stack direction="horizontal" gap={8}>
+  <Button>Save</Button>
+  <Button variant="outline">Cancel</Button>
+  <Button variant="outline">Draft</Button>
+</Stack>
+
+// Icon buttons
+<Stack direction="horizontal" gap={4} align="center">
+  <Badge count={3}><Button size="sm">📧</Button></Badge>
+  <Badge dot variant="success"><Button size="sm">🔔</Button></Badge>
+  <Button size="sm">⚙️</Button>
+</Stack>`}
+        >
+          <>
+            <div>
+              <h4 style={{ marginBottom: '12px', fontSize: '14px', color: '#666' }}>Primary Actions</h4>
+              <Stack direction="horizontal" gap={8}>
+                <Button>Save</Button>
+                <Button variant="outline">Cancel</Button>
+                <Button variant="outline">Draft</Button>
+              </Stack>
+            </div>
+            
+            <div>
+              <h4 style={{ marginBottom: '12px', fontSize: '14px', color: '#666' }}>Icon Buttons</h4>
+              <Stack direction="horizontal" gap={4} align="center">
+                <Badge count={3}>
+                  <Button size="sm">📧</Button>
+                </Badge>
+                <Badge dot variant="success">
+                  <Button size="sm">🔔</Button>
+                </Badge>
+                <Button size="sm">⚙️</Button>
+              </Stack>
+            </div>
+          </>
+        </ExampleContainer>
+
+        {/* Gap Variations */}
+        <ExampleContainer
+          title="Gap Variations"
+          description="Different spacing options for various use cases."
+          style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}
+          code={`<Stack gap={4}>    // Tight spacing
+<Stack gap={12}>   // Comfortable spacing  
+<Stack gap={24}>   // Relaxed spacing
+<Stack gap="2rem"> // Custom spacing`}
+        >
+          <>
+            {[
+              { gap: 4, label: 'Tight (4px)', variant: 'primary' as const },
+              { gap: 12, label: 'Comfortable (12px)', variant: 'default' as const },
+              { gap: 24, label: 'Relaxed (24px)', variant: 'success' as const },
+              { gap: '2rem', label: 'Custom (2rem)', variant: 'warning' as const },
+            ].map(({ gap, label, variant }) => (
+              <div key={String(gap)}>
+                <h4 style={{ marginBottom: '8px', fontSize: '12px', color: '#666' }}>{label}</h4>
+                <Stack gap={gap}>
+                  <DemoCard variant={variant} size="sm">Item A</DemoCard>
+                  <DemoCard variant={variant} size="sm">Item B</DemoCard>
+                  <DemoCard variant={variant} size="sm">Item C</DemoCard>
+                </Stack>
+              </div>
+            ))}
+          </>
+        </ExampleContainer>
+
+        {/* Alignment */}
+        <ExampleContainer
+          title="Alignment"
+          description="Controlling alignment of items within the stack."
+          style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}
+          code={`// Vertical stack alignment
+<Stack align="flex-start">
+<Stack align="center">
+<Stack align="flex-end">
+
+// Horizontal stack alignment  
+<Stack direction="horizontal" align="center">
+<Stack direction="horizontal" justify="space-between">`}
+        >
+          <>
+            <div>
+              <h4 style={{ marginBottom: '12px', fontSize: '14px', color: '#666' }}>Vertical Alignment</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {['flex-start', 'center', 'flex-end'].map((alignment) => (
+                  <div key={alignment}>
+                    <div style={{ fontSize: '12px', color: '#999', marginBottom: '4px' }}>{alignment}</div>
+                    <div style={{ border: '1px dashed #ccc', padding: '8px', width: '200px' }}>
+                      <Stack align={alignment as any} gap={8}>
+                        <DemoCard size="sm">Short</DemoCard>
+                        <DemoCard size="sm">Medium length</DemoCard>
+                        <DemoCard size="sm">A</DemoCard>
+                      </Stack>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div>
+              <h4 style={{ marginBottom: '12px', fontSize: '14px', color: '#666' }}>Horizontal Distribution</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {[
+                  { justify: 'flex-start', label: 'flex-start' },
+                  { justify: 'center', label: 'center' },
+                  { justify: 'space-between', label: 'space-between' }
+                ].map(({ justify, label }) => (
+                  <div key={justify}>
+                    <div style={{ fontSize: '12px', color: '#999', marginBottom: '4px' }}>{label}</div>
+                    <div style={{ border: '1px dashed #ccc', padding: '8px', width: '200px' }}>
+                      <Stack direction="horizontal" justify={justify as any} gap={4}>
+                        <DemoCard size="sm">A</DemoCard>
+                        <DemoCard size="sm">B</DemoCard>
+                        <DemoCard size="sm">C</DemoCard>
+                      </Stack>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        </ExampleContainer>
+
+        {/* Wrapping */}
+        <ExampleContainer
+          title="Wrapping"
+          description="Stack items can wrap to new lines when space is limited."
+          code={`<Stack direction="horizontal" wrap gap={8} style={{ width: '200px' }}>
+  <Button size="sm">Action 1</Button>
+  <Button size="sm">Action 2</Button>
+  <Button size="sm">Action 3</Button>
+  <Button size="sm">Action 4</Button>
+  <Button size="sm">Action 5</Button>
+</Stack>`}
+        >
+          <div style={{ border: '1px dashed #ccc', borderRadius: '6px', padding: '16px', width: '220px' }}>
+            <Stack direction="horizontal" wrap gap={8}>
+              <Button size="sm">Action 1</Button>
+              <Button size="sm">Action 2</Button>
+              <Button size="sm">Action 3</Button>
+              <Button size="sm">Action 4</Button>
+              <Button size="sm">Action 5</Button>
+            </Stack>
+          </div>
+        </ExampleContainer>
+
+        {/* Nested Layouts */}
+        <ExampleContainer
+          title="Nested Layouts"
+          description="Combining Stack with other layout components."
+          code={`<Stack gap={20} fullWidth>
+  <Flex justify="space-between" align="center">
+    <h3>Dashboard</h3>
+    <Badge count={12} />
+  </Flex>
+  
+  <Stack direction="horizontal" gap={16}>
+    <Stack gap={12} style={{ flex: 1 }}>
+      <h4>Recent Activity</h4>
+      <DemoCard>Activity 1</DemoCard>
+      <DemoCard>Activity 2</DemoCard>
+      <DemoCard>Activity 3</DemoCard>
+    </Stack>
+    
+    <Stack gap={12} style={{ flex: 1 }}>
+      <h4>Quick Stats</h4>
+      <DemoCard variant="success">✅ 24 Completed</DemoCard>
+      <DemoCard variant="warning">⏳ 8 Pending</DemoCard>
+      <DemoCard variant="primary">📊 View Report</DemoCard>
+    </Stack>
+  </Stack>
+</Stack>`}
+        >
+          <div style={{ border: '1px solid #e1e5e9', borderRadius: '8px', padding: '20px' }}>
+            <Stack gap={20} fullWidth>
+              <Flex justify="space-between" align="center">
+                <h3 style={{ margin: 0, fontSize: '18px' }}>Dashboard</h3>
+                <Badge count={12} />
+              </Flex>
+              
+              <Stack direction="horizontal" gap={16}>
+                <Stack gap={12} style={{ flex: 1 }}>
+                  <h4 style={{ margin: 0, fontSize: '14px', color: '#333' }}>Recent Activity</h4>
+                  <DemoCard size="sm">Activity 1</DemoCard>
+                  <DemoCard size="sm">Activity 2</DemoCard>
+                  <DemoCard size="sm">Activity 3</DemoCard>
+                </Stack>
+                
+                <Stack gap={12} style={{ flex: 1 }}>
+                  <h4 style={{ margin: 0, fontSize: '14px', color: '#333' }}>Quick Stats</h4>
+                  <DemoCard variant="success" size="sm">✅ 24 Completed</DemoCard>
+                  <DemoCard variant="warning" size="sm">⏳ 8 Pending</DemoCard>
+                  <DemoCard variant="primary" size="sm">📊 View Report</DemoCard>
+                </Stack>
+              </Stack>
+            </Stack>
+          </div>
+        </ExampleContainer>
+
+        {/* Interactive Demo */}
+        <ExampleContainer
+          title="Interactive Demo"
+          description="Experiment with different Stack configurations."
+          style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
+          code={`const [gap, setGap] = useState(16);
+const [direction, setDirection] = useState('vertical');
+const [items, setItems] = useState(['Item 1', 'Item 2', 'Item 3']);
+
+<Stack 
+  direction={direction} 
+  gap={gap}
+  style={{ minHeight: '120px', padding: '16px', border: '1px dashed #ccc' }}
+>
+  {items.map(item => <DemoCard key={item}>{item}</DemoCard>)}
+</Stack>`}
+        >
+          <>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '16px' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '12px', fontWeight: 500 }}>
+                  Gap: {dynamicGap}px
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="40"
+                  value={dynamicGap}
+                  onChange={(e) => setDynamicGap(Number(e.target.value))}
+                  style={{ width: '100%' }}
+                />
+              </div>
+              
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '12px', fontWeight: 500 }}>
+                  Direction
+                </label>
+                <select 
+                  value={direction} 
+                  onChange={(e) => setDirection(e.target.value as 'vertical' | 'horizontal')}
+                  style={{ width: '100%', padding: '4px 8px', borderRadius: '4px', border: '1px solid #d9d9d9' }}
+                >
+                  <option value="vertical">Vertical</option>
+                  <option value="horizontal">Horizontal</option>
+                </select>
+              </div>
+              
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '12px', fontWeight: 500 }}>
+                  Items: {items.length}
+                </label>
+                <Stack direction="horizontal" gap={4}>
+                  <Button size="sm" onClick={addItem}>Add</Button>
+                  <Button size="sm" onClick={removeItem} disabled={items.length <= 1}>Remove</Button>
+                </Stack>
+              </div>
+            </div>
+
+            <div style={{ border: '1px dashed #ccc', borderRadius: '6px', padding: '16px', minHeight: '120px' }}>
+              <Stack 
+                direction={direction} 
+                gap={dynamicGap}
+                style={{ minHeight: '80px' }}
+              >
+                {items.map((item, index) => (
+                  <DemoCard key={item} variant={['default', 'primary', 'success', 'warning'][index % 4] as any}>
+                    {item}
+                  </DemoCard>
+                ))}
+              </Stack>
+            </div>
+          </>
+        </ExampleContainer>
+
+        {/* Card Layout */}
+        <ExampleContainer
+          title="Card Layouts"
+          description="Using Stack to create consistent card layouts."
+          code={`<Stack gap={16}>
+  <Stack gap={8}>
+    <h3>Product Title</h3>
+    <p>Product description goes here...</p>
+  </Stack>
+  
+  <Stack gap={12}>
+    <Stack direction="horizontal" justify="space-between">
+      <span>Price:</span>
+      <strong>$29.99</strong>
+    </Stack>
+    <Stack direction="horizontal" justify="space-between">
+      <span>Stock:</span>
+      <Badge count={15} variant="success" />
+    </Stack>
+  </Stack>
+  
+  <Stack direction="horizontal" gap={8} justify="flex-end">
+    <Button variant="outline">Add to Cart</Button>
+    <Button>Buy Now</Button>
+  </Stack>
+</Stack>`}
+        >
+          <div style={{ 
+            border: '1px solid #e1e5e9', 
+            borderRadius: '8px', 
+            padding: '20px', 
+            maxWidth: '320px',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+          }}>
+            <Stack gap={16}>
+              <Stack gap={8}>
+                <h3 style={{ margin: 0, fontSize: '18px', color: '#333' }}>Product Title</h3>
+                <p style={{ margin: 0, fontSize: '14px', color: '#666', lineHeight: '1.5' }}>
+                  Product description goes here with some details about the item...
+                </p>
+              </Stack>
+              
+              <Stack gap={12}>
+                <Stack direction="horizontal" justify="space-between" align="center">
+                  <span style={{ fontSize: '14px' }}>Price:</span>
+                  <strong style={{ fontSize: '16px', color: '#2e7d32' }}>$29.99</strong>
+                </Stack>
+                <Stack direction="horizontal" justify="space-between" align="center">
+                  <span style={{ fontSize: '14px' }}>Stock:</span>
+                  <Badge count={15} variant="success" />
+                </Stack>
+              </Stack>
+              
+              <Stack direction="horizontal" gap={8} justify="flex-end">
+                <Button size="sm" variant="outline">Add to Cart</Button>
+                <Button size="sm">Buy Now</Button>
+              </Stack>
+            </Stack>
+          </div>
+        </ExampleContainer>
+
+        {/* Semantic Usage */}
+        <ExampleContainer
+          title="Semantic Elements"
+          description="Using the 'as' prop for semantic HTML structure."
+          code={`<Stack as="article" gap={20}>
+  <Stack as="header" gap={8}>
+    <h1>Article Title</h1>
+    <p>Published on March 15, 2024</p>
+  </Stack>
+  
+  <Stack as="section" gap={16}>
+    <p>Article content goes here...</p>
+    <p>More content...</p>
+  </Stack>
+  
+  <Stack as="footer" direction="horizontal" justify="space-between">
+    <Stack direction="horizontal" gap={8}>
+      <Button size="sm" variant="outline">👍 Like</Button>
+      <Button size="sm" variant="outline">💬 Comment</Button>
+    </Stack>
+    <span>Read time: 5 min</span>
+  </Stack>
+</Stack>`}
+        >
+          <div style={{ border: '1px solid #e1e5e9', borderRadius: '8px', padding: '24px', maxWidth: '500px' }}>
+            <Stack as="article" gap={20}>
+              <Stack as="header" gap={8}>
+                <h1 style={{ margin: 0, fontSize: '20px', color: '#333' }}>Article Title</h1>
+                <p style={{ margin: 0, fontSize: '12px', color: '#999' }}>Published on March 15, 2024</p>
+              </Stack>
+              
+              <Stack as="section" gap={16}>
+                <p style={{ margin: 0, fontSize: '14px', lineHeight: '1.6', color: '#555' }}>
+                  Article content goes here with some interesting information and insights...
+                </p>
+                <p style={{ margin: 0, fontSize: '14px', lineHeight: '1.6', color: '#555' }}>
+                  More content that provides value to the reader and keeps them engaged...
+                </p>
+              </Stack>
+              
+              <Stack as="footer" direction="horizontal" justify="space-between" align="center">
+                <Stack direction="horizontal" gap={8}>
+                  <Button size="sm" variant="outline">👍 Like</Button>
+                  <Button size="sm" variant="outline">💬 Comment</Button>
+                </Stack>
+                <span style={{ fontSize: '12px', color: '#666' }}>Read time: 5 min</span>
+              </Stack>
+            </Stack>
+          </div>
+        </ExampleContainer>
+
+        {/* Responsive Patterns */}
+        <ExampleContainer
+          title="Responsive Patterns"
+          description="Stack adapts well to different screen sizes and can be combined with responsive utilities."
+          code={`<Stack gap={16} fullWidth>
+  <h3>Responsive Layout</h3>
+  
+  {/* On larger screens: horizontal, on mobile: vertical */}
+  <Stack 
+    direction="horizontal" 
+    gap={16} 
+    wrap
+    className="ui-stack--mobile-vertical"
+  >
+    <DemoCard style={{ flex: 1 }}>Main Content</DemoCard>
+    <DemoCard style={{ flex: '0 0 300px' }}>Sidebar</DemoCard>
+  </Stack>
+</Stack>`}
+        >
+          <div style={{ border: '1px solid #e1e5e9', borderRadius: '8px', padding: '20px' }}>
+            <Stack gap={16} fullWidth>
+              <h3 style={{ margin: 0, fontSize: '16px' }}>Responsive Layout</h3>
+              
+              <Stack 
+                direction="horizontal" 
+                gap={16} 
+                wrap
+                style={{ minHeight: '100px' }}
+              >
+                <DemoCard style={{ flex: 1, minWidth: '200px' }}>
+                  Main Content Area
+                </DemoCard>
+                <DemoCard style={{ flex: '0 0 200px' }}>
+                  Sidebar Content
+                </DemoCard>
+              </Stack>
+              
+              <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>
+                💡 This layout would stack vertically on mobile screens
+              </p>
+            </Stack>
+          </div>
+        </ExampleContainer>
+      </div>
+
+      <div className="docs-section">
+        <h2>API</h2>
+        <p>This section describes all the available props for the <strong>Stack</strong> component. 
+          You can use these properties to control layout direction, spacing, and alignment.</p>
+        <APITable props={stackProps} />
+      </div>
+
+      <div className="docs-section">
+        <h2>CSS Classes</h2>
+        <p>The Stack component includes utility classes for common spacing and layout patterns:</p>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginTop: '16px' }}>
+          <div>
+            <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>Spacing Presets</h4>
+            <ul style={{ fontSize: '12px', lineHeight: '1.6', margin: 0, paddingLeft: '16px' }}>
+              <li><code>.ui-stack--gap-xs</code> - 4px gap</li>
+              <li><code>.ui-stack--gap-sm</code> - 8px gap</li>
+              <li><code>.ui-stack--gap-md</code> - 16px gap</li>
+              <li><code>.ui-stack--gap-lg</code> - 24px gap</li>
+              <li><code>.ui-stack--gap-xl</code> - 32px gap</li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>Form Spacing</h4>
+            <ul style={{ fontSize: '12px', lineHeight: '1.6', margin: 0, paddingLeft: '16px' }}>
+              <li><code>.ui-stack--form-spacing</code> - Standard form gap</li>
+              <li><code>.ui-stack--form-tight</code> - Tight form gap</li>
+              <li><code>.ui-stack--form-comfortable</code> - Comfortable form gap</li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>Button Groups</h4>
+            <ul style={{ fontSize: '12px', lineHeight: '1.6', margin: 0, paddingLeft: '16px' }}>
+              <li><code>.ui-stack--button-group</code> - Standard button gap</li>
+              <li><code>.ui-stack--button-group-sm</code> - Small button gap</li>
+              <li><code>.ui-stack--button-group-lg</code> - Large button gap</li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>Responsive Classes</h4>
+            <ul style={{ fontSize: '12px', lineHeight: '1.6', margin: 0, paddingLeft: '16px' }}>
+              <li><code>.ui-stack--mobile-vertical</code> - Force vertical on mobile</li>
+              <li><code>.ui-stack--mobile-tight</code> - Tighter spacing on mobile</li>
+              <li><code>.ui-stack--print-vertical</code> - Vertical for print</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div className="docs-section">
+        <h2>Stack vs Flex</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+          <div>
+            <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '8px', color: '#1890ff' }}>Use Stack When:</h4>
+            <ul style={{ fontSize: '12px', lineHeight: '1.6', margin: 0, paddingLeft: '16px' }}>
+              <li>You need simple one-dimensional layouts</li>
+              <li>Spacing consistency is the primary concern</li>
+              <li>Building forms, cards, or content areas</li>
+              <li>You want semantic direction names (vertical/horizontal)</li>
+              <li>Working with design system spacing tokens</li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '8px', color: '#52c41a' }}>Use Flex When:</h4>
+            <ul style={{ fontSize: '12px', lineHeight: '1.6', margin: 0, paddingLeft: '16px' }}>
+              <li>You need complex alignment and distribution</li>
+              <li>Building responsive layouts with grow/shrink</li>
+              <li>Working with multiple alignment axes</li>
+              <li>Need fine-grained control over flex properties</li>
+              <li>Creating advanced layout patterns</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div className="docs-section">
+        <h2>Best Practices</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+          <div>
+            <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '8px', color: '#52c41a' }}>✅ Do</h4>
+            <ul style={{ fontSize: '12px', lineHeight: '1.6', margin: 0, paddingLeft: '16px' }}>
+              <li>Use consistent gap values that align with your design system</li>
+              <li>Prefer Stack for simple vertical/horizontal layouts</li>
+              <li>Use semantic HTML elements with the <code>as</code> prop</li>
+              <li>Combine with other layout components for complex designs</li>
+              <li>Test responsive behavior across different screen sizes</li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '8px', color: '#f5222d' }}>❌ Don't</h4>
+            <ul style={{ fontSize: '12px', lineHeight: '1.6', margin: 0, paddingLeft: '16px' }}>
+              <li>Mix Stack with margin-based spacing patterns</li>
+              <li>Use Stack when Flex would be more appropriate</li>
+              <li>Hardcode gap values when design tokens are available</li>
+              <li>Forget to consider responsive behavior</li>
+              <li>Overuse nesting when simpler solutions exist</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div className="docs-section">
+        <h2>Accessibility</h2>
+        <p>Stack is a layout utility and doesn't introduce specific accessibility concerns, but consider these guidelines:</p>
+        <ul>
+          <li>Use appropriate semantic elements via the <code>as</code> prop (e.g., <code>as="section"</code>, <code>as="nav"</code>)</li>
+          <li>Ensure adequate spacing for touch targets on mobile devices</li>
+          <li>Test keyboard navigation flows through stacked elements</li>
+          <li>Maintain proper heading hierarchy in vertically stacked content</li>
+          <li>Consider screen reader experience with the visual layout order</li>
+        </ul>
+      </div>
+    </div>
+  );
+};
