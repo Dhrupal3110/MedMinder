@@ -1,0 +1,370 @@
+/* Stack Component - Spacing Layout Utilities */
+.ui-stack {
+  display: flex;
+  box-sizing: border-box;
+}
+
+/* Direction Variants */
+.ui-stack--vertical {
+  flex-direction: column;
+}
+
+.ui-stack--horizontal {
+  flex-direction: row;
+}
+
+/* Alignment Variants */
+.ui-stack--align-flex-start {
+  align-items: flex-start;
+}
+
+.ui-stack--align-center {
+  align-items: center;
+}
+
+.ui-stack--align-flex-end {
+  align-items: flex-end;
+}
+
+.ui-stack--align-stretch {
+  align-items: stretch;
+}
+
+.ui-stack--align-baseline {
+  align-items: baseline;
+}
+
+/* Justify Variants */
+.ui-stack--justify-flex-start {
+  justify-content: flex-start;
+}
+
+.ui-stack--justify-center {
+  justify-content: center;
+}
+
+.ui-stack--justify-flex-end {
+  justify-content: flex-end;
+}
+
+.ui-stack--justify-space-between {
+  justify-content: space-between;
+}
+
+.ui-stack--justify-space-around {
+  justify-content: space-around;
+}
+
+.ui-stack--justify-space-evenly {
+  justify-content: space-evenly;
+}
+
+/* Wrap Variant */
+.ui-stack--wrap {
+  flex-wrap: wrap;
+}
+
+/* Full Width */
+.ui-stack--full-width {
+  width: 100%;
+}
+
+/* Default Gap Presets using CSS Variables */
+.ui-stack--gap-xs {
+  gap: var(--spacing-xs, 4px);
+}
+
+.ui-stack--gap-sm {
+  gap: var(--spacing-sm, 8px);
+}
+
+.ui-stack--gap-md {
+  gap: var(--spacing-md, 16px);
+}
+
+.ui-stack--gap-lg {
+  gap: var(--spacing-lg, 24px);
+}
+
+.ui-stack--gap-xl {
+  gap: var(--spacing-xl, 32px);
+}
+
+.ui-stack--gap-2xl {
+  gap: var(--spacing-2xl, 40px);
+}
+
+/* Common Spacing Patterns */
+.ui-stack--spacing-tight {
+  gap: var(--spacing-tight, 4px);
+}
+
+.ui-stack--spacing-comfortable {
+  gap: var(--spacing-comfortable, 12px);
+}
+
+.ui-stack--spacing-relaxed {
+  gap: var(--spacing-relaxed, 20px);
+}
+
+.ui-stack--spacing-loose {
+  gap: var(--spacing-loose, 32px);
+}
+
+/* Form-specific Spacing */
+.ui-stack--form-spacing {
+  gap: var(--form-field-gap, 16px);
+}
+
+.ui-stack--form-tight {
+  gap: var(--form-field-gap-tight, 8px);
+}
+
+.ui-stack--form-comfortable {
+  gap: var(--form-field-gap-comfortable, 20px);
+}
+
+/* Button Group Spacing */
+.ui-stack--button-group {
+  gap: var(--button-gap, 8px);
+}
+
+.ui-stack--button-group-sm {
+  gap: var(--button-gap-sm, 6px);
+}
+
+.ui-stack--button-group-lg {
+  gap: var(--button-gap-lg, 12px);
+}
+
+/* Responsive Behavior */
+@media (max-width: 768px) {
+  /* On mobile, horizontal stacks can become vertical */
+  .ui-stack--mobile-vertical.ui-stack--horizontal {
+    flex-direction: column;
+  }
+  
+  /* Reduce gaps on mobile for tighter layouts */
+  .ui-stack--mobile-tight {
+    gap: var(--spacing-mobile-tight, 8px);
+  }
+  
+  /* Form stacks get tighter on mobile */
+  .ui-stack--form-spacing {
+    gap: var(--form-field-gap-mobile, 12px);
+  }
+}
+
+@media (max-width: 480px) {
+  /* Extra tight spacing on very small screens */
+  .ui-stack--mobile-extra-tight {
+    gap: var(--spacing-mobile-extra-tight, 4px);
+  }
+}
+
+/* Accessibility - Focus Management */
+.ui-stack:focus-within {
+  /* Optional: Add subtle indication when stack has focused children */
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .ui-stack {
+    /* Ensure proper contrast for any border/background that might be added */
+    border-color: var(--border-color-high-contrast, currentColor);
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .ui-stack * {
+    /* Ensure any animations within stack items respect user preferences */
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .ui-stack {
+    /* Ensure stack layouts work well in print */
+    display: flex !important;
+    break-inside: avoid;
+  }
+  
+  /* On print, prefer vertical stacks for better readability */
+  .ui-stack--print-vertical.ui-stack--horizontal {
+    flex-direction: column !important;
+    gap: var(--spacing-print, 8px) !important;
+  }
+  
+  /* Reduce gaps in print for space efficiency */
+  .ui-stack {
+    gap: calc(var(--current-gap, 16px) * 0.75) !important;
+  }
+}
+
+/* RTL Support */
+[dir="rtl"] .ui-stack--horizontal {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .ui-stack--horizontal.ui-stack--justify-flex-start {
+  justify-content: flex-end;
+}
+
+[dir="rtl"] .ui-stack--horizontal.ui-stack--justify-flex-end {
+  justify-content: flex-start;
+}
+
+/* Theme Support */
+[data-theme="dark"] .ui-stack {
+  /* Dark theme specific spacing adjustments if needed */
+}
+
+[data-theme="light"] .ui-stack {
+  /* Light theme specific spacing adjustments if needed */
+}
+
+/* Utility Classes for Common Patterns */
+.ui-stack--center-all {
+  align-items: center;
+  justify-content: center;
+}
+
+.ui-stack--start-all {
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.ui-stack--end-all {
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+/* Vertical Stack Utilities */
+.ui-stack--vertical-center {
+  align-items: center;
+}
+
+.ui-stack--vertical-start {
+  align-items: flex-start;
+}
+
+.ui-stack--vertical-end {
+  align-items: flex-end;
+}
+
+.ui-stack--vertical-stretch {
+  align-items: stretch;
+}
+
+/* Horizontal Stack Utilities */
+.ui-stack--horizontal-center {
+  justify-content: center;
+}
+
+.ui-stack--horizontal-start {
+  justify-content: flex-start;
+}
+
+.ui-stack--horizontal-end {
+  justify-content: flex-end;
+}
+
+.ui-stack--horizontal-between {
+  justify-content: space-between;
+}
+
+/* Stack Item Utilities (can be applied to children) */
+.ui-stack-item--grow {
+  flex-grow: 1;
+}
+
+.ui-stack-item--shrink {
+  flex-shrink: 1;
+}
+
+.ui-stack-item--no-shrink {
+  flex-shrink: 0;
+}
+
+.ui-stack-item--align-self-start {
+  align-self: flex-start;
+}
+
+.ui-stack-item--align-self-center {
+  align-self: center;
+}
+
+.ui-stack-item--align-self-end {
+  align-self: flex-end;
+}
+
+.ui-stack-item--align-self-stretch {
+  align-self: stretch;
+}
+
+/* Debug Mode (can be enabled via class for development) */
+.ui-stack--debug {
+  outline: 1px dashed var(--debug-color, #ff6b00);
+  background-color: var(--debug-bg, rgba(255, 107, 0, 0.1));
+  position: relative;
+}
+
+.ui-stack--debug::before {
+  content: attr(class);
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  font-size: 10px;
+  color: var(--debug-color, #ff6b00);
+  background: var(--debug-label-bg, #fff);
+  padding: 2px 4px;
+  border: 1px solid var(--debug-color, #ff6b00);
+  border-radius: 2px;
+  z-index: 1000;
+}
+
+.ui-stack--debug > * {
+  outline: 1px dashed var(--debug-item-color, #0066ff);
+  background-color: var(--debug-item-bg, rgba(0, 102, 255, 0.1));
+}
+
+/* Nested Stack Handling */
+.ui-stack .ui-stack {
+  /* Nested stacks inherit some spacing behavior */
+}
+
+.ui-stack--no-nested-margin > * {
+  /* Remove default margins from children to rely purely on gap */
+  margin: 0;
+}
+
+/* Animation Support */
+@keyframes ui-stack-item-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ui-stack--animate-children > * {
+  animation: ui-stack-item-enter 0.2s ease-out;
+}
+
+.ui-stack--animate-children > *:nth-child(1) { animation-delay: 0ms; }
+.ui-stack--animate-children > *:nth-child(2) { animation-delay: 50ms; }
+.ui-stack--animate-children > *:nth-child(3) { animation-delay: 100ms; }
+.ui-stack--animate-children > *:nth-child(4) { animation-delay: 150ms; }
+.ui-stack--animate-children > *:nth-child(5) { animation-delay: 200ms; }
+
+/* Ensure proper stacking context */
+.ui-stack {
+  position: relative;
+  z-index: 1;
+}
