@@ -17,7 +17,19 @@ export type GridProps<C extends ElementType> = GridOwnProps<C> &
 
 type PolymorphicRef<C extends ElementType> = ComponentPropsWithRef<C>['ref'];
 
-export const Grid = forwardRef(
+type PolymorphicComponentPropsWithRef<C extends ElementType, P> = 
+  GridProps<C> & { ref?: PolymorphicRef<C> };
+
+type GridComponentType = <C extends ElementType = 'div'>(
+  props: PolymorphicComponentPropsWithRef<C, {}>
+) => React.ReactElement | null;
+
+
+// --- SOLUTION ---
+// We define the implementation and then cast it to our desired type.
+// This solves the incompatibility error with forwardRef.
+
+const GridComponent = forwardRef(
   <C extends ElementType = 'div'>(
     {
       as,
@@ -63,4 +75,6 @@ export const Grid = forwardRef(
   }
 );
 
-(Grid as React.FunctionComponent).displayName = 'Grid';
+GridComponent.displayName = 'Grid';
+
+export const Grid = GridComponent as GridComponentType;
