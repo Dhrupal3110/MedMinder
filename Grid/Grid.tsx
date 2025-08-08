@@ -1,8 +1,9 @@
 import React, { forwardRef } from 'react';
-import clsx from 'clsx';
+import type { HTMLAttributes, ReactNode } from 'react';
+import type { JSX } from 'react';
 import './Grid.css';
 
-export interface GridProps extends React.HTMLAttributes<HTMLElement> {
+export interface GridProps extends HTMLAttributes<HTMLElement> {
   cols?: number;
   gap?: number | string;
   rowGap?: number | string;
@@ -10,7 +11,7 @@ export interface GridProps extends React.HTMLAttributes<HTMLElement> {
   responsive?: boolean;
   as?: keyof JSX.IntrinsicElements;
   className?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export const Grid = forwardRef<HTMLElement, GridProps>(({
@@ -19,20 +20,20 @@ export const Grid = forwardRef<HTMLElement, GridProps>(({
   rowGap,
   columnGap,
   responsive = true,
-  as: Component = 'div',
-  className,
+  as = 'div',
+  className = '',
   children,
   style,
   ...props
 }, ref) => {
-  const gridClasses = clsx(
-    'ui-grid',
-    {
-      'ui-grid--responsive': responsive,
-      [`ui-grid--cols-${cols}`]: cols,
-    },
-    className
-  );
+  const Component = as;
+
+  const baseClass = 'ui-grid';
+  const responsiveClass = responsive ? 'ui-grid--responsive' : '';
+  const colsClass = cols ? `ui-grid--cols-${cols}` : '';
+  const combinedClassName = [baseClass, responsiveClass, colsClass, className]
+    .filter(Boolean)
+    .join(' ');
 
   const gridStyle = {
     ...style,
@@ -45,8 +46,8 @@ export const Grid = forwardRef<HTMLElement, GridProps>(({
   return (
     <Component
       {...props}
-      ref={ref as any}
-      className={gridClasses}
+      ref={ref}
+      className={combinedClassName}
       style={gridStyle}
     >
       {children}
