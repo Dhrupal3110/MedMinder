@@ -1,0 +1,251 @@
+/* Grid Component - CSS Variables and Styles */
+
+:root {
+  --grid-gap: 1rem;
+  --grid-column-gap: 1rem;
+  --grid-row-gap: 1rem;
+  --grid-cols: 12;
+}
+
+[data-theme='dark'] {
+  --grid-gap: 1.25rem;
+  --grid-column-gap: 1.25rem;
+  --grid-row-gap: 1.25rem;
+}
+
+/* Base Grid Styles */
+.ui-grid {
+  display: grid;
+  gap: var(--grid-gap);
+  grid-template-columns: repeat(var(--grid-cols, 12), 1fr);
+  width: 100%;
+}
+
+/* Custom Gap Overrides */
+.ui-grid[style*="--grid-column-gap"] {
+  column-gap: var(--grid-column-gap);
+}
+
+.ui-grid[style*="--grid-row-gap"] {
+  row-gap: var(--grid-row-gap);
+}
+
+.ui-grid[style*="--grid-gap"]:not([style*="--grid-column-gap"]):not([style*="--grid-row-gap"]) {
+  gap: var(--grid-gap);
+}
+
+/* Column Count Variants */
+.ui-grid--cols-1 {
+  grid-template-columns: repeat(1, 1fr);
+}
+
+.ui-grid--cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.ui-grid--cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.ui-grid--cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.ui-grid--cols-5 {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.ui-grid--cols-6 {
+  grid-template-columns: repeat(6, 1fr);
+}
+
+.ui-grid--cols-7 {
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.ui-grid--cols-8 {
+  grid-template-columns: repeat(8, 1fr);
+}
+
+.ui-grid--cols-9 {
+  grid-template-columns: repeat(9, 1fr);
+}
+
+.ui-grid--cols-10 {
+  grid-template-columns: repeat(10, 1fr);
+}
+
+.ui-grid--cols-11 {
+  grid-template-columns: repeat(11, 1fr);
+}
+
+.ui-grid--cols-12 {
+  grid-template-columns: repeat(12, 1fr);
+}
+
+/* Responsive Behavior */
+.ui-grid--responsive {
+  /* Mobile first approach */
+  grid-template-columns: 1fr;
+}
+
+/* Small tablets and large phones */
+@media (min-width: 576px) {
+  .ui-grid--responsive.ui-grid--cols-2,
+  .ui-grid--responsive.ui-grid--cols-3,
+  .ui-grid--responsive.ui-grid--cols-4,
+  .ui-grid--responsive.ui-grid--cols-5,
+  .ui-grid--responsive.ui-grid--cols-6,
+  .ui-grid--responsive.ui-grid--cols-7,
+  .ui-grid--responsive.ui-grid--cols-8,
+  .ui-grid--responsive.ui-grid--cols-9,
+  .ui-grid--responsive.ui-grid--cols-10,
+  .ui-grid--responsive.ui-grid--cols-11,
+  .ui-grid--responsive.ui-grid--cols-12 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Tablets */
+@media (min-width: 768px) {
+  .ui-grid--responsive.ui-grid--cols-3,
+  .ui-grid--responsive.ui-grid--cols-4,
+  .ui-grid--responsive.ui-grid--cols-5,
+  .ui-grid--responsive.ui-grid--cols-6,
+  .ui-grid--responsive.ui-grid--cols-7,
+  .ui-grid--responsive.ui-grid--cols-8,
+  .ui-grid--responsive.ui-grid--cols-9,
+  .ui-grid--responsive.ui-grid--cols-10,
+  .ui-grid--responsive.ui-grid--cols-11,
+  .ui-grid--responsive.ui-grid--cols-12 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .ui-grid--responsive.ui-grid--cols-4,
+  .ui-grid--responsive.ui-grid--cols-5,
+  .ui-grid--responsive.ui-grid--cols-6,
+  .ui-grid--responsive.ui-grid--cols-7,
+  .ui-grid--responsive.ui-grid--cols-8,
+  .ui-grid--responsive.ui-grid--cols-9,
+  .ui-grid--responsive.ui-grid--cols-10,
+  .ui-grid--responsive.ui-grid--cols-11,
+  .ui-grid--responsive.ui-grid--cols-12 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Small desktops */
+@media (min-width: 992px) {
+  .ui-grid--responsive.ui-grid--cols-6,
+  .ui-grid--responsive.ui-grid--cols-7,
+  .ui-grid--responsive.ui-grid--cols-8,
+  .ui-grid--responsive.ui-grid--cols-9,
+  .ui-grid--responsive.ui-grid--cols-10,
+  .ui-grid--responsive.ui-grid--cols-11,
+  .ui-grid--responsive.ui-grid--cols-12 {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+/* Large desktops */
+@media (min-width: 1200px) {
+  .ui-grid--responsive.ui-grid--cols-8,
+  .ui-grid--responsive.ui-grid--cols-9,
+  .ui-grid--responsive.ui-grid--cols-10,
+  .ui-grid--responsive.ui-grid--cols-11,
+  .ui-grid--responsive.ui-grid--cols-12 {
+    grid-template-columns: repeat(8, 1fr);
+  }
+}
+
+/* Extra large desktops */
+@media (min-width: 1400px) {
+  .ui-grid--responsive.ui-grid--cols-12 {
+    grid-template-columns: repeat(12, 1fr);
+  }
+
+  .ui-grid--responsive.ui-grid--cols-10,
+  .ui-grid--responsive.ui-grid--cols-11 {
+    grid-template-columns: repeat(10, 1fr);
+  }
+}
+
+/* Grid Item Utilities */
+.ui-grid > * {
+  min-width: 0; /* Prevent overflow in grid items */
+}
+
+/* Auto-fit and Auto-fill Support */
+.ui-grid--auto-fit {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.ui-grid--auto-fill {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+/* Dense Grid Layout */
+.ui-grid--dense {
+  grid-auto-flow: dense;
+}
+
+/* Grid Alignment */
+.ui-grid--center {
+  justify-items: center;
+  align-items: center;
+}
+
+.ui-grid--start {
+  justify-items: start;
+  align-items: start;
+}
+
+.ui-grid--end {
+  justify-items: end;
+  align-items: end;
+}
+
+.ui-grid--stretch {
+  justify-items: stretch;
+  align-items: stretch;
+}
+
+/* Print Styles */
+@media print {
+  .ui-grid--responsive {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  .ui-grid {
+    break-inside: avoid;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .ui-grid {
+    outline: 1px solid var(--border-color, #000);
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .ui-grid {
+    transition: none;
+  }
+}
+
+/* RTL Support */
+[dir="rtl"] .ui-grid {
+  direction: rtl;
+}
+
+[dir="rtl"] .ui-grid > * {
+  direction: ltr;
+}
+
+/* Focus Management */
+.ui-grid:focus-visible {
+  outline: 2px solid var(--focus-color, #0066cc);
+  outline-offset: 2px;
+}
