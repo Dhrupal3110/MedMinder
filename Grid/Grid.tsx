@@ -1,9 +1,14 @@
-import React, { ElementType, forwardRef, type CSSProperties, type ReactNode } from 'react';
+import React, {
+  ElementType,
+  forwardRef,
+  type ComponentPropsWithoutRef,
+  type ElementRef,
+  type ReactNode,
+  type CSSProperties,
+} from 'react';
 import './Grid.css';
 
-type GridElement = keyof JSX.IntrinsicElements;
-
-type Props<T extends GridElement> = {
+type GridProps<T extends ElementType> = {
   as?: T;
   cols?: number;
   gap?: number | string;
@@ -11,12 +16,12 @@ type Props<T extends GridElement> = {
   columnGap?: number | string;
   responsive?: boolean;
   className?: string;
-  children: ReactNode;
   style?: CSSProperties;
-} & Omit<React.ComponentPropsWithoutRef<T>, 'as' | 'style' | 'className' | 'children'>;
+  children: ReactNode;
+} & ComponentPropsWithoutRef<T>;
 
 export const Grid = forwardRef(
-  <T extends GridElement = 'div'>(
+  <T extends ElementType = 'div'>(
     {
       as,
       cols = 12,
@@ -25,11 +30,11 @@ export const Grid = forwardRef(
       columnGap,
       responsive = true,
       className = '',
-      children,
       style,
-      ...props
-    }: Props<T>,
-    ref: React.Ref<Element>
+      children,
+      ...rest
+    }: GridProps<T>,
+    ref: React.Ref<ElementRef<T>>
   ) => {
     const Component = as || 'div';
 
@@ -38,7 +43,9 @@ export const Grid = forwardRef(
       responsive ? 'ui-grid--responsive' : '',
       `ui-grid--cols-${cols}`,
       className,
-    ].filter(Boolean).join(' ');
+    ]
+      .filter(Boolean)
+      .join(' ');
 
     const gridStyle: CSSProperties = {
       ...style,
@@ -50,10 +57,10 @@ export const Grid = forwardRef(
 
     return (
       <Component
-        {...props}
         ref={ref}
         className={gridClassName}
         style={gridStyle}
+        {...rest}
       >
         {children}
       </Component>
