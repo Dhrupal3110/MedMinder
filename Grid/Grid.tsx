@@ -1,15 +1,16 @@
 import React, { forwardRef } from 'react';
-import type { HTMLAttributes, ReactNode } from 'react';
+import type { HTMLAttributes, ReactNode, ElementType, ComponentPropsWithoutRef } from 'react';
 import type { JSX } from 'react';
 import './Grid.css';
 
-export interface GridProps extends HTMLAttributes<HTMLElement> {
+export interface GridProps<T extends ElementType = 'div'> 
+  extends Omit<ComponentPropsWithoutRef<T>, 'as' | 'children'> {
   cols?: number;
   gap?: number | string;
   rowGap?: number | string;
   columnGap?: number | string;
   responsive?: boolean;
-  as?: keyof JSX.IntrinsicElements;
+  as?: T;
   className?: string;
   children: ReactNode;
 }
@@ -26,8 +27,7 @@ export const Grid = forwardRef<HTMLElement, GridProps>(({
   style,
   ...props
 }, ref) => {
-  const Component = as;
-
+  const Component = as as ElementType;
   const baseClass = 'ui-grid';
   const responsiveClass = responsive ? 'ui-grid--responsive' : '';
   const colsClass = cols ? `ui-grid--cols-${cols}` : '';
