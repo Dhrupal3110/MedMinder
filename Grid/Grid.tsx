@@ -1,71 +1,57 @@
-import React, {
-  ElementType,
-  forwardRef,
-  type ComponentPropsWithoutRef,
-  type ElementRef,
-  type ReactNode,
-  type CSSProperties,
-} from 'react';
+import React, { forwardRef } from 'react';
+import clsx from 'clsx';
 import './Grid.css';
 
-type GridProps<T extends ElementType> = {
-  as?: T;
+export interface GridProps extends React.HTMLAttributes<HTMLElement> {
   cols?: number;
   gap?: number | string;
   rowGap?: number | string;
   columnGap?: number | string;
   responsive?: boolean;
+  as?: keyof JSX.IntrinsicElements;
   className?: string;
-  style?: CSSProperties;
-  children: ReactNode;
-} & ComponentPropsWithoutRef<T>;
+  children: React.ReactNode;
+}
 
-export const Grid = forwardRef(
-  <T extends ElementType = 'div'>(
+export const Grid = forwardRef<HTMLElement, GridProps>(({
+  cols = 12,
+  gap,
+  rowGap,
+  columnGap,
+  responsive = true,
+  as: Component = 'div',
+  className,
+  children,
+  style,
+  ...props
+}, ref) => {
+  const gridClasses = clsx(
+    'ui-grid',
     {
-      as,
-      cols = 12,
-      gap,
-      rowGap,
-      columnGap,
-      responsive = true,
-      className = '',
-      style,
-      children,
-      ...rest
-    }: GridProps<T>,
-    ref: React.Ref<ElementRef<T>>
-  ) => {
-    const Component = as || 'div';
+      'ui-grid--responsive': responsive,
+      [`ui-grid--cols-${cols}`]: cols,
+    },
+    className
+  );
 
-    const gridClassName = [
-      'ui-grid',
-      responsive ? 'ui-grid--responsive' : '',
-      `ui-grid--cols-${cols}`,
-      className,
-    ]
-      .filter(Boolean)
-      .join(' ');
+  const gridStyle = {
+    ...style,
+    ...(gap !== undefined && { '--grid-gap': typeof gap === 'number' ? `${gap}rem` : gap }),
+    ...(rowGap !== undefined && { '--grid-row-gap': typeof rowGap === 'number' ? `${rowGap}rem` : rowGap }),
+    ...(columnGap !== undefined && { '--grid-column-gap': typeof columnGap === 'number' ? `${columnGap}rem` : columnGap }),
+    ...(cols && { '--grid-cols': cols.toString() }),
+  } as React.CSSProperties;
 
-    const gridStyle: CSSProperties = {
-      ...style,
-      ...(gap !== undefined && { '--grid-gap': typeof gap === 'number' ? `${gap}rem` : gap }),
-      ...(rowGap !== undefined && { '--grid-row-gap': typeof rowGap === 'number' ? `${rowGap}rem` : rowGap }),
-      ...(columnGap !== undefined && { '--grid-column-gap': typeof columnGap === 'number' ? `${columnGap}rem` : columnGap }),
-      '--grid-cols': cols.toString(),
-    } as CSSProperties;
-
-    return (
-      <Component
-        ref={ref}
-        className={gridClassName}
-        style={gridStyle}
-        {...rest}
-      >
-        {children}
-      </Component>
-    );
-  }
-);
+  return (
+    <Component
+      {...props}
+      ref={ref as any}
+      className={gridClasses}
+      style={gridStyle}
+    >
+      {children}
+    </Component>
+  );
+});
 
 Grid.displayName = 'Grid';
