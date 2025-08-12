@@ -1,0 +1,218 @@
+/* Container Component - Layout Wrapper */
+:root {
+  --container-max-width: 1200px;
+  --container-padding: var(--spacing-md);
+  --container-padding-sm: var(--spacing-sm);
+  --container-padding-lg: var(--spacing-lg);
+  --container-margin: 0 auto;
+}
+
+[data-theme="dark"] {
+  --container-max-width: 1200px;
+  --container-padding: var(--spacing-md);
+  --container-padding-sm: var(--spacing-sm);
+  --container-padding-lg: var(--spacing-lg);
+  --container-margin: 0 auto;
+}
+
+.ui-container {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: var(--container-max-width);
+  padding-left: var(--container-padding);
+  padding-right: var(--container-padding);
+  transition: all var(--transition-duration, 0.2s) ease;
+}
+
+/* Centering */
+.ui-container--center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Fluid container */
+.ui-container--fluid {
+  max-width: none;
+  width: 100%;
+}
+
+/* Focus states */
+.ui-container:focus-visible {
+  outline: var(--focus-ring-width, 2px) solid var(--focus-ring-color, var(--primary-color));
+  outline-offset: var(--focus-ring-offset, 2px);
+}
+
+/* Responsive breakpoints */
+@media (max-width: 576px) {
+  .ui-container {
+    padding-left: var(--container-padding-sm);
+    padding-right: var(--container-padding-sm);
+  }
+}
+
+@media (min-width: 577px) and (max-width: 768px) {
+  .ui-container {
+    padding-left: var(--container-padding);
+    padding-right: var(--container-padding);
+  }
+}
+
+@media (min-width: 769px) and (max-width: 992px) {
+  .ui-container {
+    padding-left: var(--container-padding);
+    padding-right: var(--container-padding);
+  }
+}
+
+@media (min-width: 993px) and (max-width: 1200px) {
+  .ui-container {
+    padding-left: var(--container-padding-lg);
+    padding-right: var(--container-padding-lg);
+  }
+}
+
+@media (min-width: 1201px) {
+  .ui-container {
+    padding-left: var(--container-padding-lg);
+    padding-right: var(--container-padding-lg);
+  }
+}
+
+/* Container variants for different max-widths */
+.ui-container--xs {
+  max-width: 540px;
+}
+
+.ui-container--sm {
+  max-width: 720px;
+}
+
+.ui-container--md {
+  max-width: 960px;
+}
+
+.ui-container--lg {
+  max-width: 1140px;
+}
+
+.ui-container--xl {
+  max-width: 1320px;
+}
+
+/* Theme support */
+[data-theme="dark"] .ui-container {
+  color: var(--text-primary);
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .ui-container:focus-visible {
+    outline-width: var(--focus-ring-width-high-contrast, 3px);
+    outline-color: var(--text-primary);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .ui-container {
+    transition: none;
+  }
+}
+
+/* RTL Support */
+[dir="rtl"] .ui-container {
+  direction: rtl;
+}
+
+[dir="rtl"] .ui-container--center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Print styles */
+@media print {
+  .ui-container {
+    max-width: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .ui-container--fluid {
+    max-width: none;
+  }
+}
+
+/* Ensure proper stacking context */
+.ui-container {
+  position: relative;
+  z-index: 1;
+}
+
+/* Container with background support */
+.ui-container--with-background {
+  background-color: var(--surface-color);
+  border-radius: var(--border-radius-md, 8px);
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05));
+}
+
+[data-theme="dark"] .ui-container--with-background {
+  background-color: var(--surface-color);
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+/* Accessibility improvements */
+.ui-container[role="main"],
+.ui-container[role="region"],
+.ui-container[role="article"] {
+  outline: none;
+}
+
+.ui-container[tabindex] {
+  cursor: pointer;
+}
+
+/* Animation for dynamic containers */
+@keyframes ui-container-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(var(--spacing-xs, 4px));
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ui-container--animated {
+  animation: ui-container-fade-in var(--animation-duration, 0.3s) ease-out;
+}
+
+/* Container nesting support */
+.ui-container .ui-container {
+  padding-left: 0;
+  padding-right: 0;
+  max-width: none;
+}
+
+/* Full height container */
+.ui-container--full-height {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Container with padding variants */
+.ui-container--padding-none {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.ui-container--padding-sm {
+  padding-left: var(--container-padding-sm);
+  padding-right: var(--container-padding-sm);
+}
+
+.ui-container--padding-lg {
+  padding-left: var(--container-padding-lg);
+  padding-right: var(--container-padding-lg);
+}
