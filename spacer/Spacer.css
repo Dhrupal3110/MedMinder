@@ -1,0 +1,166 @@
+/* Spacer Component */
+:root {
+  /* Spacing scale variables */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 64px;
+  
+  /* Responsive breakpoints for spacer */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+}
+
+/* Dark theme variables */
+[data-theme="dark"] {
+  /* Spacer inherits spacing from root, no color-specific overrides needed */
+}
+
+/* Base Spacer */
+.ui-spacer {
+  box-sizing: border-box;
+  flex-shrink: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Vertical Spacer (default) */
+.ui-spacer--vertical {
+  width: 0;
+  min-height: var(--spacing-md);
+}
+
+/* Horizontal Spacer */
+.ui-spacer--horizontal {
+  height: 0;
+  min-width: var(--spacing-md);
+  display: inline-block;
+}
+
+/* Responsive Spacer Utilities */
+.ui-spacer--responsive-xs {
+  height: var(--spacing-xs);
+}
+
+.ui-spacer--responsive-sm {
+  height: var(--spacing-sm);
+}
+
+.ui-spacer--responsive-md {
+  height: var(--spacing-md);
+}
+
+.ui-spacer--responsive-lg {
+  height: var(--spacing-lg);
+}
+
+.ui-spacer--responsive-xl {
+  height: var(--spacing-xl);
+}
+
+/* Horizontal responsive utilities */
+.ui-spacer--horizontal.ui-spacer--responsive-xs {
+  width: var(--spacing-xs);
+  height: 0;
+}
+
+.ui-spacer--horizontal.ui-spacer--responsive-sm {
+  width: var(--spacing-sm);
+  height: 0;
+}
+
+.ui-spacer--horizontal.ui-spacer--responsive-md {
+  width: var(--spacing-md);
+  height: 0;
+}
+
+.ui-spacer--horizontal.ui-spacer--responsive-lg {
+  width: var(--spacing-lg);
+  height: 0;
+}
+
+.ui-spacer--horizontal.ui-spacer--responsive-xl {
+  width: var(--spacing-xl);
+  height: 0;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 640px) {
+  .ui-spacer--responsive-mobile {
+    height: var(--spacing-sm);
+  }
+  
+  .ui-spacer--horizontal.ui-spacer--responsive-mobile {
+    width: var(--spacing-sm);
+    height: 0;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .ui-spacer--responsive-tablet {
+    height: var(--spacing-md);
+  }
+  
+  .ui-spacer--horizontal.ui-spacer--responsive-tablet {
+    width: var(--spacing-md);
+    height: 0;
+  }
+}
+
+@media (min-width: 1025px) {
+  .ui-spacer--responsive-desktop {
+    height: var(--spacing-lg);
+  }
+  
+  .ui-spacer--horizontal.ui-spacer--responsive-desktop {
+    width: var(--spacing-lg);
+    height: 0;
+  }
+}
+
+/* Visual debugging utility (for development) */
+.ui-spacer--debug {
+  background-color: rgba(255, 0, 0, 0.1);
+  border: 1px dashed rgba(255, 0, 0, 0.3);
+  opacity: 0.5;
+}
+
+[data-theme="dark"] .ui-spacer--debug {
+  background-color: rgba(255, 100, 100, 0.1);
+  border-color: rgba(255, 100, 100, 0.3);
+}
+
+/* Ensure spacer doesn't interfere with flex layouts */
+.ui-spacer {
+  align-self: stretch;
+}
+
+.ui-spacer--horizontal {
+  align-self: auto;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .ui-spacer--debug {
+    border-color: red;
+    background-color: rgba(255, 0, 0, 0.2);
+  }
+}
+
+/* Print styles */
+@media print {
+  .ui-spacer {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  
+  .ui-spacer--debug {
+    background: none;
+    border: none;
+  }
+}
