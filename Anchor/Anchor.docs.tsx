@@ -150,7 +150,7 @@ export const AnchorDocs: React.FC = () => {
       key: 'components',
       title: 'Components',
       href: '#components',
-              children: [
+      children: [
         {
           key: 'basic-components',
           title: 'Basic Components',
@@ -163,6 +163,171 @@ export const AnchorDocs: React.FC = () => {
         { key: 'layout-components', title: 'Layout Components', href: '#layout-components' },
       ],
     },
+    { key: 'theming', title: 'Theming', href: '#theming' },
+  ];
+
+  const iconItems: AnchorItem[] = [
+    {
+      key: 'overview',
+      title: (
+        <Flex align="center" gap="xs">
+          <FileText size={14} />
+          Overview
+        </Flex>
+      ),
+      href: '#overview',
+    },
+    {
+      key: 'features',
+      title: (
+        <Flex align="center" gap="xs">
+          <Zap size={14} />
+          Features
+        </Flex>
+      ),
+      href: '#features',
+    },
+    {
+      key: 'gallery',
+      title: (
+        <Flex align="center" gap="xs">
+          <Image size={14} />
+          Gallery
+        </Flex>
+      ),
+      href: '#gallery',
+    },
+    {
+      key: 'code-examples',
+      title: (
+        <Flex align="center" gap="xs">
+          <Code size={14} />
+          Code Examples
+        </Flex>
+      ),
+      href: '#code-examples',
+    },
+    {
+      key: 'settings',
+      title: (
+        <Flex align="center" gap="xs">
+          <Settings size={14} />
+          Settings
+        </Flex>
+      ),
+      href: '#settings',
+    },
+  ];
+
+  return (
+    <div className="component-docs">
+      <div className="docs-header">
+        <h1>
+          <AnchorIcon size={24} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+          Anchor
+        </h1>
+        <p>Anchor navigation component for page sections. Automatically highlights the active section and provides smooth scrolling navigation with support for nested anchors.</p>
+      </div>
+
+      <div className="docs-section">
+        <h2>When To Use</h2>
+        <ul>
+          <li>For navigating between sections of a long page or document.</li>
+          <li>When you need to provide a table of contents for lengthy content.</li>
+          <li>To create a persistent navigation sidebar that follows the user's scroll position.</li>
+          <li>For documentation sites, articles, or any content with clear hierarchical structure.</li>
+          <li>When you want to provide quick access to different sections without losing context.</li>
+        </ul>
+      </div>
+
+      <div className="docs-section">
+        <h2>Examples</h2>
+
+        {/* Basic */}
+        <ExampleContainer
+          title="Basic"
+          description="Simple anchor navigation with a few links. Click on any link to see smooth scrolling."
+          style={{ display: 'flex', gap: '24px' }}
+          code={`const items = [
+  { key: 'introduction', title: 'Introduction', href: '#introduction' },
+  { key: 'installation', title: 'Installation', href: '#installation' },
+  { key: 'usage', title: 'Usage', href: '#usage' },
+  { key: 'examples', title: 'Examples', href: '#examples' },
+  { key: 'api', title: 'API Reference', href: '#api' },
+];
+
+<Anchor items={items} />`}
+        >
+          <>
+            <div style={{ minWidth: '180px' }}>
+              <Anchor items={basicItems} />
+            </div>
+            <div style={{ flex: 1, maxHeight: '300px', overflow: 'auto', padding: '16px', border: '1px solid var(--color-border)', borderRadius: '8px' }}>
+              <div id="introduction" style={{ marginBottom: '100px' }}>
+                <Typography variant="h3">Introduction</Typography>
+                <Typography variant="body1">
+                  This is the introduction section. It contains basic information about the component and how to get started.
+                </Typography>
+              </div>
+              <div id="installation" style={{ marginBottom: '100px' }}>
+                <Typography variant="h3">Installation</Typography>
+                <Typography variant="body1">
+                  Installation instructions and requirements go here. Follow the steps to set up the component in your project.
+                </Typography>
+              </div>
+              <div id="usage" style={{ marginBottom: '100px' }}>
+                <Typography variant="h3">Usage</Typography>
+                <Typography variant="body1">
+                  Basic usage examples and common patterns. Learn how to implement the component effectively.
+                </Typography>
+              </div>
+              <div id="examples" style={{ marginBottom: '100px' }}>
+                <Typography variant="h3">Examples</Typography>
+                <Typography variant="body1">
+                  Comprehensive examples showcasing different features and use cases of the component.
+                </Typography>
+              </div>
+              <div id="api" style={{ marginBottom: '50px' }}>
+                <Typography variant="h3">API Reference</Typography>
+                <Typography variant="body1">
+                  Complete API documentation with all available props, methods, and configuration options.
+                </Typography>
+              </div>
+            </div>
+          </>
+        </ExampleContainer>
+
+        {/* Nested Items */}
+        <ExampleContainer
+          title="Nested Anchor Links"
+          description="Hierarchical navigation with nested children. Supports multiple levels of nesting."
+          style={{ display: 'flex', gap: '24px' }}
+          code={`const nestedItems = [
+  {
+    key: 'getting-started',
+    title: 'Getting Started',
+    href: '#getting-started',
+    children: [
+      { key: 'prerequisites', title: 'Prerequisites', href: '#prerequisites' },
+      { key: 'quick-start', title: 'Quick Start', href: '#quick-start' },
+    ],
+  },
+  {
+    key: 'components',
+    title: 'Components',
+    href: '#components',
+    children: [
+      {
+        key: 'basic-components',
+        title: 'Basic Components',
+        href: '#basic-components',
+        children: [
+          { key: 'button-component', title: 'Button', href: '#button-component' },
+          { key: 'input-component', title: 'Input', href: '#input-component' },
+        ],
+      },
+      { key: 'layout-components', title: 'Layout Components', href: '#layout-components' },
+    ],
   },
   { key: 'theming', title: 'Theming', href: '#theming' },
 ];
@@ -555,186 +720,4 @@ export const AnchorDocs: React.FC = () => {
       </div>
     </div>
   );
-};: [
-            {
-              key: 'button-component',
-              title: 'Button',
-              href: '#button-component',
-            },
-            {
-              key: 'input-component',
-              title: 'Input',
-              href: '#input-component',
-            },
-          ],
-        },
-        {
-          key: 'layout-components',
-          title: 'Layout Components',
-          href: '#layout-components',
-        },
-      ],
-    },
-    {
-      key: 'theming',
-      title: 'Theming',
-      href: '#theming',
-    },
-  ];
-
-  const iconItems: AnchorItem[] = [
-    {
-      key: 'overview',
-      title: (
-        <Flex align="center" gap="xs">
-          <FileText size={14} />
-          Overview
-        </Flex>
-      ),
-      href: '#overview',
-    },
-    {
-      key: 'features',
-      title: (
-        <Flex align="center" gap="xs">
-          <Zap size={14} />
-          Features
-        </Flex>
-      ),
-      href: '#features',
-    },
-    {
-      key: 'gallery',
-      title: (
-        <Flex align="center" gap="xs">
-          <Image size={14} />
-          Gallery
-        </Flex>
-      ),
-      href: '#gallery',
-    },
-    {
-      key: 'code-examples',
-      title: (
-        <Flex align="center" gap="xs">
-          <Code size={14} />
-          Code Examples
-        </Flex>
-      ),
-      href: '#code-examples',
-    },
-    {
-      key: 'settings',
-      title: (
-        <Flex align="center" gap="xs">
-          <Settings size={14} />
-          Settings
-        </Flex>
-      ),
-      href: '#settings',
-    },
-  ];
-
-  return (
-    <div className="component-docs">
-      <div className="docs-header">
-        <h1>
-          <AnchorIcon size={24} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
-          Anchor
-        </h1>
-        <p>Anchor navigation component for page sections. Automatically highlights the active section and provides smooth scrolling navigation with support for nested anchors.</p>
-      </div>
-
-      <div className="docs-section">
-        <h2>When To Use</h2>
-        <ul>
-          <li>For navigating between sections of a long page or document.</li>
-          <li>When you need to provide a table of contents for lengthy content.</li>
-          <li>To create a persistent navigation sidebar that follows the user's scroll position.</li>
-          <li>For documentation sites, articles, or any content with clear hierarchical structure.</li>
-          <li>When you want to provide quick access to different sections without losing context.</li>
-        </ul>
-      </div>
-
-      <div className="docs-section">
-        <h2>Examples</h2>
-
-        {/* Basic */}
-        <ExampleContainer
-          title="Basic"
-          description="Simple anchor navigation with a few links. Click on any link to see smooth scrolling."
-          style={{ display: 'flex', gap: '24px' }}
-          code={`const items = [
-  { key: 'introduction', title: 'Introduction', href: '#introduction' },
-  { key: 'installation', title: 'Installation', href: '#installation' },
-  { key: 'usage', title: 'Usage', href: '#usage' },
-  { key: 'examples', title: 'Examples', href: '#examples' },
-  { key: 'api', title: 'API Reference', href: '#api' },
-];
-
-<Anchor items={items} />`}
-        >
-          <>
-            <div style={{ minWidth: '180px' }}>
-              <Anchor items={basicItems} />
-            </div>
-            <div style={{ flex: 1, maxHeight: '300px', overflow: 'auto', padding: '16px', border: '1px solid var(--color-border)', borderRadius: '8px' }}>
-              <div id="introduction" style={{ marginBottom: '100px' }}>
-                <Typography variant="h3">Introduction</Typography>
-                <Typography variant="body1">
-                  This is the introduction section. It contains basic information about the component and how to get started.
-                </Typography>
-              </div>
-              <div id="installation" style={{ marginBottom: '100px' }}>
-                <Typography variant="h3">Installation</Typography>
-                <Typography variant="body1">
-                  Installation instructions and requirements go here. Follow the steps to set up the component in your project.
-                </Typography>
-              </div>
-              <div id="usage" style={{ marginBottom: '100px' }}>
-                <Typography variant="h3">Usage</Typography>
-                <Typography variant="body1">
-                  Basic usage examples and common patterns. Learn how to implement the component effectively.
-                </Typography>
-              </div>
-              <div id="examples" style={{ marginBottom: '100px' }}>
-                <Typography variant="h3">Examples</Typography>
-                <Typography variant="body1">
-                  Comprehensive examples showcasing different features and use cases of the component.
-                </Typography>
-              </div>
-              <div id="api" style={{ marginBottom: '50px' }}>
-                <Typography variant="h3">API Reference</Typography>
-                <Typography variant="body1">
-                  Complete API documentation with all available props, methods, and configuration options.
-                </Typography>
-              </div>
-            </div>
-          </>
-        </ExampleContainer>
-
-        {/* Nested Items */}
-        <ExampleContainer
-          title="Nested Anchor Links"
-          description="Hierarchical navigation with nested children. Supports multiple levels of nesting."
-          style={{ display: 'flex', gap: '24px' }}
-          code={`const nestedItems = [
-  {
-    key: 'getting-started',
-    title: 'Getting Started',
-    href: '#getting-started',
-    children: [
-      { key: 'prerequisites', title: 'Prerequisites', href: '#prerequisites' },
-      { key: 'quick-start', title: 'Quick Start', href: '#quick-start' },
-    ],
-  },
-  {
-    key: 'components',
-    title: 'Components',
-    href: '#components',
-    children: [
-      {
-        key: 'basic-components',
-        title: 'Basic Components',
-        href: '#basic-components',
-        children
+};
