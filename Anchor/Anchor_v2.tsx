@@ -19,8 +19,8 @@ export interface AnchorProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 
   className?: string;
   style?: React.CSSProperties;
   'aria-label'?: string;
-  containerId?: string; // ID of the scrollable container (optional)
-  anchorId?: string; // Unique ID for this anchor instance
+  container?: HTMLElement | string | (() => HTMLElement);
+  namespace?: string;
 }
 
 export const Anchor = forwardRef<HTMLDivElement, AnchorProps>(({
@@ -33,120 +33,120 @@ export const Anchor = forwardRef<HTMLDivElement, AnchorProps>(({
   className = '',
   style,
   'aria-label': ariaLabel,
-  containerId,
-  anchorId,
+  container,
+  namespace,
   ...props
 }, ref) => {
   const [internalActiveKey, setInternalActiveKey] = useState<string>(activeKey || '');
   const [isFixed, setIsFixed] = useState(false);
+  const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(null);
   const anchorRef = useRef<HTMLDivElement>(null);
   const inkRef = useRef<HTMLDivElement>(null);
   const isScrollingToTarget = useRef(false);
-  const instanceId = useRef(anchorId || `anchor-${Math.random().toString(36).substr(2, 9)}`);
   
   const currentActiveKey = activeKey ?? internalActiveKey;
 
-  // Get the scroll container (either specified container or window)
-  const getScrollContainer = useCallback(() => {
-    if (containerId) {
-      return document.getElementById(containerId);
-    }
-    return null; // Use window
-  }, [containerId]);
-
-  // Get scroll position for container or window
-  const getScrollTop = useCallback((container: HTMLElement | null) => {
-    if (container) {
-      return container.scrollTop;
-    }
-    return window.pageYOffset || document.documentElement.scrollTop;
-  }, []);
-
-  // Get container rect for relative positioning
-  const getContainerRect = useCallback((container: HTMLElement | null) => {
-    if (container) {
-      return container.getBoundingClientRect();
-    }
-    return { top: 0, left: 0 };
-  }, []);
-
-  // Generate unique href for this instance
-  const getUniqueHref = useCallback((originalHref: string) => {
-    if (anchorId || containerId) {
-      const prefix = anchorId || containerId;
-      // Remove the # if present and add our prefix
-      const cleanHref = originalHref.replace('#', '');
-      return `#${prefix}-${cleanHref}`;
-    }
-    return originalHref;
-  }, [anchorId, containerId]);
-
-  // Process items to add unique hrefs
+  // Process items with namespace
   const processedItems = React.useMemo(() => {
+    if (!namespace) return items;
+    
     const processItem = (item: AnchorItem): AnchorItem => ({
       ...item,
-      href: getUniqueHref(item.href),
+      href: item.href.startsWith('#') ? `#${namespace}-${item.href.slice(1)}` : item.href,
       children: item.children?.map(processItem)
     });
     
     return items.map(processItem);
-  }, [items, getUniqueHref]);
+  }, [items, namespace]);
+
+  // Get scroll container
+  useEffect(() => {
+    if (!container) {
+      setScrollContainer(null);
+      return;
+    }
+
+    let containerElement: HTMLElement | null = null;
+
+    if (typeof container === 'string') {
+      containerElement = document.querySelector(container);
+    } else if (typeof container === 'function') {
+      containerElement = container();
+    } else {
+      containerElement = container;
+    }
+
+    setScrollContainer(containerElement);
+  }, [container]);
+
+  // Get scroll position and dimensions
+  const getScrollInfo = useCallback(() => {
+    if (scrollContainer) {
+      return {
+        scrollTop: scrollContainer.scrollTop,
+        scrollHeight: scrollContainer.scrollHeight,
+        clientHeight: scrollContainer.clientHeight,
+        getBoundingClientRect: () => scrollContainer.getBoundingClientRect()
+      };
+    }
+    
+    return {
+      scrollTop: window.pageYOffset || document.documentElement.scrollTop,
+      scrollHeight: document.documentElement.scrollHeight,
+      clientHeight: window.innerHeight,
+      getBoundingClientRect: () => ({ top: 0, left: 0 })
+    };
+  }, [scrollContainer]);
 
   // Smooth scroll to target element
   const scrollToTarget = useCallback((href: string, key: string) => {
-    const container = getScrollContainer();
     const targetElement = document.querySelector(href);
+    if (!targetElement) return;
+
+    isScrollingToTarget.current = true;
     
-    if (targetElement) {
-      isScrollingToTarget.current = true;
-      
-      if (container) {
-        // Scroll within container
-        const containerRect = container.getBoundingClientRect();
-        const targetRect = targetElement.getBoundingClientRect();
-        const relativeTop = targetRect.top - containerRect.top;
-        const scrollPosition = container.scrollTop + relativeTop - offsetTop;
-        
-        container.scrollTo({
-          top: Math.max(0, scrollPosition),
-          behavior: 'smooth'
-        });
-      } else {
-        // Scroll window
-        const elementPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
-        const offsetPosition = elementPosition - offsetTop;
+    if (scrollContainer) {
+      // Scroll within container
+      const containerRect = scrollContainer.getBoundingClientRect();
+      const targetRect = targetElement.getBoundingClientRect();
+      const relativeTop = targetRect.top - containerRect.top;
+      const scrollTop = scrollContainer.scrollTop + relativeTop - offsetTop;
 
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        });
-      }
+      scrollContainer.scrollTo({
+        top: scrollTop,
+        behavior: 'smooth'
+      });
+    } else {
+      // Scroll document
+      const elementPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
+      const offsetPosition = elementPosition - offsetTop;
 
-      // Update active key
-      if (activeKey === undefined) {
-        setInternalActiveKey(key);
-      }
-      onChange?.(key);
-
-      // Reset scroll flag after animation
-      setTimeout(() => {
-        isScrollingToTarget.current = false;
-      }, 800);
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
     }
-  }, [getScrollContainer, offsetTop, activeKey, onChange]);
+
+    // Update active key
+    if (activeKey === undefined) {
+      setInternalActiveKey(key);
+    }
+    onChange?.(key);
+
+    // Reset scroll flag after animation
+    setTimeout(() => {
+      isScrollingToTarget.current = false;
+    }, 800);
+  }, [scrollContainer, offsetTop, activeKey, onChange]);
 
   // Handle scroll to detect active section
   useEffect(() => {
     if (processedItems.length === 0) return;
 
-    const container = getScrollContainer();
-    const scrollElement = container || window;
-
     const handleScroll = () => {
       if (isScrollingToTarget.current) return;
 
-      const scrollTop = getScrollTop(container);
-      const containerRect = getContainerRect(container);
+      const scrollInfo = getScrollInfo();
       let activeItem: string = '';
       let minDistance = Infinity;
 
@@ -154,29 +154,27 @@ export const Anchor = forwardRef<HTMLDivElement, AnchorProps>(({
       const checkItems = (itemList: AnchorItem[]) => {
         itemList.forEach(item => {
           const element = document.querySelector(item.href);
-          if (element) {
-            const rect = element.getBoundingClientRect();
-            let elementTop: number;
-            
-            if (container) {
-              // Calculate position relative to container
-              elementTop = rect.top - containerRect.top + container.scrollTop;
-              const distance = Math.abs(elementTop - scrollTop - offsetTop);
-              
-              if (elementTop <= scrollTop + offsetTop + 50 && distance < minDistance) {
-                minDistance = distance;
-                activeItem = item.key;
-              }
-            } else {
-              // Calculate position relative to window
-              elementTop = rect.top + window.pageYOffset;
-              const distance = Math.abs(elementTop - scrollTop - offsetTop);
-              
-              if (elementTop <= scrollTop + offsetTop + 50 && distance < minDistance) {
-                minDistance = distance;
-                activeItem = item.key;
-              }
-            }
+          if (!element) return;
+
+          let elementTop: number;
+          
+          if (scrollContainer) {
+            // Calculate position relative to container
+            const containerRect = scrollContainer.getBoundingClientRect();
+            const elementRect = element.getBoundingClientRect();
+            elementTop = elementRect.top - containerRect.top + scrollContainer.scrollTop;
+          } else {
+            // Calculate position relative to document
+            elementTop = element.getBoundingClientRect().top + scrollInfo.scrollTop;
+          }
+          
+          const distance = Math.abs(elementTop - scrollInfo.scrollTop - offsetTop);
+          
+          // Check if element is in view
+          const threshold = scrollContainer ? 50 : 50;
+          if (elementTop <= scrollInfo.scrollTop + offsetTop + threshold && distance < minDistance) {
+            minDistance = distance;
+            activeItem = item.key;
           }
           
           if (item.children) {
@@ -195,18 +193,20 @@ export const Anchor = forwardRef<HTMLDivElement, AnchorProps>(({
       }
     };
 
+    const target = scrollContainer || window;
     const eventOptions = { passive: true };
-    scrollElement.addEventListener('scroll', handleScroll, eventOptions);
+    
+    target.addEventListener('scroll', handleScroll, eventOptions);
     handleScroll(); // Initial check
 
     return () => {
-      scrollElement.removeEventListener('scroll', handleScroll);
+      target.removeEventListener('scroll', handleScroll, eventOptions);
     };
-  }, [processedItems, currentActiveKey, offsetTop, activeKey, onChange, getScrollContainer, getScrollTop, getContainerRect]);
+  }, [processedItems, currentActiveKey, offsetTop, activeKey, onChange, scrollContainer, getScrollInfo]);
 
-  // Handle affix behavior (only works with window scroll)
+  // Handle affix behavior (only for document scroll)
   useEffect(() => {
-    if (!affix || containerId) return; // Affix only works with window scroll
+    if (!affix || scrollContainer) return;
 
     const handleScroll = () => {
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
@@ -219,17 +219,17 @@ export const Anchor = forwardRef<HTMLDivElement, AnchorProps>(({
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [affix, offsetTop, containerId]);
+  }, [affix, offsetTop, scrollContainer]);
 
   // Update ink position
   useEffect(() => {
-    if (!inkRef.current || !currentActiveKey) return;
+    if (!inkRef.current || !currentActiveKey || !anchorRef.current) return;
 
-    const activeLink = anchorRef.current?.querySelector(`[data-anchor-key="${currentActiveKey}"]`);
+    const activeLink = anchorRef.current.querySelector(`[data-anchor-key="${currentActiveKey}"]`);
     if (activeLink) {
       const rect = activeLink.getBoundingClientRect();
-      const containerRect = anchorRef.current!.getBoundingClientRect();
-      const top = rect.top - containerRect.top + anchorRef.current!.scrollTop;
+      const containerRect = anchorRef.current.getBoundingClientRect();
+      const top = rect.top - containerRect.top + anchorRef.current.scrollTop;
       const height = rect.height;
 
       inkRef.current.style.top = `${top}px`;
@@ -281,7 +281,7 @@ export const Anchor = forwardRef<HTMLDivElement, AnchorProps>(({
 
   // Build class names
   const baseClass = 'ui-anchor';
-  const affixClass = affix && isFixed ? 'ui-anchor--fixed' : '';
+  const affixClass = affix && isFixed && !scrollContainer ? 'ui-anchor--fixed' : '';
   const showInkClass = showInkInFixed || !isFixed ? 'ui-anchor--show-ink' : '';
 
   const classes = [baseClass, affixClass, showInkClass, className]
@@ -296,7 +296,6 @@ export const Anchor = forwardRef<HTMLDivElement, AnchorProps>(({
       style={style}
       aria-label={ariaLabel || 'Page navigation'}
       role="navigation"
-      data-anchor-instance={instanceId.current}
     >
       <div ref={anchorRef} className="ui-anchor-wrapper">
         <div className="ui-anchor-ink-wrapper">
@@ -309,5 +308,3 @@ export const Anchor = forwardRef<HTMLDivElement, AnchorProps>(({
     </div>
   );
 });
-
-Anchor.displayName = 'Anchor';
