@@ -1,4 +1,7 @@
-Dropdown.css';
+
+import React, { forwardRef, useState, useRef, useEffect, useCallback } from 'react';
+import { ChevronDown } from 'lucide-react';
+import './Dropdown.css';
 
 export type DropdownPlacement = 'top' | 'bottom' | 'bottomRight' | 'bottomLeft' | 'topRight' | 'topLeft';
 export type DropdownTrigger = 'hover' | 'click' | 'contextMenu';
