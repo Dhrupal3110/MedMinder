@@ -1,4 +1,4 @@
-Dropdown.css';
+const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 export type DropdownPlacement = 'top' | 'bottom' | 'bottomRight' | 'bottomLeft' | 'topRight' | 'topLeft';
 export type DropdownTrigger = 'hover' | 'click' | 'contextMenu';
