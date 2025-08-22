@@ -52,12 +52,21 @@
 
 /* Apply animation to rotating elements */
 .ui-spin-rotating {
+  display: inline-block !important;
+  transform-origin: center;
   animation: ui-spin-rotate 1s linear infinite;
 }
 
 /* Specific selectors for the spinning elements */
-.ui-spin-icon.ui-spin-rotating,
+.ui-spin-icon.ui-spin-rotating {
+  display: inline-block !important;
+  transform-origin: center;
+  animation: ui-spin-rotate 1s linear infinite;
+}
+
 .ui-spin-indicator.ui-spin-rotating {
+  display: inline-block !important;
+  transform-origin: center;
   animation: ui-spin-rotate 1s linear infinite;
 }
 
