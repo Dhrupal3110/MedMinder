@@ -1,0 +1,85 @@
+/* CSS Variables for Card Component */
+:root {
+  --card-background: #ffffff;
+  --card-border-color: #d9d9d9;
+  --card-border-radius: 8px;
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+  --card-shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="dark"] {
+  --card-background: #1f1f1f;
+  --card-border-color: #434343;
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --card-shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+/* Base Card Styles */
+.ui-card {
+  background: var(--card-background);
+  border-radius: var(--card-border-radius);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* Bordered Card */
+.ui-card--bordered {
+  border: 1px solid var(--card-border-color);
+  box-shadow: var(--card-shadow);
+}
+
+/* Size Variants */
+.ui-card--sm {
+  padding: 12px;
+}
+
+.ui-card--md {
+  padding: 16px;
+}
+
+.ui-card--lg {
+  padding: 24px;
+}
+
+/* Hoverable Card */
+.ui-card--hoverable {
+  cursor: pointer;
+}
+
+.ui-card--hoverable:hover {
+  box-shadow: var(--card-shadow-hover);
+  transform: translateY(-2px);
+}
+
+/* Focus States */
+.ui-card--hoverable:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .ui-card--bordered {
+    border-width: 2px;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .ui-card {
+    transition: none;
+  }
+  
+  .ui-card--hoverable:hover {
+    transform: none;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .ui-card {
+    box-shadow: none !important;
+    border: 1px solid var(--card-border-color) !important;
+  }
+}
