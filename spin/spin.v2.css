@@ -1,21 +1,25 @@
 /* CSS Variables for Spin Component */
 :root {
-  --spin-color: #1890ff;
-  --spin-color-hover: #40a9ff;
-  --spin-overlay-bg: rgba(255, 255, 255, 0.85);
-  --spin-tip-color: #595959;
-  --spin-progress-trail: #f0f0f0;
-  --spin-progress-path: #1890ff;
+  --spin-color: var(--primary-500, #3b82f6);
+  --spin-color-hover: var(--primary-400, #60a5fa);
+  --spin-overlay-bg: var(--overlay-bg, rgba(255, 255, 255, 0.85));
+  --spin-tip-color: var(--text-muted, #6b7280);
+  --spin-progress-trail: var(--border-200, #e5e7eb);
+  --spin-progress-path: var(--primary-500, #3b82f6);
   --spin-backdrop-filter: blur(2px);
+  --spin-background: var(--background, #ffffff);
+  --spin-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06));
 }
 
 [data-theme="dark"] {
-  --spin-color: #1890ff;
-  --spin-color-hover: #40a9ff;
-  --spin-overlay-bg: rgba(0, 0, 0, 0.85);
-  --spin-tip-color: rgba(255, 255, 255, 0.65);
-  --spin-progress-trail: #434343;
-  --spin-progress-path: #1890ff;
+  --spin-color: var(--primary-400, #60a5fa);
+  --spin-color-hover: var(--primary-300, #93c5fd);
+  --spin-overlay-bg: var(--overlay-bg-dark, rgba(0, 0, 0, 0.85));
+  --spin-tip-color: var(--text-muted-dark, #9ca3af);
+  --spin-progress-trail: var(--border-700, #374151);
+  --spin-progress-path: var(--primary-400, #60a5fa);
+  --spin-background: var(--background-dark, #1f2937);
+  --spin-shadow: var(--shadow-md-dark, 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2));
 }
 
 /* Base Spin Styles */
@@ -36,19 +40,25 @@
   gap: 8px;
 }
 
-/* Spin Icon */
-.ui-spin-icon {
-  animation: ui-spin-rotate 1s linear infinite;
-  display: inline-block;
-}
-
+/* Spin Animation - This is the key fix */
 @keyframes ui-spin-rotate {
-  0% {
+  from {
     transform: rotate(0deg);
   }
-  100% {
+  to {
     transform: rotate(360deg);
   }
+}
+
+/* Apply animation to rotating elements */
+.ui-spin-rotating {
+  animation: ui-spin-rotate 1s linear infinite;
+}
+
+/* Specific selectors for the spinning elements */
+.ui-spin-icon.ui-spin-rotating,
+.ui-spin-indicator.ui-spin-rotating {
+  animation: ui-spin-rotate 1s linear infinite;
 }
 
 /* Size Variants */
@@ -94,6 +104,7 @@
 .ui-spin-wrapper {
   position: relative;
   transition: opacity 0.3s ease;
+  isolation: isolate;
 }
 
 .ui-spin-wrapper--spinning {
@@ -113,10 +124,10 @@
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 10;
-  background: var(--background-color);
+  background: var(--spin-background);
   padding: 16px;
   border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--spin-shadow);
 }
 
 /* Fullscreen Spinner */
@@ -205,35 +216,15 @@
 }
 
 /* Hover Effects */
-.ui-spin:hover .ui-spin-icon {
+.ui-spin:hover .ui-spin-rotating {
   color: var(--spin-color-hover);
 }
 
-/* Dark Theme Support */
-[data-theme="dark"] .ui-spin-wrapper .ui-spin {
-  background: var(--background-color);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
-}
-
-/* High Contrast Mode */
-@media (prefers-contrast: high) {
-  .ui-spin-icon {
-    stroke-width: 2.5px;
-  }
-  
-  .ui-spin-progress-trail,
-  .ui-spin-progress-path {
-    stroke-width: 3px;
-  }
-  
-  .ui-spin-wrapper .ui-spin {
-    border: 1px solid var(--border-color);
-  }
-}
-
-/* Reduced Motion */
+/* Reduced Motion Support */
 @media (prefers-reduced-motion: reduce) {
-  .ui-spin-icon {
+  .ui-spin-rotating,
+  .ui-spin-icon.ui-spin-rotating,
+  .ui-spin-indicator.ui-spin-rotating {
     animation: none;
   }
   
@@ -246,16 +237,20 @@
   .ui-spin-overlay {
     animation: none;
   }
+  
+  .ui-spin-content {
+    animation: none;
+  }
 }
 
 /* RTL Support */
-[dir="rtl"] .ui-spin-icon {
+[dir="rtl"] .ui-spin-rotating {
   animation-direction: reverse;
 }
 
 /* Focus States */
 .ui-spin:focus-visible {
-  outline: 2px solid var(--primary-color);
+  outline: 2px solid var(--spin-color);
   outline-offset: 4px;
   border-radius: 4px;
 }
@@ -304,23 +299,18 @@
   }
 }
 
-/* Ensure proper stacking */
-.ui-spin-wrapper {
-  isolation: isolate;
-}
-
-.ui-spin {
-  z-index: 1;
-}
-
-/* Custom indicator support */
-.ui-spin .ui-spin-content > *:not(.ui-spin-tip):not(.ui-spin-progress) {
-  animation: ui-spin-rotate 1s linear infinite;
-  display: inline-block;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .ui-spin .ui-spin-content > *:not(.ui-spin-tip):not(.ui-spin-progress) {
-    animation: none;
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .ui-spin-rotating {
+    stroke-width: 2.5px;
+  }
+  
+  .ui-spin-progress-trail,
+  .ui-spin-progress-path {
+    stroke-width: 3px;
+  }
+  
+  .ui-spin-wrapper .ui-spin {
+    border: 1px solid var(--spin-color);
   }
 }
