@@ -82,11 +82,17 @@ export const Spin = forwardRef<HTMLDivElement, SpinProps>(({
   // Default indicator with proper spinning class
   const getDefaultIndicator = () => {
     const iconSize = size === 'sm' ? 16 : size === 'lg' ? 24 : 20;
-    return <Loader2 size={iconSize} className="ui-spin-icon ui-spin-rotating" />;
+    return (
+      <Loader2 
+        size={iconSize} 
+        className="ui-spin-icon ui-spin-rotating"
+        style={{ display: 'inline-block' }}
+      />
+    );
   };
 
   const spinIndicator = indicator ? (
-    <div className="ui-spin-indicator ui-spin-rotating">
+    <div className="ui-spin-indicator ui-spin-rotating" style={{ display: 'inline-block' }}>
       {indicator}
     </div>
   ) : getDefaultIndicator();
