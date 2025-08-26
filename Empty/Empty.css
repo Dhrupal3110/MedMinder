@@ -1,0 +1,296 @@
+/* CSS Variables for Empty Component */
+:root {
+  --empty-color: #00000040;
+  --empty-img-color: #00000025;
+  --empty-text-color: rgba(0, 0, 0, 0.25);
+  --empty-description-color: #999999;
+  --empty-bg-color: #fafafa;
+  --empty-border-color: #f0f0f0;
+}
+
+[data-theme="dark"] {
+  --empty-color: rgba(255, 255, 255, 0.25);
+  --empty-img-color: rgba(255, 255, 255, 0.1);
+  --empty-text-color: rgba(255, 255, 255, 0.25);
+  --empty-description-color: rgba(255, 255, 255, 0.45);
+  --empty-bg-color: #141414;
+  --empty-border-color: #303030;
+}
+
+/* Base Empty Styles */
+.ui-empty {
+  margin: 32px 0;
+  text-align: center;
+  color: var(--empty-color);
+}
+
+.ui-empty-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px;
+}
+
+/* Image Section */
+.ui-empty-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.ui-empty-image-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Default Image Styles */
+.ui-empty-default-image {
+  color: var(--empty-img-color);
+  width: 64px;
+  height: 41px;
+  opacity: 0.8;
+}
+
+.ui-empty-ellipse {
+  fill: var(--empty-img-color);
+}
+
+.ui-empty-path {
+  fill: var(--empty-bg-color);
+  stroke: var(--empty-img-color);
+}
+
+/* Simple Image Styles */
+.ui-empty-simple-image {
+  width: 48px;
+  height: 48px;
+  color: var(--empty-img-color);
+}
+
+.ui-empty-circle {
+  fill: var(--empty-img-color);
+  opacity: 0.8;
+}
+
+.ui-empty-inbox-icon {
+  color: var(--empty-text-color);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Custom Image Styles */
+.ui-empty-custom-image {
+  max-width: 100%;
+  height: auto;
+  max-height: 120px;
+  object-fit: contain;
+  opacity: 0.8;
+}
+
+/* Text Section */
+.ui-empty-text {
+  margin-bottom: 8px;
+}
+
+.ui-empty-description {
+  color: var(--empty-description-color);
+  font-size: 14px;
+  line-height: 1.5715;
+  margin: 0;
+  padding: 0;
+}
+
+/* Footer Section */
+.ui-empty-footer {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 576px) {
+  .ui-empty {
+    margin: 16px 0;
+  }
+  
+  .ui-empty-content {
+    padding: 12px;
+    gap: 12px;
+  }
+  
+  .ui-empty-default-image {
+    width: 48px;
+    height: 31px;
+  }
+  
+  .ui-empty-simple-image {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .ui-empty-custom-image {
+    max-height: 80px;
+  }
+  
+  .ui-empty-description {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ui-empty-content {
+    padding: 8px;
+    gap: 8px;
+  }
+  
+  .ui-empty-footer {
+    margin-top: 12px;
+  }
+}
+
+/* Large Screen Adjustments */
+@media (min-width: 1200px) {
+  .ui-empty-default-image {
+    width: 80px;
+    height: 51px;
+  }
+  
+  .ui-empty-simple-image {
+    width: 56px;
+    height: 56px;
+  }
+  
+  .ui-empty-custom-image {
+    max-height: 160px;
+  }
+  
+  .ui-empty-description {
+    font-size: 15px;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .ui-empty-description {
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+  
+  .ui-empty-default-image,
+  .ui-empty-simple-image {
+    opacity: 1;
+  }
+  
+  .ui-empty-path {
+    stroke-width: 2;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .ui-empty-content {
+    transition: none;
+  }
+}
+
+/* Focus States */
+.ui-empty:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* Print Styles */
+@media print {
+  .ui-empty {
+    color: #000 !important;
+  }
+  
+  .ui-empty-description {
+    color: #666 !important;
+  }
+  
+  .ui-empty-default-image,
+  .ui-empty-simple-image {
+    opacity: 0.6;
+  }
+}
+
+/* RTL Support */
+[dir="rtl"] .ui-empty-content {
+  text-align: center; /* Center alignment works for both LTR and RTL */
+}
+
+/* Animation for content appearance */
+.ui-empty-content {
+  animation: ui-empty-fade-in 0.3s ease-out;
+}
+
+@keyframes ui-empty-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-empty-content {
+    animation: none;
+  }
+}
+
+/* Ensure proper spacing in different contexts */
+.ui-empty + .ui-empty {
+  margin-top: 0;
+}
+
+/* Container adaptations */
+.ui-empty-content > * {
+  max-width: 100%;
+}
+
+/* Ensure images don't break layout */
+.ui-empty-image-wrapper svg,
+.ui-empty-image-wrapper img {
+  display: block;
+}
+
+/* Custom icon positioning for simple image */
+.ui-empty-simple-image {
+  position: relative;
+}
+
+/* Accessibility improvements */
+.ui-empty[role="status"] {
+  position: relative;
+}
+
+/* Content alignment */
+.ui-empty-footer > * {
+  margin: 0 4px;
+}
+
+@media (max-width: 576px) {
+  .ui-empty-footer {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .ui-empty-footer > * {
+    margin: 0;
+    width: 100%;
+    max-width: 200px;
+  }
+}
