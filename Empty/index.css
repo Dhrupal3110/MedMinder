@@ -1,0 +1,25 @@
+/* Light Theme (add to :root) */
+:root {
+  /* Existing variables... */
+  
+  /* Empty Component Variables */
+  --empty-color: #00000040;
+  --empty-img-color: #00000025;
+  --empty-text-color: rgba(0, 0, 0, 0.25);
+  --empty-description-color: #999999;
+  --empty-bg-color: #fafafa;
+  --empty-border-color: #f0f0f0;
+}
+
+/* Dark Theme (add to [data-theme="dark"]) */
+[data-theme="dark"] {
+  /* Existing variables... */
+  
+  /* Empty Component Variables */
+  --empty-color: rgba(255, 255, 255, 0.25);
+  --empty-img-color: rgba(255, 255, 255, 0.1);
+  --empty-text-color: rgba(255, 255, 255, 0.25);
+  --empty-description-color: rgba(255, 255, 255, 0.45);
+  --empty-bg-color: #141414;
+  --empty-border-color: #303030;
+}
