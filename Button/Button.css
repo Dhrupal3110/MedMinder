@@ -1,3 +1,15 @@
+:root {
+  --gray-100: #33363b; /* A dark charcoal gray */
+  --gray-200: #4b5258; /* A medium-dark gray */
+  --gray-300: #6c757d; /* A more neutral gray */
+
+  --button-light: var(--gray-100);
+  --button-light-hover: var(--gray-200);
+  --button-light-active: var(--gray-300);
+}
+
+
+
 /* Root CSS Variables for Button Colors */
 :root {
   /* Primary Colors */
