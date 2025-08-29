@@ -1,0 +1,358 @@
+/* Add new CSS variables for card colors */
+:root {
+  --card-bg: #ffffff;
+  --card-border: rgba(5, 5, 5, 0.06);
+  --card-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px 0 rgba(0, 0, 0, 0.02);
+  --card-shadow-hover: 0 2px 8px 0 rgba(0, 0, 0, 0.09), 0 3px 12px -1px rgba(0, 0, 0, 0.08), 0 4px 8px 0 rgba(0, 0, 0, 0.05);
+  --card-head-bg: transparent;
+  --card-head-border: var(--card-border);
+  --card-loading-bg: #f5f5f5;
+  --card-inner-bg: #fafafa;
+}
+
+[data-theme="dark"] {
+  --card-bg: #1f1f1f;
+  --card-border: rgba(253, 253, 253, 0.12);
+  --card-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.16), 0 1px 6px -1px rgba(0, 0, 0, 0.12), 0 2px 4px 0 rgba(0, 0, 0, 0.09);
+  --card-shadow-hover: 0 2px 8px 0 rgba(0, 0, 0, 0.24), 0 3px 12px -1px rgba(0, 0, 0, 0.20), 0 4px 8px 0 rgba(0, 0, 0, 0.16);
+  --card-head-bg: transparent;
+  --card-head-border: var(--card-border);
+  --card-loading-bg: #262626;
+  --card-inner-bg: #141414;
+}
+
+/* Base Card */
+.ui-card {
+  position: relative;
+  background: var(--card-bg);
+  border-radius: 6px;
+  border: 1px solid var(--card-border);
+  box-shadow: var(--card-shadow);
+  transition: box-shadow 0.3s ease;
+  overflow: hidden;
+  color: var(--text-primary);
+}
+
+/* Size variants */
+.ui-card--small .ui-card-head {
+  padding: 12px;
+  min-height: auto;
+}
+
+.ui-card--small .ui-card-body {
+  padding: 12px;
+}
+
+.ui-card--small .ui-card-actions {
+  padding: 8px 12px;
+}
+
+.ui-card--small .ui-card-head-title {
+  font-size: 14px;
+}
+
+/* Bordered variants */
+.ui-card--no-border {
+  border: none;
+  box-shadow: none;
+}
+
+/* Hoverable */
+.ui-card--hoverable {
+  cursor: pointer;
+}
+
+.ui-card--hoverable:hover {
+  box-shadow: var(--card-shadow-hover);
+}
+
+/* Type variants */
+.ui-card--inner {
+  background: var(--card-inner-bg);
+}
+
+/* Card Cover */
+.ui-card-cover {
+  position: relative;
+  overflow: hidden;
+}
+
+.ui-card-cover img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Card Head */
+.ui-card-head {
+  background: var(--card-head-bg);
+  border-bottom: 1px solid var(--card-head-border);
+  padding: 16px 24px;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+}
+
+.ui-card-head-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 24px;
+}
+
+.ui-card-head-title {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ui-card-extra {
+  margin-left: auto;
+  font-weight: normal;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+/* Card Body */
+.ui-card-body {
+  padding: 24px;
+  color: var(--text-primary);
+  line-height: 1.5715;
+}
+
+/* Card Actions */
+.ui-card-actions {
+  background: var(--card-head-bg);
+  border-top: 1px solid var(--card-head-border);
+  padding: 12px 24px;
+}
+
+.ui-card-actions-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  gap: 12px;
+}
+
+.ui-card-actions-item {
+  flex: 1;
+  color: var(--text-secondary);
+}
+
+.ui-card-actions-item > * {
+  display: block;
+  width: 100%;
+  text-align: center;
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.3s ease;
+}
+
+.ui-card-actions-item:hover {
+  color: var(--primary-color);
+}
+
+/* Card Meta */
+.ui-card-meta {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.ui-card-meta-avatar {
+  flex-shrink: 0;
+}
+
+.ui-card-meta-detail {
+  flex: 1;
+  min-width: 0;
+}
+
+.ui-card-meta-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0 0 4px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ui-card-meta-description {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Loading State */
+.ui-card--loading {
+  overflow: hidden;
+}
+
+.ui-card-loading {
+  padding: 24px;
+}
+
+.ui-card-loading-content {
+  animation: ui-card-loading-pulse 1.4s ease-in-out infinite;
+}
+
+.ui-card-loading-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.ui-card-loading-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ui-card-loading-skeleton {
+  background: var(--card-loading-bg);
+  border-radius: 4px;
+  height: 16px;
+}
+
+.ui-card-loading-skeleton--title {
+  width: 60%;
+  height: 20px;
+}
+
+.ui-card-loading-skeleton--extra {
+  width: 20%;
+  height: 16px;
+}
+
+.ui-card-loading-skeleton--line {
+  width: 100%;
+}
+
+.ui-card-loading-skeleton--short {
+  width: 75%;
+}
+
+@keyframes ui-card-loading-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* Small size loading adjustments */
+.ui-card--small .ui-card-loading {
+  padding: 12px;
+}
+
+.ui-card--small .ui-card-loading-header {
+  margin-bottom: 12px;
+}
+
+.ui-card--small .ui-card-loading-skeleton--title {
+  height: 16px;
+}
+
+.ui-card--small .ui-card-loading-skeleton {
+  height: 14px;
+}
+
+/* Grid responsive behavior */
+.ui-card-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+@media (max-width: 768px) {
+  .ui-card-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .ui-card-head {
+    padding: 12px 16px;
+  }
+  
+  .ui-card-body {
+    padding: 16px;
+  }
+  
+  .ui-card-actions {
+    padding: 8px 16px;
+  }
+  
+  .ui-card--small .ui-card-head,
+  .ui-card--small .ui-card-body {
+    padding: 8px 12px;
+  }
+}
+
+/* RTL Support */
+[dir="rtl"] .ui-card-extra {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+[dir="rtl"] .ui-card-meta {
+  direction: rtl;
+}
+
+[dir="rtl"] .ui-card-actions-list {
+  direction: rtl;
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .ui-card {
+    border: 2px solid var(--border-color);
+  }
+  
+  .ui-card-head,
+  .ui-card-actions {
+    border-color: var(--border-color);
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .ui-card {
+    transition: none;
+  }
+  
+  .ui-card-actions-item > * {
+    transition: none;
+  }
+  
+  .ui-card-loading-content {
+    animation: none;
+  }
+  
+  .ui-card-loading-skeleton {
+    opacity: 0.4;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .ui-card {
+    background: white !important;
+    border: 1px solid #000 !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+  
+  .ui-card-actions {
+    display: none;
+  }
+}
